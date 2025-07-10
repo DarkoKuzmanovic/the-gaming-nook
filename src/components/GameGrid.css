@@ -1,0 +1,65 @@
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  aspect-ratio: 1;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.grid-space {
+  position: relative;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f9f9f9;
+}
+
+.grid-space:hover {
+  border-color: #667eea;
+}
+
+.grid-space.primary {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.grid-space.secondary {
+  border-color: #FF9800;
+  background: rgba(255, 152, 0, 0.1);
+}
+
+.space-number {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 0.7rem;
+  color: #999;
+  font-weight: bold;
+}
+
+.placement-hint {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  color: #666;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.game-grid.opponent .grid-space {
+  cursor: default;
+}
+
+.game-grid.opponent .grid-space:hover {
+  border-color: #ddd;
+}

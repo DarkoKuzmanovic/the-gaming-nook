@@ -1,0 +1,167 @@
+.card {
+  width: 70px;
+  height: 100px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: 0.75rem;
+  color: #333;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card.selected {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+}
+
+.card.placed {
+  width: 100%;
+  height: 100%;
+  max-width: 80px;
+  max-height: 120px;
+  margin: 0 auto;
+}
+
+.card.validated {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+}
+
+/* Color themes */
+.card-blue { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); }
+.card-green { background: linear-gradient(135deg, #E8F5E8, #C8E6C9); }
+.card-yellow { background: linear-gradient(135deg, #FFF8E1, #FFECB3); }
+.card-orange { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
+.card-red { background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+.card-purple { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); }
+.card-brown { background: linear-gradient(135deg, #EFEBE9, #D7CCC8); }
+.card-multi { background: linear-gradient(135deg, #E8F5E8, #FFECB3, #FFCDD2); }
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-number {
+  font-size: 1.2rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.card-symbols {
+  display: flex;
+  gap: 0.1rem;
+}
+
+.spiral, .cross {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.card-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.card-color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  margin-bottom: 0.2rem;
+}
+
+.special-indicator {
+  font-size: 0.8rem;
+  color: #FFD700;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.card-number-small {
+  font-size: 0.8rem;
+  font-weight: bold;
+  transform: rotate(180deg);
+}
+
+.validation-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.stacked-indicator {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 20px;
+  height: 20px;
+  background: #FF9800;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #2C3E50, #34495E);
+  color: white;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-back-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(255,255,255,0.1) 5px,
+    rgba(255,255,255,0.1) 10px
+  );
+  border-radius: 6px;
+}
+
+.card-number-peek {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 0.6rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  padding: 0.1rem 0.2rem;
+  border-radius: 2px;
+}
