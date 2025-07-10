@@ -1,24 +1,28 @@
 # Vetrolisci Card Creation Checklist
 
 ## **Card Asset Specifications**
+
 - **Format**: PNG with transparency
 - **Size**: 280x400 pixels (2:3 aspect ratio)
 - **Location**: `public/cards/fronts/` and `public/cards/backs/`
 - **Naming**: `{color}-{number}-{symbols}.png`
 
 ## **Symbols Legend**
+
 - 🌀 = Spiral (+1 point)
-- ✖️ = Cross (-1 point)  
+- ✖️ = Cross (-1 point)
 - ⭐ = Special Card (bonus spirals)
 
 ---
 
 ## **Card Back (1 card)**
+
 - [ ] `card-back.png` - Generic card back design
 
 ---
 
 ## **Blue Cards (10 cards)**
+
 - [ ] `blue-1.png` - Blue 1 (scoring: 6)
 - [ ] `blue-2.png` - Blue 2 (scoring: 4)
 - [ ] `blue-3.png` - Blue 3 (scoring: 0)
@@ -35,6 +39,7 @@
 ---
 
 ## **Green Cards (10 cards)**
+
 - [ ] `green-1.png` - Green 1 (scoring: 5)
 - [ ] `green-2.png` - Green 2 (scoring: 3)
 - [ ] `green-3-special.png` - Green 3 Special Card (scoring: 2)
@@ -49,6 +54,7 @@
 ---
 
 ## **Yellow Cards (11 cards)**
+
 - [ ] `yellow-1.png` - Yellow 1 (scoring: 4)
 - [ ] `yellow-2-special.png` - Yellow 2 Special Card (scoring: 1)
 - [ ] `yellow-2-alt.png` - Yellow 2 (scoring: 2)
@@ -64,6 +70,7 @@
 ---
 
 ## **Red Cards (13 cards)**
+
 - [ ] `red-1-special.png` - Red 1 Special Card (scoring: 1)
 - [ ] `red-1-alt.png` - Red 1 (scoring: 3)
 - [ ] `red-2.png` - Red 2 (scoring: 5)
@@ -79,6 +86,7 @@
 ---
 
 ## **Multi-colored Cards (6 cards)**
+
 - [ ] `multi-2.png` - Multi 2 (scoring: 0)
 - [ ] `multi-3.png` - Multi 3 (scoring: 0)
 - [ ] `multi-4.png` - Multi 4 (scoring: 0)
@@ -89,9 +97,10 @@
 ---
 
 ## **Summary**
+
 - **Total Cards**: 70 cards
 - **Blue Cards**: 10 cards
-- **Green Cards**: 10 cards  
+- **Green Cards**: 10 cards
 - **Yellow Cards**: 11 cards
 - **Red Cards**: 13 cards
 - **Multi-colored Cards**: 6 cards
@@ -99,6 +108,7 @@
 - **Card Back**: 1 card
 
 ## **Design Notes**
+
 - **Special Cards** should have a distinctive star (⭐) or similar indicator
 - **Multi-colored cards** should use gradient or multiple color sections
 - **Scoring values** shown in parentheses indicate the card's point value
@@ -107,7 +117,8 @@
 - Cards with multiple scoring values represent different instances of the same number/color combination
 
 ## **File Organization**
-```
+
+```structure
 public/cards/
 ├── backs/
 │   └── card-back.png
@@ -117,9 +128,10 @@ public/cards/
     ├── ... (all 70 cards)
 ```
 
-**Total Assets Needed: 71 files (1 back + 70 fronts)**
+**\*Total Assets Needed: 71 files (1 back + 70 fronts)**
 
 ## **Card Distribution Notes**
+
 - Some numbers appear multiple times with different scoring values (e.g., Blue 3 appears twice with scores 0 and 1)
 - This represents different card instances with the same number/color but different effects
 - Special cards are indicated in the CSV with "yes" in the Special column

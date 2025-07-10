@@ -11,6 +11,7 @@
 ## 2. Game Objective
 
 Score the most points across 3 rounds by strategically placing cards in a 3×3 grid. Points come from:
+
 - Validated card numbers
 - Symbol bonuses/penalties
 - Largest color zone bonus
@@ -24,11 +25,13 @@ Score the most points across 3 rounds by strategically placing cards in a 3×3 g
 ## 4. Game Structure
 
 ### 4.1 Overall Flow
+
 - Game consists of exactly 3 rounds
 - Each round has multiple turns
 - A round ends when any player fills all 9 grid spaces
 
 ### 4.2 Turn Structure (2-Player Specific)
+
 Each turn follows these steps:
 
 1. **Reveal Phase**: The current first player reveals 4 cards from the deck
@@ -44,20 +47,23 @@ Each turn follows these steps:
 Cards must be placed according to these scenarios based on the card's number:
 
 ### Scenario 1: Empty Space or Face-down Card
+
 - **Condition**: No face-up card with this number exists in your grid
 - **Action**: Place the card face-up on the space matching its number
 - **Special case**: If a face-down card already occupies that space, place the new card face-up on top
 - **Result**: If placed on top of a face-down card, the new card is immediately "validated"
 
 ### Scenario 2: Duplicate Number (Face-up Already Present)
+
 - **Condition**: You already have a face-up card with this number
-- **Action**: 
+- **Action**:
   1. Choose which of the two cards to keep face-up
   2. Turn the other card face-down and slide it partially underneath the face-up card
   3. The face-down card must remain partially visible to opponents
 - **Result**: The top (face-up) card is now "validated"
 
 ### Scenario 3: Already Validated Number
+
 - **Condition**: The number already has a validated face-up card
 - **Action**: Place the new card face-down on ANY empty space (ignoring its number)
 - **Note**: This card cannot be placed under another card
@@ -66,25 +72,30 @@ Cards must be placed according to these scenarios based on the card's number:
 ## 6. Card States
 
 ### Face-up Cards
+
 - Active and visible
 - Show color, symbols, and number
 - Can score points if validated
 
 ### Face-down Cards
+
 - Act as placeholders
 - Must be tucked to show the number
 - Cannot score points themselves
 
 ### Validated Cards
+
 - Definition: A face-up card that covers a face-down card
 - Only validated cards score their printed number value
 
 ## 7. Round End Conditions
 
 ### Standard End
+
 - A round ends after the turn in which any player fills all 9 spaces (face-up or face-down)
 
 ### 2-Player Special Rule
+
 - If one player fills their last space mid-turn, the round continues until both players have placed an equal number of cards
 - Example: Player 1 fills their grid after placing their first card of the turn. Player 2 still gets to place one more card. The round then ends even if 2 cards remain unpicked.
 
@@ -93,16 +104,19 @@ Cards must be placed according to these scenarios based on the card's number:
 Calculate points at the end of each round:
 
 ### 8.1 Validated Card Numbers
+
 - Add the printed number of each validated card
 - Non-validated face-up cards score 0 for their number
 
 ### 8.2 Symbol Points (All Face-up Cards)
+
 - Spiral (🌀): +1 point each
 - Cross (✖️): -1 point each
 - Special Cards: Gain +1 spiral for each OTHER face-up card of the indicated color
   - Multi-colored cards count for all colors
 
 ### 8.3 Largest Color Zone Bonus
+
 1. Identify groups of 2+ face-up cards of the same color that are orthogonally adjacent (not diagonal)
 2. Find your largest zone
 3. Score per card in that zone:
@@ -112,7 +126,9 @@ Calculate points at the end of each round:
 4. Multi-colored cards can join any color zone
 
 ### 8.4 Scoring Example
+
 Player's grid at end of Round 1:
+
 - Validated cards: 1, 5, 7, 8 = 21 points
 - Symbols: 10 spirals on cards + 5 from special card - 4 crosses = 11 points
 - Largest zone: 4 blue cards × 2 points = 8 points
@@ -133,6 +149,7 @@ Player's grid at end of Round 1:
 ## 11. Implementation Notes for Online Play
 
 ### Key Data Structures Needed
+
 - Player grids: 3×3 array tracking card states (empty/face-up/face-down)
 - Card objects: number, color, symbols, special status
 - Validation tracking: which cards are validated
@@ -140,6 +157,7 @@ Player's grid at end of Round 1:
 - Score tracking per round
 
 ### Critical Rules to Enforce
+
 1. Card must go to matching number space if possible (unless Scenario 3)
 2. Face-down cards must track what number space they're on
 3. Validated status is permanent once achieved
@@ -147,6 +165,7 @@ Player's grid at end of Round 1:
 5. Equal turns rule for 2-player round endings
 
 ### UI Requirements
+
 - Show partially visible face-down cards under face-up cards
 - Highlight legal placement options
 - Display running score calculations
