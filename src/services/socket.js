@@ -10,7 +10,7 @@ class SocketService {
   }
 
   connect() {
-    this.socket = io('http://localhost:3001')
+    this.socket = io('http://localhost:8001')
     
     this.socket.on('connect', () => {
       console.log('Connected to server:', this.socket.id)
@@ -72,6 +72,11 @@ class SocketService {
   onCardPickedAndPlaced(callback) {
     if (!this.socket) return
     this.socket.on('card-picked-and-placed', callback)
+  }
+
+  onCardPickedAndDiscarded(callback) {
+    if (!this.socket) return
+    this.socket.on('card-picked-and-discarded', callback)
   }
 
   onNewTurn(callback) {

@@ -3,9 +3,10 @@ import GameGrid from './GameGrid'
 import CardHand from './CardHand'
 import ScoreBoard from './ScoreBoard'
 import CardChoiceModal from './CardChoiceModal'
+import RoundCompleteModal from './RoundCompleteModal'
 import DraftPhase from './DraftPhase'
 import Card from './Card'
-import { determinePlacementScenario, executeCardPlacement, PlacementScenario } from '../game/placement'
+import { determinePlacementScenario, executeCardPlacement, PlacementScenario, getPickableCards } from '../game/placement'
 import { CARDS, shuffleDeck, createGameDeck } from '../data/cards.js'
 import { initializeDraftPhase, pickCard, startPickPhase, DraftPhase as DraftPhaseEnum } from '../game/draft'
 import './GameBoard.css'
@@ -27,6 +28,8 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
   const [draftState, setDraftState] = useState(null)
   const [showCardChoice, setShowCardChoice] = useState(false)
   const [cardChoiceData, setCardChoiceData] = useState(null)
+  const [showRoundComplete, setShowRoundComplete] = useState(false)
+  const [roundCompleteData, setRoundCompleteData] = useState(null)
   const playerIndex = gameInfo?.playerIndex || 0
 
   useEffect(() => {
@@ -43,16 +46,16 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
       setDraftState(newDraftState)
     })
 
-    socketService.onCardPickedAndPlaced(({ playerIndex: placingPlayer, cardId, placedCard, newGrid, draftState: newDraftState, placementResult }) => {
-      console.log(`Player ${placingPlayer} picked and placed card ${cardId}`)
+    socketService.onCardPickedAndPlaced(({ playerIndex: pickingPlayer, cardId, placedCard, newGrid, draftState: newDraftState, placementResult }) => {
+      console.log(`Player ${pickingPlayer} picked and placed card ${cardId}`)
       
       setDraftState(newDraftState)
-      
       setGameState(prev => {
         const newPlayers = [...prev.players]
-        newPlayers[placingPlayer] = {
-          ...newPlayers[placingPlayer],
-          grid: newGrid
+        // Ensure we're updating the correct player's grid with the server's authoritative state
+        newPlayers[pickingPlayer] = {
+          ...newPlayers[pickingPlayer],
+          grid: [...newGrid] // Create a new array to ensure React detects the change
         }
         
         return {
@@ -60,6 +63,21 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
           players: newPlayers
         }
       })
+    })
+
+    socketService.onCardPickedAndDiscarded(({ playerIndex: pickingPlayer, cardId, discardedCard, draftState: newDraftState, reason }) => {
+      console.log(`Player ${pickingPlayer} picked card ${cardId} but it was discarded (${reason})`)
+      
+      // Show notification to all players
+      const playerName = `Player ${pickingPlayer + 1}`
+      const message = reason === 'no_empty_spaces' 
+        ? `${playerName} picked a card but had to discard it - no empty spaces available!`
+        : `${playerName} picked a card but it was discarded`
+      
+      // You could add a toast notification system here
+      console.log(message)
+      
+      setDraftState(newDraftState)
     })
 
     socketService.onNewTurn(({ currentPlayer: newCurrentPlayer, draftState: newDraftState }) => {
@@ -94,9 +112,10 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
       
       setGameState(prev => {
         const newPlayers = [...prev.players]
+        // Ensure we're updating with the server's authoritative grid state
         newPlayers[placingPlayer] = {
           ...newPlayers[placingPlayer],
-          grid: newGrid
+          grid: [...newGrid] // Create a new array to ensure React detects the change
         }
         
         // Remove card from current player's hand if it's our turn
@@ -119,11 +138,24 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
     socketService.onRoundComplete(({ roundNumber, roundScores, nextRound, draftState: newDraftState, currentPlayer: newCurrentPlayer }) => {
       console.log(`Round ${roundNumber} completed, starting round ${nextRound}`)
       
+      // Show round complete modal
+      setRoundCompleteData({
+        roundNumber,
+        roundScores,
+        nextRound
+      })
+      setShowRoundComplete(true)
+      
       // Update scores and start new round
       setGameState(prev => {
         const newPlayers = [...prev.players]
         roundScores.forEach(({ playerIndex, score }) => {
           newPlayers[playerIndex].scores[roundNumber] = score
+        })
+        
+        // Clear grids for new round
+        newPlayers.forEach(player => {
+          player.grid = Array(9).fill(null)
         })
         
         return {
@@ -258,6 +290,11 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
     setCardChoiceData(null)
   }
 
+  const handleRoundContinue = () => {
+    setShowRoundComplete(false)
+    setRoundCompleteData(null)
+  }
+
   // Show game completion screen
   if (gameState.phase === 'finished') {
     return (
@@ -301,28 +338,44 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
         <div className="revealed-cards-section">
           <h3>Revealed Cards</h3>
           <div className="revealed-cards">
-            {draftState.revealedCards.map(card => (
-              <div 
-                key={card.id} 
-                className={`revealed-card ${draftState.pickOrder[draftState.currentPickIndex] === playerIndex ? 'can-pick' : 'waiting'}`}
-                onClick={() => {
-                  if (draftState.pickOrder[draftState.currentPickIndex] === playerIndex) {
-                    handleDraftCardPick(card.id)
-                  }
-                }}
-              >
-                {/* Use the actual Card component for proper image display */}
-                <Card 
-                  card={card} 
-                  onClick={() => {
-                    if (draftState.pickOrder[draftState.currentPickIndex] === playerIndex) {
-                      handleDraftCardPick(card.id)
-                    }
-                  }}
-                  isSelected={false}
-                />
-              </div>
-            ))}
+            {(() => {
+              const pickableCards = getPickableCards(gameState.players[playerIndex].grid, draftState.revealedCards)
+              const isMyTurn = draftState.pickOrder[draftState.currentPickIndex] === playerIndex
+              
+              return pickableCards.map(cardData => {
+                const canPlayerPick = isMyTurn && cardData.pickable.canPick
+                const cardClass = `revealed-card ${canPlayerPick ? 'can-pick' : 'waiting'}`
+                const tooltipText = !cardData.pickable.canPick ? 
+                  (cardData.pickable.reason === 'all_cards_validated' ? 
+                    'All cards would violate validation rule - can place face-down' : 
+                    'You already have a validated card with this number') : ''
+                
+                return (
+                  <div 
+                    key={cardData.id} 
+                    className={cardClass}
+                    title={tooltipText}
+                    style={{ position: 'relative' }}
+                  >
+                    <Card 
+                      card={cardData} 
+                      onClick={() => {
+                        if (canPlayerPick) {
+                          handleDraftCardPick(cardData.id)
+                        }
+                      }}
+                      isSelected={false}
+                    />
+                    {!cardData.pickable.canPick && (
+                      <div className="card-restriction-overlay">
+                        {cardData.pickable.reason === 'already_validated' ? '🚫' : '⬇️'}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            })()
+            }
           </div>
           <div className="turn-indicator">
             {draftState.pickOrder[draftState.currentPickIndex] === playerIndex ? 
@@ -376,6 +429,14 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
         newCard={cardChoiceData?.newCard}
         onChoose={handleCardChoice}
         onCancel={handleCardChoiceCancel}
+      />
+      
+      <RoundCompleteModal
+        isOpen={showRoundComplete}
+        roundNumber={roundCompleteData?.roundNumber}
+        roundScores={roundCompleteData?.roundScores}
+        nextRound={roundCompleteData?.nextRound}
+        onContinue={handleRoundContinue}
       />
     </div>
   )

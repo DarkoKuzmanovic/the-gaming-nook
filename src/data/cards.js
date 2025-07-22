@@ -127,6 +127,20 @@ export const dealRoundCards = (deck, roundNumber) => {
   };
 };
 
+// Turn management - deals 4 cards from the front of the deck
+export const dealTurnCards = (deck) => {
+  const cardsPerTurn = 4;
+  
+  if (deck.length < cardsPerTurn) {
+    throw new Error('Not enough cards in deck for turn');
+  }
+  
+  return {
+    turnCards: deck.slice(0, cardsPerTurn),
+    remainingDeck: deck.slice(cardsPerTurn)
+  };
+};
+
 // Card image mapping based on checklist and CSV data
 export const getCardImagePath = (card) => {
   if (!card) return null;

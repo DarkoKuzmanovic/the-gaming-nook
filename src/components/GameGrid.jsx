@@ -39,7 +39,7 @@ const GameGrid = ({ grid, onCardPlace, canPlace, selectedCard, isOpponent = fals
             <Card 
               card={card}
               isPlaced={true}
-              showBack={isOpponent && !card.faceUp}
+              showBack={!card.faceUp}
             />
           )}
           {getPlacementHint(index) && (

@@ -1,13 +1,17 @@
 import React from 'react'
 import Card from './Card'
 import { getDraftPhaseStatus, getUpcomingPickOrder } from '../game/draft'
+import { getPickableCards } from '../game/placement'
 import './DraftPhase.css'
 
-const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames }) => {
+const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames, playerGrid }) => {
   const status = getDraftPhaseStatus(draftState)
   const upcomingPicks = getUpcomingPickOrder(draftState)
   const currentPlayerName = playerNames[status.currentPickingPlayer] || `Player ${status.currentPickingPlayer + 1}`
   const isMyTurn = status.currentPickingPlayer === playerIndex
+  
+  // Get pickable cards based on validation rules
+  const pickableCards = playerGrid ? getPickableCards(playerGrid, draftState.revealedCards) : draftState.revealedCards.map(card => ({ ...card, pickable: { canPick: true, reason: null } }))
 
   if (draftState.phase === 'reveal') {
     return (
@@ -56,15 +60,30 @@ const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames }) => {
           <div className="revealed-cards">
             <h4>Available Cards ({status.cardsRemaining} remaining)</h4>
             <div className="card-grid">
-              {draftState.revealedCards.map(card => (
-                <Card 
-                  key={card.id}
-                  card={card}
-                  onClick={() => isMyTurn ? onCardPick(card.id) : null}
-                  isSelected={false}
-                  className={isMyTurn ? 'pickable' : 'not-pickable'}
-                />
-              ))}
+              {pickableCards.map(cardData => {
+                const canPlayerPick = isMyTurn && cardData.pickable.canPick
+                const cardClass = canPlayerPick ? 'pickable' : 'not-pickable'
+                const tooltipText = !cardData.pickable.canPick ? 
+                  (cardData.pickable.reason === 'all_cards_validated' ? 
+                    'All cards would violate validation rule - can place face-down' : 
+                    'You already have a validated card with this number') : ''
+                
+                return (
+                  <div key={cardData.id} className="card-container" title={tooltipText}>
+                    <Card 
+                      card={cardData}
+                      onClick={() => canPlayerPick ? onCardPick(cardData.id) : null}
+                      isSelected={false}
+                      className={cardClass}
+                    />
+                    {!cardData.pickable.canPick && (
+                      <div className="card-restriction-overlay">
+                        {cardData.pickable.reason === 'already_validated' ? '🚫' : '⬇️'}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 

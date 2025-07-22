@@ -23,7 +23,7 @@ const CardChoiceModal = ({
             <Card card={existingCard} />
             <button 
               className="choice-button"
-              onClick={() => onChoose('existing')}
+              onClick={() => onChoose('keep-existing')}
             >
               Choose This
             </button>
@@ -34,7 +34,7 @@ const CardChoiceModal = ({
             <Card card={newCard} />
             <button 
               className="choice-button"
-              onClick={() => onChoose('new')}
+              onClick={() => onChoose('keep-new')}
             >
               Choose This
             </button>

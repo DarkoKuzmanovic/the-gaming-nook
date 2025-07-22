@@ -164,3 +164,37 @@ export function validateCard(cardToPlace, targetIndex, grid) {
   newGrid[targetIndex] = validatedCard
   return { grid: newGrid, validated: true }
 }
+
+// Check if a player already has a validated card with the given number
+export function hasValidatedCardWithNumber(grid, cardNumber) {
+  return grid.some(gridCard => 
+    gridCard && gridCard.faceUp && gridCard.value === cardNumber && gridCard.validated
+  )
+}
+
+// Check if a player can pick a card based on validation rules
+export function canPickCard(card, grid, revealedCards) {
+  // If player doesn't have this number validated, they can pick it
+  if (!hasValidatedCardWithNumber(grid, card.value)) {
+    return { canPick: true, reason: null }
+  }
+  
+  // Player has this number validated - check if all revealed cards would violate the rule
+  const allCardsWouldViolate = revealedCards.every(revealedCard => 
+    hasValidatedCardWithNumber(grid, revealedCard.value)
+  )
+  
+  if (allCardsWouldViolate) {
+    return { canPick: true, reason: 'all_cards_validated' }
+  }
+  
+  return { canPick: false, reason: 'already_validated' }
+}
+
+// Get pickable cards from revealed cards based on validation rules
+export function getPickableCards(grid, revealedCards) {
+  return revealedCards.map(card => ({
+    ...card,
+    pickable: canPickCard(card, grid, revealedCards)
+  }))
+}

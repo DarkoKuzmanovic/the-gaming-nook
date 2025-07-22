@@ -3,6 +3,8 @@ const http = require('http')
 const socketIo = require('socket.io')
 const cors = require('cors')
 const path = require('path')
+const { CARDS, shuffleDeck, dealRoundCards, dealTurnCards, createGameDeck } = require('./src/data/cards.js')
+const { canPickCard } = require('./src/game/placement.js')
 
 const app = express()
 const server = http.createServer(app)
@@ -13,7 +15,7 @@ const io = socketIo(server, {
   }
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 8001
 
 // Middleware
 app.use(cors())
@@ -77,12 +79,14 @@ io.on('connection', (socket) => {
   // Draft phase handlers
   socket.on('start-draft', ({ gameId }) => {
     const game = games.get(gameId)
-    if (!game) return
+    if (!game || !game.draftState) return
 
     try {
-      game.draftState = initializeDraftPhase(game.deck, game.currentRound)
-      game.draftState.phase = 'pick' // Start picking immediately
-      io.to(gameId).emit('draft-started', game.draftState)
+      // Just transition from 'reveal' to 'pick' phase
+      if (game.draftState.phase === 'reveal') {
+        game.draftState.phase = 'pick'
+        io.to(gameId).emit('draft-started', game.draftState)
+      }
     } catch (error) {
       console.error('Failed to start draft:', error)
       socket.emit('error', { message: 'Failed to start draft phase' })
@@ -101,50 +105,107 @@ io.on('connection', (socket) => {
         return
       }
 
+      // Find the card to pick
+      const cardToPick = game.draftState.revealedCards.find(card => card.id === cardId)
+      if (!cardToPick) {
+        socket.emit('error', { message: 'Card not found in revealed cards' })
+        return
+      }
+
+      // Check if player can pick this card based on validation rules
+      const player = game.players[playerIndex]
+      const pickResult = canPickCard(cardToPick, player.grid, game.draftState.revealedCards)
+      
+      if (!pickResult.canPick) {
+        socket.emit('error', { 
+          message: 'Cannot pick this card - you already have a validated card with this number',
+          reason: pickResult.reason
+        })
+        return
+      }
+
       // Execute the pick
       const result = pickCard(game.draftState, playerIndex, cardId)
       const pickedCard = result.selectedCard
       game.draftState = result.draftState
 
       // Immediately place the picked card
-      const player = game.players[playerIndex]
+      const pickerPlayer = game.players[playerIndex]
       let gridIndex = pickedCard.value - 1 // Default placement
       
       // Handle different placement scenarios
-      const scenario = determineServerPlacementScenario(pickedCard, player.grid)
+      const scenario = determineServerPlacementScenario(pickedCard, pickerPlayer.grid)
       if (scenario === 'validated') {
         // Find first empty space for scenario 3
-        gridIndex = player.grid.findIndex(cell => cell === null)
+        gridIndex = pickerPlayer.grid.findIndex(cell => cell === null)
         if (gridIndex === -1) {
-          throw new Error('No empty space available')
+          // Edge case: No empty spaces available - discard the card
+          console.log(`Card ${pickedCard.id} discarded - no empty spaces available for face-down placement`)
+          
+          // Broadcast the pick without placement (card is discarded)
+          io.to(gameId).emit('card-picked-and-discarded', {
+            playerIndex,
+            cardId,
+            discardedCard: pickedCard,
+            draftState: game.draftState,
+            reason: 'no_empty_spaces'
+          })
+          
+          // Continue with turn completion logic
+          if (game.draftState.revealedCards.length === 0) {
+            const lastPicker = game.draftState.pickOrder[game.draftState.currentPickIndex - 1]
+            game.currentPlayer = lastPicker
+            
+            const roundShouldEnd = checkRoundEndCondition(game)
+            if (roundShouldEnd) {
+              endRound(game, gameId, io)
+            } else {
+              game.draftState = initializeTurnPhase(game.draftState.remainingDeck, lastPicker)
+              game.deck = game.draftState.remainingDeck
+              io.to(gameId).emit('new-turn', {
+                currentPlayer: game.currentPlayer,
+                draftState: game.draftState
+              })
+            }
+          }
+          return // Exit early, card was discarded
         }
       }
 
-      const placementResult = executeServerCardPlacement(pickedCard, gridIndex, player.grid, choice)
-      player.grid = placementResult.grid
+      // For duplicate scenarios, default to 'keep-existing' if no choice provided
+      let finalChoice = choice
+      if (scenario === 'duplicate' && !choice) {
+        finalChoice = 'keep-existing'
+      }
+      
+      const placementResult = executeServerCardPlacement(pickedCard, gridIndex, pickerPlayer.grid, finalChoice)
+      pickerPlayer.grid = placementResult.grid
 
       // Broadcast the pick-and-place to all players
       io.to(gameId).emit('card-picked-and-placed', {
         playerIndex,
         cardId,
         placedCard: pickedCard,
-        newGrid: player.grid,
+        newGrid: pickerPlayer.grid,
         draftState: game.draftState,
         placementResult
       })
 
       // Check if all cards in this turn are picked
       if (game.draftState.revealedCards.length === 0) {
-        // Turn complete - next player becomes first player
-        game.currentPlayer = game.draftState.pickOrder[game.draftState.currentPickIndex - 1]
+        // Turn complete - the last picker becomes first player for next turn
+        const lastPicker = game.draftState.pickOrder[game.draftState.currentPickIndex - 1]
+        game.currentPlayer = lastPicker
         
         // Check if round should end
         const roundShouldEnd = checkRoundEndCondition(game)
         if (roundShouldEnd) {
           endRound(game, gameId, io)
         } else {
-          // Start new turn
-          game.draftState = initializeDraftPhase(game.deck, game.currentRound)
+          // Start new turn using remaining deck
+          game.draftState = initializeTurnPhase(game.draftState.remainingDeck, lastPicker)
+          // Update the main deck reference
+          game.deck = game.draftState.remainingDeck
           io.to(gameId).emit('new-turn', {
             currentPlayer: game.currentPlayer,
             draftState: game.draftState
@@ -179,11 +240,11 @@ io.on('connection', (socket) => {
       }
 
       // Execute card placement
-      const player = game.players[playerIndex]
-      const placementResult = executeServerCardPlacement(card, gridIndex, player.grid, choice)
+      const currentPlayer = game.players[playerIndex]
+      const placementResult = executeServerCardPlacement(card, gridIndex, currentPlayer.grid, choice)
       
       // Update player grid
-      player.grid = placementResult.grid
+      currentPlayer.grid = placementResult.grid
 
       // Remove card from player's hand
       if (game.draftState?.playerHands[playerIndex]) {
@@ -199,7 +260,7 @@ io.on('connection', (socket) => {
         cardId,
         gridIndex,
         choice,
-        newGrid: player.grid,
+        newGrid: currentPlayer.grid,
         currentPlayer: game.currentPlayer,
         placementResult
       })
@@ -242,79 +303,7 @@ function generateGameId() {
   return Math.random().toString(36).substr(2, 9)
 }
 
-// Import our proper card data and draft logic
-const CARDS = [
-  { id: 1, value: 7, color: 'multi', scoring: -1, special: false },
-  { id: 2, value: 6, color: 'green', scoring: -1, special: false },
-  { id: 3, value: 9, color: 'green', scoring: -4, special: false },
-  { id: 4, value: 4, color: 'blue', scoring: 1, special: true },
-  { id: 5, value: 3, color: 'green', scoring: 2, special: false },
-  { id: 6, value: 4, color: 'multi', scoring: 0, special: false },
-  { id: 7, value: 7, color: 'red', scoring: -4, special: false },
-  { id: 8, value: 4, color: 'yellow', scoring: -1, special: false },
-  { id: 9, value: 7, color: 'yellow', scoring: 1, special: false },
-  { id: 10, value: 5, color: 'red', scoring: 1, special: true },
-  { id: 11, value: 1, color: 'red', scoring: 1, special: true },
-  { id: 12, value: 7, color: 'red', scoring: -1, special: false },
-  { id: 13, value: 5, color: 'yellow', scoring: 0, special: false },
-  { id: 14, value: 2, color: 'yellow', scoring: 1, special: true },
-  { id: 15, value: 2, color: 'green', scoring: 3, special: false },
-  { id: 16, value: 5, color: 'blue', scoring: 1, special: true },
-  { id: 17, value: 9, color: 'blue', scoring: -6, special: false },
-  { id: 18, value: 6, color: 'red', scoring: -2, special: false },
-  { id: 19, value: 5, color: 'yellow', scoring: 1, special: true },
-  { id: 20, value: 6, color: 'multi', scoring: -1, special: false },
-  { id: 21, value: 6, color: 'red', scoring: 0, special: false },
-  { id: 22, value: 5, color: 'blue', scoring: 0, special: false },
-  { id: 23, value: 5, color: 'green', scoring: 1, special: true },
-  { id: 24, value: 1, color: 'blue', scoring: 6, special: false },
-  { id: 25, value: 6, color: 'yellow', scoring: 0, special: false },
-  { id: 26, value: 6, color: 'yellow', scoring: -3, special: false },
-  { id: 27, value: 3, color: 'multi', scoring: 0, special: false },
-  { id: 28, value: 9, color: 'yellow', scoring: -2, special: false },
-  { id: 29, value: 4, color: 'red', scoring: 2, special: false },
-  { id: 30, value: 7, color: 'yellow', scoring: -5, special: false },
-  { id: 31, value: 2, color: 'blue', scoring: 4, special: false },
-  { id: 32, value: 1, color: 'green', scoring: 5, special: false },
-  { id: 33, value: 6, color: 'blue', scoring: 1, special: false },
-  { id: 34, value: 2, color: 'multi', scoring: 0, special: false },
-  { id: 35, value: 4, color: 'red', scoring: 0, special: false },
-  { id: 36, value: 3, color: 'blue', scoring: 0, special: false },
-  { id: 37, value: 8, color: 'green', scoring: -2, special: false },
-  { id: 38, value: 8, color: 'red', scoring: 0, special: false },
-  { id: 39, value: 6, color: 'green', scoring: 1, special: false },
-  { id: 40, value: 7, color: 'green', scoring: -2, special: false },
-  { id: 41, value: 3, color: 'blue', scoring: 1, special: false },
-  { id: 42, value: 8, color: 'multi', scoring: -1, special: false },
-  { id: 43, value: 5, color: 'blue', scoring: -2, special: false },
-  { id: 44, value: 3, color: 'yellow', scoring: 5, special: false },
-  { id: 45, value: 5, color: 'red', scoring: -1, special: false },
-  { id: 46, value: 8, color: 'red', scoring: -5, special: false },
-  { id: 47, value: 5, color: 'yellow', scoring: -2, special: false },
-  { id: 48, value: 3, color: 'green', scoring: 1, special: true },
-  { id: 49, value: 3, color: 'yellow', scoring: 0, special: false },
-  { id: 50, value: 2, color: 'red', scoring: 5, special: false },
-  { id: 51, value: 1, color: 'red', scoring: 3, special: false },
-  { id: 52, value: 4, color: 'yellow', scoring: 3, special: false },
-  { id: 53, value: 4, color: 'green', scoring: 4, special: false },
-  { id: 54, value: 4, color: 'blue', scoring: 0, special: false },
-  { id: 55, value: 1, color: 'yellow', scoring: 4, special: false },
-  { id: 56, value: 5, color: 'green', scoring: -1, special: false },
-  { id: 57, value: 2, color: 'yellow', scoring: 2, special: false },
-  { id: 58, value: 3, color: 'red', scoring: 4, special: false },
-  { id: 59, value: 9, color: 'blue', scoring: -1, special: false },
-  { id: 60, value: 9, color: 'red', scoring: 0, special: false },
-  { id: 61, value: 8, color: 'blue', scoring: -3, special: false },
-  { id: 62, value: 8, color: 'yellow', scoring: -1, special: false },
-  { id: 63, value: 6, color: 'blue', scoring: -1, special: false },
-  { id: 64, value: 6, color: 'green', scoring: -4, special: false },
-  { id: 65, value: 5, color: 'red', scoring: 0, special: false },
-  { id: 66, value: 5, color: 'green', scoring: 0, special: false },
-  { id: 67, value: 4, color: 'green', scoring: -1, special: false },
-  { id: 68, value: 4, color: 'blue', scoring: 1, special: false },
-  { id: 69, value: 7, color: 'blue', scoring: -3, special: false },
-  { id: 70, value: 7, color: 'green', scoring: 0, special: false }
-]
+// Game logic functions
 
 function initializeGame(game) {
   // Initialize deck with our proper 70-card deck
@@ -329,9 +318,7 @@ function initializeGame(game) {
   })
 }
 
-function createGameDeck() {
-  return shuffleDeck([...CARDS]) // Copy and shuffle
-}
+
 
 function initializeDraftPhase(deck, roundNumber) {
   const { roundCards, remainingDeck } = dealRoundCards(deck, roundNumber)
@@ -347,20 +334,25 @@ function initializeDraftPhase(deck, roundNumber) {
   }
 }
 
-function dealRoundCards(deck, roundNumber) {
-  const cardsPerRound = 4 // Each player gets 2 cards, 2 players = 4 total
-  const startIndex = (roundNumber - 1) * cardsPerRound
-  const endIndex = startIndex + cardsPerRound
+// Initialize a new turn using remaining deck
+function initializeTurnPhase(remainingDeck, lastPicker) {
+  const { turnCards, remainingDeck: newRemainingDeck } = dealTurnCards(remainingDeck)
   
-  if (deck.length < endIndex) {
-    throw new Error('Not enough cards for round')
-  }
+  // The last picker becomes the first picker of the next turn
+  const pickOrder = lastPicker === 0 ? [0, 1, 1, 0] : [1, 0, 0, 1]
   
   return {
-    roundCards: deck.slice(startIndex, endIndex),
-    remainingDeck: deck.slice(endIndex)
+    phase: 'reveal',
+    revealedCards: turnCards,
+    playerHands: [[], []], // Reset player hands for new turn
+    pickOrder, // Adjusted pick order based on last picker
+    currentPickIndex: 0,
+    remainingDeck: newRemainingDeck,
+    completedPicks: 0
   }
 }
+
+
 
 function pickCard(draftState, playerIndex, cardId) {
   // Validate turn
@@ -399,13 +391,7 @@ function pickCard(draftState, playerIndex, cardId) {
   }
 }
 
-function shuffleDeck(deck) {
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]]
-  }
-  return deck
-}
+
 
 // Server-side card placement logic
 function executeServerCardPlacement(card, gridIndex, grid, choice) {
@@ -429,12 +415,25 @@ function executeServerCardPlacement(card, gridIndex, grid, choice) {
     case 'duplicate':
       // Scenario 2: Duplicate number
       const existingIndex = card.value - 1
+      const existingCard = result.grid[existingIndex]
+      
       if (choice === 'keep-new') {
-        // Keep new card face-up, put existing face-down
-        result.grid[existingIndex] = { ...card, faceUp: true, validated: true }
+        // Keep new card face-up, put existing face-down underneath
+        result.grid[existingIndex] = { 
+          ...card, 
+          faceUp: true, 
+          validated: true,
+          stackedCard: { ...existingCard, faceUp: false }
+        }
+      } else if (choice === 'keep-existing') {
+        // Keep existing face-up, put new face-down underneath
+        result.grid[existingIndex] = {
+          ...existingCard,
+          validated: true,
+          stackedCard: { ...card, faceUp: false }
+        }
       } else {
-        // Keep existing face-up, put new face-down under it
-        result.grid[existingIndex].validated = true
+        throw new Error('Invalid choice for duplicate scenario: must be "keep-new" or "keep-existing"')
       }
       result.validated.push(existingIndex)
       break
