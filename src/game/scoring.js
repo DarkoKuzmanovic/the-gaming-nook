@@ -34,34 +34,34 @@ export function calculatePlayerScore(grid, currentRound) {
 
 function calculateValidatedNumbers(faceUpCards, breakdown) {
   const validatedCards = faceUpCards.filter(card => card.validated)
-  breakdown.validatedCards = validatedCards.map(card => ({ number: card.number, color: card.color }))
+  breakdown.validatedCards = validatedCards.map(card => ({ value: card.value, color: card.color }))
   
-  return validatedCards.reduce((sum, card) => sum + card.number, 0)
+  return validatedCards.reduce((sum, card) => sum + card.value, 0)
 }
 
 function calculateSymbolPoints(faceUpCards, breakdown) {
-  let spirals = 0
-  let crosses = 0
+  let totalPoints = 0
   let specialBonuses = 0
   
-  // Count base symbols
+  // Count scoring points from each card
   faceUpCards.forEach(card => {
-    if (card.hasSpiral) spirals++
-    if (card.hasCross) crosses++
+    if (card.validated) {
+      totalPoints += card.scoring || 0
+    }
   })
   
   // Calculate special card bonuses
-  const specialCards = faceUpCards.filter(card => card.isSpecial)
+  const specialCards = faceUpCards.filter(card => card.special && card.validated)
   specialCards.forEach(specialCard => {
     const bonusSpirals = calculateSpecialCardBonus(specialCard, faceUpCards)
     specialBonuses += bonusSpirals
   })
   
-  breakdown.spirals = spirals
-  breakdown.crosses = crosses
+  breakdown.spirals = faceUpCards.filter(card => card.validated && (card.scoring > 0)).length
+  breakdown.crosses = faceUpCards.filter(card => card.validated && (card.scoring < 0)).length
   breakdown.specialBonuses = specialBonuses
   
-  return spirals + specialBonuses - crosses
+  return totalPoints + specialBonuses
 }
 
 function calculateSpecialCardBonus(specialCard, faceUpCards) {

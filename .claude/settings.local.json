@@ -3,7 +3,12 @@
     "allow": [
       "WebFetch(domain:github.com)",
       "Bash(mkdir:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(node server.js)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

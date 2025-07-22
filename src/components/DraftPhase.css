@@ -1,0 +1,238 @@
+.draft-phase {
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 12px;
+  margin: 1rem;
+}
+
+.draft-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.draft-header h3 {
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.start-draft-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.start-draft-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.turn-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.current-picker {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.current-picker.my-turn {
+  color: #48bb78;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pick-counter {
+  background: #4a5568;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.draft-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 200px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.revealed-cards h4 {
+  color: #2d3748;
+  margin-bottom: 0.75rem;
+}
+
+.card-grid {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.card-grid .card.pickable {
+  cursor: pointer;
+  border-color: #48bb78;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.card-grid .card.pickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);
+}
+
+.card-grid .card.not-pickable {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.player-hands {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.player-hand h4 {
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+}
+
+.hand-cards {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pick-order {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.pick-order h4 {
+  color: #2d3748;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pick-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.pick-item.current {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  font-weight: 600;
+  transform: scale(1.05);
+}
+
+.pick-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #4a5568;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.pick-item.current .pick-number {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.player-name {
+  font-size: 0.875rem;
+  flex: 1;
+}
+
+.current-indicator {
+  font-size: 1.2rem;
+}
+
+.draft-complete {
+  text-align: center;
+}
+
+.draft-complete h3 {
+  color: #48bb78;
+  margin-bottom: 1rem;
+}
+
+.final-hands {
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.final-hands .player-hand {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 1rem;
+  border-radius: 8px;
+  min-width: 200px;
+}
+
+.final-hands .hand-cards {
+  justify-content: center;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .draft-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .pick-order {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .turn-indicator {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .final-hands {
+    flex-direction: column;
+  }
+  
+  .card-grid {
+    justify-content: center;
+  }
+}

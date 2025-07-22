@@ -4,6 +4,7 @@ import './ScoreBoard.css'
 
 const ScoreBoard = ({ players, currentRound }) => {
   const [expandedPlayer, setExpandedPlayer] = useState(null)
+  const [isCollapsed, setIsCollapsed] = useState(true)
   
   const getCurrentScore = (player) => {
     if (!player.grid) return { total: 0 }
@@ -20,8 +21,11 @@ const ScoreBoard = ({ players, currentRound }) => {
 
   return (
     <div className="score-board">
-      <h3>Scoreboard</h3>
-      <div className="scores-container">
+      <h3 onClick={() => setIsCollapsed(!isCollapsed)} style={{ cursor: 'pointer' }}>
+        Scoreboard {isCollapsed ? '▼' : '▲'}
+      </h3>
+      {!isCollapsed && (
+        <div className="scores-container">
         {players.map((player, index) => (
           <div key={index} className="player-score">
             <h4>{player.name}</h4>
@@ -47,7 +51,8 @@ const ScoreBoard = ({ players, currentRound }) => {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

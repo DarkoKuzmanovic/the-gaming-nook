@@ -7,17 +7,17 @@ export const PlacementScenario = {
 }
 
 export function determinePlacementScenario(card, grid) {
-  const cardNumber = card.number
-  const targetIndex = cardNumber - 1 // Cards 1-9 map to indices 0-8
+  const cardValue = card.value
+  const targetIndex = cardValue - 1 // Cards 1-9 map to indices 0-8
   
-  // Find if there's already a face-up card with this number
+  // Find if there's already a face-up card with this value
   const existingFaceUpCard = grid.find(gridCard => 
-    gridCard && gridCard.faceUp && gridCard.number === cardNumber
+    gridCard && gridCard.faceUp && gridCard.value === cardValue
   )
   
-  // Check if the number is already validated
+  // Check if the value is already validated
   const isValidated = grid.some(gridCard => 
-    gridCard && gridCard.faceUp && gridCard.number === cardNumber && gridCard.validated
+    gridCard && gridCard.faceUp && gridCard.value === cardValue && gridCard.validated
   )
   
   if (isValidated) {
@@ -31,7 +31,7 @@ export function determinePlacementScenario(card, grid) {
 
 export function getValidPlacementPositions(card, grid) {
   const scenario = determinePlacementScenario(card, grid)
-  const targetIndex = card.number - 1
+  const targetIndex = card.value - 1
   
   switch (scenario) {
     case PlacementScenario.EMPTY_OR_FACE_DOWN:
@@ -69,7 +69,7 @@ export function getValidPlacementPositions(card, grid) {
 export function executeCardPlacement(card, targetIndex, grid, chosenCard = null) {
   const scenario = determinePlacementScenario(card, grid)
   const newGrid = [...grid]
-  const targetPos = card.number - 1
+  const targetPos = card.value - 1
   
   switch (scenario) {
     case PlacementScenario.EMPTY_OR_FACE_DOWN:
@@ -144,8 +144,8 @@ export function canValidateCard(card, position, grid) {
 export function validateCard(cardToPlace, targetIndex, grid) {
   const spaceNumber = targetIndex + 1
   
-  if (cardToPlace.number !== spaceNumber) {
-    throw new Error('Card number must match space number for validation')
+  if (cardToPlace.value !== spaceNumber) {
+    throw new Error('Card value must match space value for validation')
   }
   
   const existingCard = grid[targetIndex]

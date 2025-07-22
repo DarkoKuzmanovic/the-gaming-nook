@@ -17,92 +17,112 @@
 
 ## **Card Back (1 card)**
 
-- [ ] `card-back.png` - Generic card back design
+- [x] `card-back.png` - Generic card back design
 
 ---
 
-## **Blue Cards (10 cards)**
+## **Blue Cards (16 cards)**
 
-- [ ] `blue-1.png` - Blue 1 (scoring: 6)
-- [ ] `blue-2.png` - Blue 2 (scoring: 4)
-- [ ] `blue-3.png` - Blue 3 (scoring: 0)
-- [ ] `blue-3-alt.png` - Blue 3 (scoring: 1)
-- [ ] `blue-4-special.png` - Blue 4 Special Card (scoring: 1)
-- [ ] `blue-4-alt.png` - Blue 4 (scoring: 0)
-- [ ] `blue-5-special.png` - Blue 5 Special Card (scoring: 1)
-- [ ] `blue-5-alt.png` - Blue 5 (scoring: 0, -2)
-- [ ] `blue-6.png` - Blue 6 (scoring: 1, -1)
-- [ ] `blue-7.png` - Blue 7 (scoring: -3)
-- [ ] `blue-8.png` - Blue 8 (scoring: -3)
-- [ ] `blue-9.png` - Blue 9 (scoring: -6, -1)
-
----
-
-## **Green Cards (10 cards)**
-
-- [ ] `green-1.png` - Green 1 (scoring: 5)
-- [ ] `green-2.png` - Green 2 (scoring: 3)
-- [ ] `green-3-special.png` - Green 3 Special Card (scoring: 2)
-- [ ] `green-4.png` - Green 4 (scoring: 4, -1)
-- [ ] `green-5-special.png` - Green 5 Special Card (scoring: 1)
-- [ ] `green-5-alt.png` - Green 5 (scoring: -1, 0)
-- [ ] `green-6.png` - Green 6 (scoring: -1, 1, -4)
-- [ ] `green-7.png` - Green 7 (scoring: -2, 0)
-- [ ] `green-8.png` - Green 8 (scoring: -2)
-- [ ] `green-9.png` - Green 9 (scoring: -4)
+- [x] `blue-1.png` - Blue 1 (scoring: 6)
+- [x] `blue-2.png` - Blue 2 (scoring: 4)
+- [x] `blue-3.png` - Blue 3 (scoring: 0)
+- [x] `blue-3-alt.png` - Blue 3 (scoring: 1)
+- [x] `blue-4-alt.png` - Blue 4 (scoring: 0)
+- [x] `blue-4.png` - Blue 4 (scoring: 1)
+- [x] `blue-5-special.png` - Blue 5 Special Card (scoring: 1)
+- [x] `blue-5-alt.png` - Blue 5 (scoring: 0)
+- [x] `blue-5-alt2.png` - Blue 5 (scoring: -2)
+- [x] `blue-6.png` - Blue 6 (scoring: 1)
+- [x] `blue-6-alt.png` - Blue 6 (scoring: -1)
+- [x] `blue-7.png` - Blue 7 (scoring: -3)
+- [x] `blue-8.png` - Blue 8 (scoring: -3)
+- [x] `blue-9.png` - Blue 9 (scoring: -6)
+- [x] `blue-9-alt.png` - Blue 9 (scoring: -1)
+- [x] `blue-4-alt2.png` - Blue 4 (scoring: 1)
 
 ---
 
-## **Yellow Cards (11 cards)**
+## **Green Cards (16 cards)**
 
-- [ ] `yellow-1.png` - Yellow 1 (scoring: 4)
-- [ ] `yellow-2-special.png` - Yellow 2 Special Card (scoring: 1)
-- [ ] `yellow-2-alt.png` - Yellow 2 (scoring: 2)
-- [ ] `yellow-3.png` - Yellow 3 (scoring: 5, 0)
-- [ ] `yellow-4.png` - Yellow 4 (scoring: -1, 3)
-- [ ] `yellow-5-special.png` - Yellow 5 Special Card (scoring: 1)
-- [ ] `yellow-5-alt.png` - Yellow 5 (scoring: 0, -2)
-- [ ] `yellow-6.png` - Yellow 6 (scoring: 0, -3)
-- [ ] `yellow-7.png` - Yellow 7 (scoring: 1, -5)
-- [ ] `yellow-8.png` - Yellow 8 (scoring: -1)
-- [ ] `yellow-9.png` - Yellow 9 (scoring: -2)
+- [x] `green-1.png` - Green 1 (scoring: 5)
+- [x] `green-2.png` - Green 2 (scoring: 3)
+- [x] `green-3.png` - Green 3 (scoring: 2)
+- [x] `green-3-special.png` - Green 3 Special Card (scoring: 1)
+- [x] `green-4.png` - Green 4 (scoring: 4)
+- [x] `green-4-alt.png` - Green 4 (scoring: -1)
+- [x] `green-5-special.png` - Green 5 Special Card (scoring: 1)
+- [x] `green-5-alt.png` - Green 5 (scoring: -1)
+- [x] `green-5-alt2.png` - Green 5 (scoring: 0)
+- [x] `green-6.png` - Green 6 (scoring: -1)
+- [x] `green-6-alt.png` - Green 6 (scoring: 1)
+- [x] `green-6-alt2.png` - Green 6 (scoring: -4)
+- [x] `green-7.png` - Green 7 (scoring: -2)
+- [x] `green-7-alt.png` - Green 7 (scoring: 0)
+- [x] `green-8.png` - Green 8 (scoring: -2)
+- [x] `green-9.png` - Green 9 (scoring: -4)
 
 ---
 
-## **Red Cards (13 cards)**
+## **Yellow Cards (16 cards)**
 
-- [ ] `red-1-special.png` - Red 1 Special Card (scoring: 1)
-- [ ] `red-1-alt.png` - Red 1 (scoring: 3)
-- [ ] `red-2.png` - Red 2 (scoring: 5)
-- [ ] `red-3.png` - Red 3 (scoring: 4)
-- [ ] `red-4.png` - Red 4 (scoring: 2, 0)
-- [ ] `red-5-special.png` - Red 5 Special Card (scoring: 1)
-- [ ] `red-5-alt.png` - Red 5 (scoring: -1, 0)
-- [ ] `red-6.png` - Red 6 (scoring: -2, 0)
-- [ ] `red-7.png` - Red 7 (scoring: -4, -1)
-- [ ] `red-8.png` - Red 8 (scoring: 0, -5)
-- [ ] `red-9.png` - Red 9 (scoring: 0)
+- [x] `yellow-1.png` - Yellow 1 (scoring: 4)
+- [x] `yellow-2-special.png` - Yellow 2 Special Card (scoring: 1)
+- [x] `yellow-2-alt.png` - Yellow 2 (scoring: 2)
+- [x] `yellow-3.png` - Yellow 3 (scoring: 5)
+- [x] `yellow-3-alt.png` - Yellow 3 (scoring: 0)
+- [x] `yellow-4.png` - Yellow 4 (scoring: -1)
+- [x] `yellow-4-alt.png` - Yellow 4 (scoring: 3)
+- [x] `yellow-5-special.png` - Yellow 5 Special Card (scoring: 1)
+- [x] `yellow-5-alt.png` - Yellow 5 (scoring: 0)
+- [x] `yellow-5-alt2.png` - Yellow 5 (scoring: -2)
+- [x] `yellow-6.png` - Yellow 6 (scoring: 0)
+- [x] `yellow-6-alt.png` - Yellow 6 (scoring: -3)
+- [x] `yellow-7.png` - Yellow 7 (scoring: 1)
+- [x] `yellow-7-alt.png` - Yellow 7 (scoring: -5)
+- [x] `yellow-8.png` - Yellow 8 (scoring: -1)
+- [x] `yellow-9.png` - Yellow 9 (scoring: -2)
+
+---
+
+## **Red Cards (16 cards)**
+
+- [x] `red-1-special.png` - Red 1 Special Card (scoring: 1)
+- [x] `red-1-alt.png` - Red 1 (scoring: 3)
+- [x] `red-2.png` - Red 2 (scoring: 5)
+- [x] `red-3.png` - Red 3 (scoring: 4)
+- [x] `red-4.png` - Red 4 (scoring: 2)
+- [x] `red-4-alt.png` - Red 4 (scoring: 0)
+- [x] `red-5-special.png` - Red 5 Special Card (scoring: 1)
+- [x] `red-5-alt.png` - Red 5 (scoring: -1)
+- [x] `red-5-alt2.png` - Red 5 (scoring: 0)
+- [x] `red-6.png` - Red 6 (scoring: -2)
+- [x] `red-6-alt.png` - Red 6 (scoring: 0)
+- [x] `red-7.png` - Red 7 (scoring: -4)
+- [x] `red-7-alt.png` - Red 7 (scoring: -1)
+- [x] `red-8.png` - Red 8 (scoring: 0)
+- [x] `red-8-alt.png` - Red 8 (scoring: -5)
+- [x] `red-9.png` - Red 9 (scoring: 0)
 
 ---
 
 ## **Multi-colored Cards (6 cards)**
 
-- [ ] `multi-2.png` - Multi 2 (scoring: 0)
-- [ ] `multi-3.png` - Multi 3 (scoring: 0)
-- [ ] `multi-4.png` - Multi 4 (scoring: 0)
-- [ ] `multi-6.png` - Multi 6 (scoring: -1)
-- [ ] `multi-7.png` - Multi 7 (scoring: -1)
-- [ ] `multi-8.png` - Multi 8 (scoring: -1)
+- [x] `multi-2.png` - Multi 2 (scoring: 0)
+- [x] `multi-3.png` - Multi 3 (scoring: 0)
+- [x] `multi-4.png` - Multi 4 (scoring: 0)
+- [x] `multi-6.png` - Multi 6 (scoring: -1)
+- [x] `multi-7.png` - Multi 7 (scoring: -1)
+- [x] `multi-8.png` - Multi 8 (scoring: -1)
 
 ---
 
 ## **Summary**
 
 - **Total Cards**: 70 cards
-- **Blue Cards**: 10 cards
-- **Green Cards**: 10 cards
-- **Yellow Cards**: 11 cards
-- **Red Cards**: 13 cards
+- **Blue Cards**: 16 cards
+- **Green Cards**: 16 cards
+- **Yellow Cards**: 16 cards
+- **Red Cards**: 16 cards
 - **Multi-colored Cards**: 6 cards
 - **Special Cards**: 9 cards (marked with "yes" in CSV)
 - **Card Back**: 1 card
@@ -128,7 +148,7 @@ public/cards/
     ├── ... (all 70 cards)
 ```
 
-**\*Total Assets Needed: 71 files (1 back + 70 fronts)**
+**\*Total Assets Needed: 73 files (1 back + 72 fronts)**
 
 ## **Card Distribution Notes**
 

@@ -53,8 +53,88 @@
   transition: background 0.3s;
 }
 
-.menu-form button:hover {
+.menu-form button:hover:not(:disabled) {
   background: #5a6fd8;
+}
+
+.menu-form button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.connection-status {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+}
+
+.instructions {
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  color: #888;
+}
+
+.waiting {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 3rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+}
+
+.waiting h1 {
+  color: #333;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+
+.waiting-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spinner {
+  font-size: 3rem;
+  animation: spin 2s linear infinite;
+  color: #667eea;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.waiting h2 {
+  margin: 1rem 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.waiting p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.waiting button {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.waiting button:hover {
+  background: #c82333;
 }
 
 .app-header {
