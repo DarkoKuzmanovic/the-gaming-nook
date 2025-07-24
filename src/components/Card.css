@@ -1,16 +1,16 @@
 .card {
-  width: 70px;
-  height: 100px;
+  width: 90px;
+  height: 130px;
   border: 2px solid #333;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 0.25rem;
+  padding: 0.3rem;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: #333;
   overflow: hidden;
 }
@@ -57,26 +57,42 @@
 .card.placed {
   width: 100%;
   height: 100%;
-  max-width: 80px;
-  max-height: 120px;
+  max-width: 100px;
+  max-height: 150px;
   margin: 0 auto;
 }
 
 .card.validated {
-  border-color: #4CAF50;
+  border-color: #4caf50;
   border-width: 3px;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5), 0 0 8px rgba(76, 175, 80, 0.3);
 }
 
 /* Color themes */
-.card-blue { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); }
-.card-green { background: linear-gradient(135deg, #E8F5E8, #C8E6C9); }
-.card-yellow { background: linear-gradient(135deg, #FFF8E1, #FFECB3); }
-.card-orange { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
-.card-red { background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
-.card-purple { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); }
-.card-brown { background: linear-gradient(135deg, #EFEBE9, #D7CCC8); }
-.card-multi { background: linear-gradient(135deg, #E8F5E8, #FFECB3, #FFCDD2); }
+.card-blue {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+}
+.card-green {
+  background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+}
+.card-yellow {
+  background: linear-gradient(135deg, #fff8e1, #ffecb3);
+}
+.card-orange {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+}
+.card-red {
+  background: linear-gradient(135deg, #ffebee, #ffcdd2);
+}
+.card-purple {
+  background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+}
+.card-brown {
+  background: linear-gradient(135deg, #efebe9, #d7ccc8);
+}
+.card-multi {
+  background: linear-gradient(135deg, #e8f5e8, #ffecb3, #ffcdd2);
+}
 
 .card-header {
   display: flex;
@@ -85,18 +101,19 @@
 }
 
 .card-number {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: bold;
   line-height: 1;
 }
 
 .card-symbols {
   display: flex;
-  gap: 0.1rem;
+  gap: 0.15rem;
 }
 
-.spiral, .cross {
-  font-size: 0.8rem;
+.spiral,
+.cross {
+  font-size: 1rem;
   line-height: 1;
 }
 
@@ -109,16 +126,16 @@
 }
 
 .card-color-indicator {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.2);
   margin-bottom: 0.2rem;
 }
 
 .special-indicator {
-  font-size: 0.8rem;
-  color: #FFD700;
+  font-size: 1rem;
+  color: #ffd700;
 }
 
 .card-footer {
@@ -127,7 +144,7 @@
 }
 
 .card-number-small {
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: bold;
   transform: rotate(180deg);
 }
@@ -138,7 +155,7 @@
   right: -5px;
   width: 20px;
   height: 20px;
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -154,7 +171,7 @@
   left: -5px;
   width: 20px;
   height: 20px;
-  background: #FF9800;
+  background: #ff9800;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -164,7 +181,7 @@
 }
 
 .card-back {
-  background: linear-gradient(135deg, #2C3E50, #34495E);
+  background: linear-gradient(135deg, #2c3e50, #34495e);
   color: white;
   justify-content: center;
   align-items: center;
@@ -180,8 +197,8 @@
     45deg,
     transparent,
     transparent 5px,
-    rgba(255,255,255,0.1) 5px,
-    rgba(255,255,255,0.1) 10px
+    rgba(255, 255, 255, 0.1) 5px,
+    rgba(255, 255, 255, 0.1) 10px
   );
   border-radius: 6px;
 }
