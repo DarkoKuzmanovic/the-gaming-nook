@@ -11,7 +11,7 @@ import { CARDS, shuffleDeck, createGameDeck } from '../data/cards.js'
 import { initializeDraftPhase, pickCard, startPickPhase, DraftPhase as DraftPhaseEnum } from '../game/draft'
 import './GameBoard.css'
 
-const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
+const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService, onGameStateChange, onDraftStateChange }) => {
   const [gameState, setGameState] = useState({
     currentRound: 1,
     currentPlayer: 0,
@@ -31,6 +31,19 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
   const [showRoundComplete, setShowRoundComplete] = useState(false)
   const [roundCompleteData, setRoundCompleteData] = useState(null)
   const playerIndex = gameInfo?.playerIndex || 0
+
+  // Notify parent component of state changes
+  useEffect(() => {
+    if (onGameStateChange) {
+      onGameStateChange(gameState)
+    }
+  }, [gameState, onGameStateChange])
+
+  useEffect(() => {
+    if (onDraftStateChange) {
+      onDraftStateChange(draftState)
+    }
+  }, [draftState, onDraftStateChange])
 
   useEffect(() => {
     if (!socketService || !gameInfo) return
@@ -326,12 +339,6 @@ const GameBoard = ({ playerName = 'Player 1', gameInfo, socketService }) => {
   // Main game interface - shows both draft and placement together
   return (
     <div className="game-board">
-      <div className="game-info">
-        <h2>Round {gameState.currentRound}/3</h2>
-        <p>Current Turn: {gameState.players[gameState.currentPlayer].name}</p>
-        <p>Phase: {draftState ? (draftState.phase === 'reveal' ? 'Revealing Cards' : 'Pick & Place') : 'Waiting'}</p>
-        <p>Cards in deck: {gameState.deck.length || 0}</p>
-      </div>
 
       {/* Revealed Cards Section */}
       {draftState && draftState.revealedCards && draftState.revealedCards.length > 0 && (

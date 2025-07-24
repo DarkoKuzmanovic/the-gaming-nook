@@ -8,6 +8,8 @@ function App() {
   const [playerName, setPlayerName] = useState('')
   const [gameInfo, setGameInfo] = useState(null)
   const [connectionStatus, setConnectionStatus] = useState('disconnected')
+  const [currentGameState, setCurrentGameState] = useState(null)
+  const [currentDraftState, setCurrentDraftState] = useState(null)
 
   useEffect(() => {
     // Connect to server on app start
@@ -119,14 +121,41 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Vetrolisci</h1>
-        <p>Player: {playerName} | Game: {gameInfo?.gameId}</p>
+        <div className="app-header-left">
+          <h1>Vetrolisci</h1>
+          <p>Player: {playerName} | Game: {gameInfo?.gameId}</p>
+        </div>
+        <div className="app-header-right">
+          <GameInfo gameState={currentGameState} draftState={currentDraftState} />
+        </div>
       </header>
       <GameBoard 
         playerName={playerName} 
         gameInfo={gameInfo}
         socketService={socketService}
+        onGameStateChange={setCurrentGameState}
+        onDraftStateChange={setCurrentDraftState}
       />
+    </div>
+  )
+}
+
+// Game info component to be used in header
+const GameInfo = ({ gameState, draftState }) => {
+  if (!gameState) {
+    return (
+      <div className="game-info-inline">
+        <h2>Loading...</h2>
+      </div>
+    )
+  }
+
+  return (
+    <div className="game-info-inline">
+      <h2>Round {gameState.currentRound}/3</h2>
+      <p>Turn: {gameState.players[gameState.currentPlayer]?.name}</p>
+      <p>Phase: {draftState ? (draftState.phase === 'reveal' ? 'Revealing Cards' : 'Pick & Place') : 'Waiting'}</p>
+      <p>Deck: {gameState.deck?.length || 0} cards</p>
     </div>
   )
 }

@@ -139,6 +139,17 @@ class SocketService {
     this.socket.on('player-disconnected', callback)
   }
 
+  // Game state events
+  onGameUpdate(callback) {
+    if (!this.socket) return
+    this.socket.on('game-update', callback)
+  }
+
+  onDraftUpdate(callback) {
+    if (!this.socket) return
+    this.socket.on('draft-update', callback)
+  }
+
   disconnect() {
     if (this.socket) {
       this.socket.disconnect()
