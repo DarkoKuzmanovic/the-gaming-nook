@@ -41,6 +41,7 @@ const GameBoard = ({
   const [revealingCards, setRevealingCards] = useState(false);
   const [revealedCardIds, setRevealedCardIds] = useState(new Set());
   const [flyingCards, setFlyingCards] = useState(new Map());
+  const [newlyPlacedCards, setNewlyPlacedCards] = useState(new Set());
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const playerIndex = gameInfo?.playerIndex || 0;
@@ -147,6 +148,7 @@ const GameBoard = ({
         // Trigger placement animation for the placed card
         if (placedCard) {
           setPlacingCards(prev => new Set([...prev, placedCard.id]));
+          setNewlyPlacedCards(prev => new Set([...prev, placedCard.id]));
           
           // Clear placement animation after duration
           setTimeout(() => {
@@ -156,6 +158,15 @@ const GameBoard = ({
               return newSet;
             });
           }, 600);
+          
+          // Clear fade-in animation after duration
+          setTimeout(() => {
+            setNewlyPlacedCards(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(placedCard.id);
+              return newSet;
+            });
+          }, 500);
         }
 
         setDraftState(newDraftState);
@@ -228,6 +239,18 @@ const GameBoard = ({
          if (soundEnabled) {
            AudioService.playSound('playCard');
          }
+
+        // Add fade-in animation for the placed card
+        setNewlyPlacedCards(prev => new Set([...prev, cardId]));
+        
+        // Clear fade-in animation after duration
+        setTimeout(() => {
+          setNewlyPlacedCards(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(cardId);
+            return newSet;
+          });
+        }, 500);
 
         setGameState((prev) => {
           const newPlayers = [...prev.players];
@@ -345,19 +368,8 @@ const GameBoard = ({
       AudioService.playSound('playCard');
     }
 
-    // Calculate flying animation coordinates
-    const revealedCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
-    const gridSection = document.querySelector('.player-grid-section');
-    
-    if (revealedCardElement && gridSection) {
-      const revealedRect = revealedCardElement.getBoundingClientRect();
-      const gridRect = gridSection.getBoundingClientRect();
-      
-      const flyX = gridRect.left + gridRect.width / 2 - revealedRect.left - revealedRect.width / 2;
-      const flyY = gridRect.top + gridRect.height / 2 - revealedRect.top - revealedRect.height / 2;
-      
-      setFlyingCards(prev => new Map([...prev, [cardId, { x: flyX, y: flyY }]]));
-    }
+    // Start fade out animation for the drafted card
+    setFlyingCards(prev => new Map([...prev, [cardId, { fadeOut: true }]]));
 
     // Check placement scenario to see if we need to show choice modal
     const currentPlayer = gameState.players[playerIndex];
@@ -496,13 +508,10 @@ const GameBoard = ({
                 const isRevealed = revealedCardIds.has(cardData.id) || !revealingCards;
                 const canPick = canPlayerPick && !isAnimating && isRevealed;
                 
-                const flyCoords = flyingCards.get(cardData.id);
-                const cardStyle = isFlying && flyCoords ? {
-                  '--fly-x': `${flyCoords.x}px`,
-                  '--fly-y': `${flyCoords.y}px`
-                } : {};
+                const fadeData = flyingCards.get(cardData.id);
+                const isFadingOut = fadeData?.fadeOut;
                 
-                const cardClass = `revealed-card ${canPick ? "can-pick" : "waiting"} ${isAnimating ? "card-picking" : ""} ${isFlying ? "card-flying" : ""} ${!isRevealed ? "card-revealing" : ""}`;
+                const cardClass = `revealed-card ${canPick ? "can-pick" : "waiting"} ${isAnimating ? "card-picking" : ""} ${isFadingOut ? "card-fade-out" : ""} ${!isRevealed ? "card-revealing" : ""}`;
                 const tooltipText = !cardData.pickable.canPick
                   ? cardData.pickable.reason === "all_cards_validated"
                     ? "All cards would violate validation rule - can place face-down"
@@ -517,7 +526,6 @@ const GameBoard = ({
                     title={tooltipText} 
                     style={{ 
                       position: "relative",
-                      ...cardStyle,
                       animationDelay: !isRevealed ? `${index * 200}ms` : '0ms'
                     }}
                   >
@@ -560,6 +568,7 @@ const GameBoard = ({
             canPlace={false} // Placement happens automatically after pick
             selectedCard={gameState.selectedCard}
             placingCards={placingCards}
+            newlyPlacedCards={newlyPlacedCards}
           />
         </div>
 
@@ -571,6 +580,7 @@ const GameBoard = ({
             canPlace={false}
             isOpponent={true}
             placingCards={placingCards}
+            newlyPlacedCards={newlyPlacedCards}
           />
         </div>
       </div>

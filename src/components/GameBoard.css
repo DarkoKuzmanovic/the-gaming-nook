@@ -231,22 +231,14 @@
   }
 }
 
-@keyframes cardFlyToGrid {
+@keyframes cardFadeOut {
   0% {
-    transform: scale(1) translate(0, 0);
     opacity: 1;
-  }
-  25% {
-    transform: scale(1.2) translate(0, -30px);
-    opacity: 0.9;
-  }
-  75% {
-    transform: scale(0.9) translate(var(--fly-x, 0), var(--fly-y, 0));
-    opacity: 0.7;
+    transform: scale(1);
   }
   100% {
-    transform: scale(1) translate(var(--fly-x, 0), var(--fly-y, 0));
     opacity: 0;
+    transform: scale(0.8);
   }
 }
 
@@ -275,10 +267,9 @@
   animation: cardPlaceAnimation 0.6s ease-out;
 }
 
-.card-flying {
-  animation: cardFlyToGrid 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  z-index: 9999;
-  position: fixed;
+.card-fade-out {
+  animation: cardFadeOut 0.2s ease-out forwards;
+  pointer-events: none;
 }
 
 .card-revealing {

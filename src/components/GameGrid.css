@@ -101,3 +101,18 @@
 .game-grid.opponent .grid-space:hover {
   border-color: #ddd;
 }
+
+.card-fade-in {
+  animation: cardFadeIn 0.2s ease-in;
+}
+
+@keyframes cardFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
