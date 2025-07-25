@@ -10,7 +10,13 @@ class SocketService {
   }
 
   connect() {
-    this.socket = io("http://localhost:8001");
+    // Dynamically determine server URL based on current host
+    const serverUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:8001'
+      : `http://${window.location.hostname}:8001`;
+    
+    console.log('Connecting to server:', serverUrl);
+    this.socket = io(serverUrl);
 
     this.socket.on("connect", () => {
       console.log("Connected to server:", this.socket.id);

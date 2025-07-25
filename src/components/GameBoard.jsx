@@ -38,9 +38,44 @@ const GameBoard = ({
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [animatingCards, setAnimatingCards] = useState(new Set());
   const [placingCards, setPlacingCards] = useState(new Set());
+  const [revealingCards, setRevealingCards] = useState(false);
+  const [revealedCardIds, setRevealedCardIds] = useState(new Set());
+  const [flyingCards, setFlyingCards] = useState(new Map());
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const playerIndex = gameInfo?.playerIndex || 0;
+
+  // Effect to handle staggered card reveal animation
+  useEffect(() => {
+    if (draftState && draftState.revealedCards && draftState.revealedCards.length > 0) {
+      const currentCardIds = new Set(draftState.revealedCards.map(card => card.id));
+      const previousCardIds = revealedCardIds;
+      
+      // Check if we have new cards to reveal
+      const newCards = draftState.revealedCards.filter(card => !previousCardIds.has(card.id));
+      
+      if (newCards.length > 0) {
+        setRevealingCards(true);
+        setRevealedCardIds(new Set());
+        
+        // Stagger the reveal of each card
+        newCards.forEach((card, index) => {
+          setTimeout(() => {
+            setRevealedCardIds(prev => new Set([...prev, card.id]));
+          }, index * 200); // 200ms delay between each card
+        });
+        
+        // End revealing state after all cards are shown
+        setTimeout(() => {
+          setRevealingCards(false);
+          setRevealedCardIds(currentCardIds);
+        }, newCards.length * 200 + 500);
+      } else if (!revealingCards) {
+        // If not revealing and no new cards, make sure all current cards are marked as revealed
+        setRevealedCardIds(currentCardIds);
+      }
+    }
+  }, [draftState?.revealedCards, revealingCards]);
 
   // Initialize audio when component mounts
   useEffect(() => {
@@ -305,6 +340,25 @@ const GameBoard = ({
     // Start pick animation
     setAnimatingCards(prev => new Set([...prev, cardId]));
 
+    // Play card sound effect
+    if (soundEnabled) {
+      AudioService.playSound('playCard');
+    }
+
+    // Calculate flying animation coordinates
+    const revealedCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+    const gridSection = document.querySelector('.player-grid-section');
+    
+    if (revealedCardElement && gridSection) {
+      const revealedRect = revealedCardElement.getBoundingClientRect();
+      const gridRect = gridSection.getBoundingClientRect();
+      
+      const flyX = gridRect.left + gridRect.width / 2 - revealedRect.left - revealedRect.width / 2;
+      const flyY = gridRect.top + gridRect.height / 2 - revealedRect.top - revealedRect.height / 2;
+      
+      setFlyingCards(prev => new Map([...prev, [cardId, { x: flyX, y: flyY }]]));
+    }
+
     // Check placement scenario to see if we need to show choice modal
     const currentPlayer = gameState.players[playerIndex];
     const scenario = determinePlacementScenario(pickedCard, currentPlayer.grid);
@@ -332,7 +386,12 @@ const GameBoard = ({
         newSet.delete(cardId);
         return newSet;
       });
-    }, 600); // Match animation duration
+      setFlyingCards(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(cardId);
+        return newMap;
+      });
+    }, 800); // Increased timeout to account for flying animation
   };
 
   const handleCardSelect = (card) => {
@@ -430,10 +489,20 @@ const GameBoard = ({
               const pickableCards = getPickableCards(gameState.players[playerIndex].grid, draftState.revealedCards);
               const isMyTurn = draftState.pickOrder[draftState.currentPickIndex] === playerIndex;
 
-              return pickableCards.map((cardData) => {
+              return pickableCards.map((cardData, index) => {
                 const canPlayerPick = isMyTurn && cardData.pickable.canPick;
                 const isAnimating = animatingCards.has(cardData.id);
-                const cardClass = `revealed-card ${canPlayerPick ? "can-pick" : "waiting"} ${isAnimating ? "card-picking" : ""}`;
+                const isFlying = flyingCards.has(cardData.id);
+                const isRevealed = revealedCardIds.has(cardData.id) || !revealingCards;
+                const canPick = canPlayerPick && !isAnimating && isRevealed;
+                
+                const flyCoords = flyingCards.get(cardData.id);
+                const cardStyle = isFlying && flyCoords ? {
+                  '--fly-x': `${flyCoords.x}px`,
+                  '--fly-y': `${flyCoords.y}px`
+                } : {};
+                
+                const cardClass = `revealed-card ${canPick ? "can-pick" : "waiting"} ${isAnimating ? "card-picking" : ""} ${isFlying ? "card-flying" : ""} ${!isRevealed ? "card-revealing" : ""}`;
                 const tooltipText = !cardData.pickable.canPick
                   ? cardData.pickable.reason === "all_cards_validated"
                     ? "All cards would violate validation rule - can place face-down"
@@ -441,17 +510,27 @@ const GameBoard = ({
                   : "";
 
                 return (
-                  <div key={cardData.id} className={cardClass} title={tooltipText} style={{ position: "relative" }}>
+                  <div 
+                    key={cardData.id} 
+                    data-card-id={cardData.id}
+                    className={cardClass} 
+                    title={tooltipText} 
+                    style={{ 
+                      position: "relative",
+                      ...cardStyle,
+                      animationDelay: !isRevealed ? `${index * 200}ms` : '0ms'
+                    }}
+                  >
                     <Card
                       card={cardData}
                       onClick={() => {
-                        if (canPlayerPick && !isAnimating) {
+                        if (canPick) {
                           handleDraftCardPick(cardData.id);
                         }
                       }}
                       isSelected={false}
                     />
-                    {!cardData.pickable.canPick && (
+                    {!cardData.pickable.canPick && isRevealed && (
                       <div className="card-restriction-overlay">
                         {cardData.pickable.reason === "already_validated" ? "🚫" : "⬇️"}
                       </div>
@@ -521,15 +600,14 @@ const GameBoard = ({
         className="header-score-button audio-toggle-button" 
         onClick={() => setSoundEnabled(!soundEnabled)} 
         title={soundEnabled ? "Disable Sound Effects" : "Enable Sound Effects"}
-        style={{ bottom: '140px' }}
+        style={{ bottom: '220px' }}
       >
         <img 
           src="/effects.svg" 
           alt="Sound Effects" 
           style={{ 
             width: '30px', 
-            height: '30px', 
-            marginLeft: '5px',
+            height: '30px',
             opacity: soundEnabled ? 1 : 0.5 
           }} 
         />
@@ -539,23 +617,22 @@ const GameBoard = ({
         className="header-score-button audio-toggle-button" 
         onClick={() => setMusicEnabled(!musicEnabled)} 
         title={musicEnabled ? "Disable Music" : "Enable Music"}
-        style={{ bottom: '90px' }}
+        style={{ bottom: '150px' }}
       >
         <img 
           src="/music.svg" 
           alt="Music" 
           style={{ 
             width: '30px', 
-            height: '30px', 
-            marginLeft: '5px',
+            height: '30px',
             opacity: musicEnabled ? 1 : 0.5 
           }} 
         />
       </button>
 
       {/* Floating scoreboard button */}
-      <button className="header-score-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard">
-        <img src="/scoreboard.svg" alt="Scoreboard" style={{ width: '30px', height: '30px', marginLeft: '5px' }} />
+      <button className="header-score-button scoreboard-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard" style={{ bottom: '80px' }}>
+        <img src="/scoreboard.svg" alt="Scoreboard" style={{ width: '30px', height: '30px' }} />
       </button>
 
       {/* Scoreboard Modal */}

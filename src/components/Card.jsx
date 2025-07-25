@@ -30,7 +30,7 @@ const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false, c
   if (showBack) {
     const backImagePath = getCardBackImagePath()
     return (
-      <div className={`card card-back ${className}`}>
+      <div className={`card card-back ${isPlaced ? 'placed' : ''} ${className}`}>
         <img 
           src={`/cards/backs/${backImagePath}`} 
           alt="Card back"

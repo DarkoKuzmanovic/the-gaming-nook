@@ -10,8 +10,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: true, // Allow all origins for network access
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
@@ -564,6 +565,7 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", games: games.size, players: players.size });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT} and accessible from network`);
 });
+
