@@ -4,115 +4,147 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(6px);
 }
 
 .round-complete-modal {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  max-width: 500px;
+  background: var(--color-bg-primary);
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  max-width: 600px;
   width: 90%;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  text-align: center;
+  max-height: 80vh;
+  overflow-y: auto;
   animation: slideIn 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.round-complete-modal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  z-index: 1;
+}
+
+.round-complete-modal > * {
+  position: relative;
+  z-index: 2;
 }
 
 .round-complete-header {
-  margin-bottom: 1.5rem;
+  text-align: center;
+  margin-bottom: var(--space-8);
 }
 
 .round-complete-header h2 {
-  color: #333;
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: bold;
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
 }
 
 .round-scores {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-8);
 }
 
 .round-scores h3 {
-  color: #555;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
 }
 
 .player-round-score {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-2);
+  background: var(--color-bg-overlay);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .player-name {
-  font-weight: bold;
-  color: #333;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
 .round-score {
-  color: #4CAF50;
-  font-weight: bold;
-  font-size: 1.1rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-success);
+  font-size: var(--font-size-lg);
 }
 
 .total-score {
-  color: #666;
-  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .next-round-info {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+  text-align: center;
+  margin-bottom: var(--space-8);
+  padding: var(--space-4);
+  background: var(--color-primary-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(102, 126, 234, 0.3);
 }
 
 .next-round-info p {
-  margin: 0.25rem 0;
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
 }
 
 .game-complete-info {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+  text-align: center;
+  margin-bottom: var(--space-8);
+  padding: var(--space-6);
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  border-radius: var(--radius-xl);
+  border: 2px solid #f59e0b;
+  box-shadow: var(--shadow-lg);
 }
 
 .game-complete-info p {
-  margin: 0.25rem 0;
-  font-size: 1.1rem;
-  font-weight: bold;
+  margin: 0;
+  color: #92400e;
+  font-weight: var(--font-weight-semibold);
 }
 
 .continue-button {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  display: block;
+  width: 100%;
+  padding: var(--space-4) var(--space-8);
+  background: var(--color-primary);
+  color: var(--color-text-white);
   border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 200px;
+  box-shadow: var(--shadow-md);
 }
 
 .continue-button:hover {
+  background: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 .continue-button:active {
@@ -144,17 +176,17 @@
     padding: 1.5rem;
     margin: 1rem;
   }
-  
+
   .round-complete-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .player-round-score {
     flex-direction: column;
     gap: 0.25rem;
     text-align: center;
   }
-  
+
   .continue-button {
     width: 100%;
   }

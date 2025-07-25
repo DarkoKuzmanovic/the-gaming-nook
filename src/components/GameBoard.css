@@ -1,31 +1,81 @@
 .game-board {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: var(--space-4);
+  background: url("/background.jpg") repeat;
+  background-size: 200px 200px;
+  position: relative;
+  border-radius: var(--radius-xl);
+  min-height: 80vh;
+  box-shadow: var(--shadow-lg);
 }
 
-/* Game info styles moved to App.css as game-info-inline */
+.game-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+  background: var(--color-bg-overlay);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.game-info h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.game-info p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+.game-info-inline {
+  color: var(--color-text-white);
+  text-shadow: var(--text-shadow-sm);
+  font-weight: var(--font-weight-medium);
+}
 
 .game-content {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-8);
+  align-items: start;
 }
 
-.player-area,
-.opponent-area {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.player-section {
+  background: var(--color-bg-overlay);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.player-area h3,
-.opponent-area h3 {
-  margin: 0 0 1rem 0;
-  color: #333;
-  text-align: center;
+.player-section h3 {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.current-player {
+  color: var(--color-success) !important;
+  font-weight: var(--font-weight-bold) !important;
+}
+
+.player-section.current-player {
+  background: var(--color-success-light);
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 2px rgba(72, 187, 120, 0.2), var(--shadow-md);
 }
 
 .center-area {
@@ -153,30 +203,29 @@
 }
 
 .revealed-card {
-  background: white;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   cursor: pointer;
   transition: all 0.2s;
-  min-width: 120px;
-  text-align: center;
+  display: inline-block;
 }
 
 .revealed-card.can-pick {
-  border-color: #007bff;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
   transform: translateY(-2px);
+  filter: brightness(1.1) drop-shadow(0 4px 15px rgba(0, 123, 255, 0.3));
 }
 
 .revealed-card.can-pick:hover {
-  border-color: #0056b3;
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  transform: translateY(-4px);
+  filter: brightness(1.2) drop-shadow(0 6px 20px rgba(0, 123, 255, 0.4));
 }
 
 .revealed-card.waiting {
   opacity: 0.6;
   cursor: not-allowed;
+  filter: grayscale(0.3);
 }
 
 .card-restriction-overlay {
@@ -225,8 +274,6 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   font-size: 1.1em;
 }
-
-
 
 .player-grid-section,
 .opponent-grid-section {
@@ -278,7 +325,7 @@
 @media (max-width: 768px) {
   .revealed-cards {
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
   }
 
   .revealed-card {

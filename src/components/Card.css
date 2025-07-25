@@ -1,18 +1,17 @@
 .card {
-  width: 90px;
-  height: 130px;
-  border: 2px solid #333;
-  border-radius: 8px;
+  width: 80px;
+  height: 120px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 0.3rem;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  font-size: 0.85rem;
-  color: #333;
-  overflow: hidden;
+  box-shadow: var(--shadow-md);
 }
 
 .card-image {
@@ -46,12 +45,14 @@
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
 }
 
 .card.selected {
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light), var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .card.placed {
@@ -60,38 +61,56 @@
   max-width: 100px;
   max-height: 150px;
   margin: 0 auto;
+  border-color: var(--color-success);
+  background: rgba(72, 187, 120, 0.05);
 }
 
 .card.validated {
-  border-color: #4caf50;
-  border-width: 3px;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5), 0 0 8px rgba(76, 175, 80, 0.3);
+  border-color: var(--color-success);
+  background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+  box-shadow: 0 0 0 2px var(--color-success-light), var(--shadow-md);
 }
 
 /* Color themes */
 .card-blue {
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  background: url('/background.jpg') repeat, rgba(227, 242, 253, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
 }
 .card-green {
-  background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+  background: url('/background.jpg') repeat, rgba(232, 245, 232, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
 }
 .card-yellow {
-  background: linear-gradient(135deg, #fff8e1, #ffecb3);
+  background: url('/background.jpg') repeat, rgba(255, 248, 225, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
 }
 .card-orange {
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  background: url('/background.jpg') repeat, rgba(255, 243, 224, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
 }
 .card-red {
-  background: linear-gradient(135deg, #ffebee, #ffcdd2);
+  background: url('/background.jpg') repeat, rgba(255, 235, 238, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
 }
 .card-purple {
-  background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+  background: url('/background.jpg') repeat, rgba(243, 229, 245, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
 }
 .card-brown {
-  background: linear-gradient(135deg, #efebe9, #d7ccc8);
+  background: url('/background.jpg') repeat, rgba(239, 235, 233, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
 }
 .card-multi {
-  background: linear-gradient(135deg, #e8f5e8, #ffecb3, #ffcdd2);
+  background: url('/background.jpg') repeat, rgba(240, 248, 240, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
 }
 
 .card-header {
@@ -101,14 +120,16 @@
 }
 
 .card-number {
-  font-size: 1.4rem;
-  font-weight: bold;
-  line-height: 1;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-1);
+  color: var(--color-text-primary);
 }
 
 .card-symbols {
   display: flex;
-  gap: 0.15rem;
+  gap: 2px;
+  font-size: var(--font-size-xs);
 }
 
 .spiral,
@@ -126,15 +147,19 @@
 }
 
 .card-color-indicator {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.2);
-  margin-bottom: 0.2rem;
+  margin-bottom: var(--space-1);
+  box-shadow: var(--shadow-sm);
 }
 
 .special-indicator {
-  font-size: 1rem;
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  font-size: var(--font-size-sm);
   color: #ffd700;
 }
 
@@ -181,10 +206,29 @@
 }
 
 .card-back {
-  background: linear-gradient(135deg, #2c3e50, #34495e);
+  background: url('/background.jpg') repeat;
+  background-size: 50px 50px;
+  position: relative;
   color: white;
   justify-content: center;
   align-items: center;
+}
+
+.card-back::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(44, 62, 80, 0.8);
+  border-radius: 6px;
+  z-index: 1;
+}
+
+.card-back > * {
+  position: relative;
+  z-index: 2;
 }
 
 .card-back-pattern {

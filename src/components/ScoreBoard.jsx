@@ -1,31 +1,34 @@
-import React, { useState } from 'react'
-import { calculatePlayerScore, calculateTotalGameScore } from '../game/scoring'
-import './ScoreBoard.css'
+import React, { useState } from "react";
+import { calculatePlayerScore, calculateTotalGameScore } from "../game/scoring";
+import "./ScoreBoard.css";
 
-const ScoreBoard = ({ players, currentRound }) => {
-  const [expandedPlayer, setExpandedPlayer] = useState(null)
-  const [isCollapsed, setIsCollapsed] = useState(true)
-  
+const ScoreBoard = ({ players, currentRound, onClose }) => {
+  const [expandedPlayer, setExpandedPlayer] = useState(null);
+
   const getCurrentScore = (player) => {
-    if (!player.grid) return { total: 0 }
-    return calculatePlayerScore(player.grid, currentRound)
-  }
+    if (!player.grid) return { total: 0 };
+    return calculatePlayerScore(player.grid, currentRound);
+  };
 
   const getTotalScore = (player) => {
-    return calculateTotalGameScore(player) + getCurrentScore(player).total
-  }
-  
+    return calculateTotalGameScore(player) + getCurrentScore(player).total;
+  };
+
   const toggleExpanded = (playerIndex) => {
-    setExpandedPlayer(expandedPlayer === playerIndex ? null : playerIndex)
-  }
+    setExpandedPlayer(expandedPlayer === playerIndex ? null : playerIndex);
+  };
 
   return (
-    <div className="score-board">
-      <h3 onClick={() => setIsCollapsed(!isCollapsed)} style={{ cursor: 'pointer' }}>
-        Scoreboard {isCollapsed ? '▼' : '▲'}
-      </h3>
-      {!isCollapsed && (
-        <div className="scores-container">
+    <div className="scoreboard-container">
+      <div className="scoreboard-header">
+        <h3>Scoreboard</h3>
+        {onClose && (
+          <button className="scoreboard-close" onClick={onClose}>
+            ✕
+          </button>
+        )}
+      </div>
+      <div className="scores-container">
         {players.map((player, index) => (
           <div key={index} className="player-score">
             <h4>{player.name}</h4>
@@ -43,27 +46,26 @@ const ScoreBoard = ({ players, currentRound }) => {
                 </div>
               </div>
               <div className="total-score" onClick={() => toggleExpanded(index)}>
-                <strong>Total: {getTotalScore(player)} {expandedPlayer === index ? '▼' : '▶'}</strong>
+                <strong>
+                  Total: {getTotalScore(player)} {expandedPlayer === index ? "▼" : "▶"}
+                </strong>
               </div>
-              {expandedPlayer === index && (
-                <ScoreDetails player={player} currentRound={currentRound} />
-              )}
+              {expandedPlayer === index && <ScoreDetails player={player} currentRound={currentRound} />}
             </div>
           </div>
         ))}
-        </div>
-      )}
+      </div>
     </div>
-  )
-}
+  );
+};
 
 const ScoreDetails = ({ player, currentRound }) => {
-  const scoreData = getCurrentScore(player)
-  
-  if (!scoreData) return null
-  
-  const { breakdown } = scoreData
-  
+  const scoreData = getCurrentScore(player);
+
+  if (!scoreData) return null;
+
+  const { breakdown } = scoreData;
+
   return (
     <div className="score-details">
       <div className="score-category">
@@ -76,28 +78,18 @@ const ScoreDetails = ({ player, currentRound }) => {
           ))}
         </div>
       </div>
-      
+
       <div className="score-category">
         <h5>Symbols ({scoreData.symbols})</h5>
         <div className="score-items">
-          {breakdown.spirals > 0 && (
-            <span className="score-item positive">
-              +{breakdown.spirals} spirals
-            </span>
-          )}
+          {breakdown.spirals > 0 && <span className="score-item positive">+{breakdown.spirals} spirals</span>}
           {breakdown.specialBonuses > 0 && (
-            <span className="score-item positive">
-              +{breakdown.specialBonuses} special bonus
-            </span>
+            <span className="score-item positive">+{breakdown.specialBonuses} special bonus</span>
           )}
-          {breakdown.crosses > 0 && (
-            <span className="score-item negative">
-              -{breakdown.crosses} crosses
-            </span>
-          )}
+          {breakdown.crosses > 0 && <span className="score-item negative">-{breakdown.crosses} crosses</span>}
         </div>
       </div>
-      
+
       <div className="score-category">
         <h5>Color Zone ({scoreData.colorZone})</h5>
         <div className="score-items">
@@ -111,12 +103,12 @@ const ScoreDetails = ({ player, currentRound }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 function getCurrentScore(player) {
-  if (!player.grid) return { total: 0 }
-  return calculatePlayerScore(player.grid, 1) // Default to round 1 for now
+  if (!player.grid) return { total: 0 };
+  return calculatePlayerScore(player.grid, 1); // Default to round 1 for now
 }
 
-export default ScoreBoard
+export default ScoreBoard;

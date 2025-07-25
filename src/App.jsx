@@ -11,7 +11,6 @@ function App() {
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const [currentGameState, setCurrentGameState] = useState(null);
   const [currentDraftState, setCurrentDraftState] = useState(null);
-  const [showScoreModal, setShowScoreModal] = useState(false);
 
   useEffect(() => {
     // Connect to server on app start
@@ -142,13 +141,6 @@ function App() {
                 }...`}
           </div>
         )}
-
-        {/* Floating scoreboard button in bottom right */}
-        {currentGameState && (
-          <button className="header-score-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard">
-            📊
-          </button>
-        )}
       </header>
 
       <GameBoard
@@ -160,21 +152,6 @@ function App() {
         hideScoreBoard={true}
         hideTurnIndicator={true}
       />
-
-      {/* Scoreboard Modal */}
-      {showScoreModal && currentGameState && (
-        <div className="score-modal-overlay" onClick={() => setShowScoreModal(false)}>
-          <div className="score-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="score-modal-header">
-              <h2>Scoreboard</h2>
-              <button className="score-modal-close" onClick={() => setShowScoreModal(false)}>
-                ✕
-              </button>
-            </div>
-            <ScoreBoard players={currentGameState.players} currentRound={currentGameState.currentRound} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

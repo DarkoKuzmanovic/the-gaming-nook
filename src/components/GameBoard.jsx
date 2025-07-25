@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from "react";
 import GameGrid from "./GameGrid";
-import CardHand from "./CardHand";
-import ScoreBoard from "./ScoreBoard";
+import Card from "./Card";
 import CardChoiceModal from "./CardChoiceModal";
 import RoundCompleteModal from "./RoundCompleteModal";
-import DraftPhase from "./DraftPhase";
-import Card from "./Card";
-import {
-  determinePlacementScenario,
-  executeCardPlacement,
-  PlacementScenario,
-  getPickableCards,
-} from "../game/placement";
-import { CARDS, shuffleDeck, createGameDeck } from "../data/cards.js";
-import { initializeDraftPhase, pickCard, startPickPhase, DraftPhase as DraftPhaseEnum } from "../game/draft";
+import ScoreBoard from "./ScoreBoard";
+import { PlacementScenario, determinePlacementScenario, getPickableCards } from "../game/placement";
 import "./GameBoard.css";
 
 const GameBoard = ({
@@ -43,6 +34,7 @@ const GameBoard = ({
   const [cardChoiceData, setCardChoiceData] = useState(null);
   const [showRoundComplete, setShowRoundComplete] = useState(false);
   const [roundCompleteData, setRoundCompleteData] = useState(null);
+  const [showScoreModal, setShowScoreModal] = useState(false);
   const playerIndex = gameInfo?.playerIndex || 0;
 
   // Notify parent component of state changes
@@ -447,6 +439,20 @@ const GameBoard = ({
         nextRound={roundCompleteData?.nextRound}
         onContinue={handleRoundContinue}
       />
+
+      {/* Floating scoreboard button */}
+      <button className="header-score-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard">
+        📊
+      </button>
+
+      {/* Scoreboard Modal */}
+      {showScoreModal && (
+        <div className="score-modal-overlay" onClick={() => setShowScoreModal(false)}>
+          <div className="score-modal-content" onClick={(e) => e.stopPropagation()}>
+            <ScoreBoard players={gameState.players} currentRound={gameState.currentRound} onClose={() => setShowScoreModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -46,7 +46,7 @@ const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames, playerGr
       <div className="draft-phase">
         <div className="draft-header">
           <h3>Draft Phase</h3>
-          <div className="turn-indicator">
+          <div className={`turn-indicator ${isMyTurn ? 'my-turn' : ''}`}>
             <p className={`current-picker ${isMyTurn ? 'my-turn' : ''}`}>
               {isMyTurn ? "Your turn to pick!" : `${currentPlayerName}'s turn`}
             </p>
@@ -88,7 +88,7 @@ const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames, playerGr
           </div>
 
           <div className="player-hands">
-            <div className="player-hand">
+            <div className={`player-hand ${status.currentPickingPlayer === 0 ? 'current-player' : ''}`}>
               <h4>{playerNames[0] || 'Player 1'} ({status.playerHands[0].length} cards)</h4>
               <div className="hand-cards">
                 {status.playerHands[0].map(card => (
@@ -102,7 +102,7 @@ const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames, playerGr
               </div>
             </div>
 
-            <div className="player-hand">
+            <div className={`player-hand ${status.currentPickingPlayer === 1 ? 'current-player' : ''}`}>
               <h4>{playerNames[1] || 'Player 2'} ({status.playerHands[1].length} cards)</h4>
               <div className="hand-cards">
                 {status.playerHands[1].map(card => (
