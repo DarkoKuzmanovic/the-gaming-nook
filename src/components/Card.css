@@ -1,6 +1,6 @@
 .card {
-  width: 80px;
-  height: 120px;
+  width: 96px;
+  height: 144px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-md);
   background: var(--color-bg-primary);
@@ -58,8 +58,8 @@
 .card.placed {
   width: 100%;
   height: 100%;
-  max-width: 100px;
-  max-height: 150px;
+  max-width: 120px;
+  max-height: 180px;
   margin: 0 auto;
   border-color: var(--color-success);
   background: rgba(72, 187, 120, 0.05);

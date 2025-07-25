@@ -3,7 +3,7 @@ import Card from './Card'
 import { getValidPlacementPositions } from '../game/placement'
 import './GameGrid.css'
 
-const GameGrid = ({ grid, onCardPlace, canPlace, selectedCard, isOpponent = false }) => {
+const GameGrid = ({ grid, onCardPlace, canPlace, selectedCard, isOpponent = false, placingCards = new Set() }) => {
   const handleGridClick = (index) => {
     if (canPlace && selectedCard) {
       onCardPlace(index)
@@ -40,6 +40,7 @@ const GameGrid = ({ grid, onCardPlace, canPlace, selectedCard, isOpponent = fals
               card={card}
               isPlaced={true}
               showBack={!card.faceUp}
+              className={placingCards.has(card.id) ? 'card-placing' : ''}
             />
           )}
           {getPlacementHint(index) && (

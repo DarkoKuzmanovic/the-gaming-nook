@@ -35,6 +35,8 @@ const GameBoard = ({
   const [showRoundComplete, setShowRoundComplete] = useState(false);
   const [roundCompleteData, setRoundCompleteData] = useState(null);
   const [showScoreModal, setShowScoreModal] = useState(false);
+  const [animatingCards, setAnimatingCards] = useState(new Set());
+  const [placingCards, setPlacingCards] = useState(new Set());
   const playerIndex = gameInfo?.playerIndex || 0;
 
   // Notify parent component of state changes
@@ -67,6 +69,20 @@ const GameBoard = ({
     socketService.onCardPickedAndPlaced(
       ({ playerIndex: pickingPlayer, cardId, placedCard, newGrid, draftState: newDraftState, placementResult }) => {
         console.log(`Player ${pickingPlayer} picked and placed card ${cardId}`);
+
+        // Trigger placement animation for the placed card
+        if (placedCard) {
+          setPlacingCards(prev => new Set([...prev, placedCard.id]));
+          
+          // Clear placement animation after duration
+          setTimeout(() => {
+            setPlacingCards(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(placedCard.id);
+              return newSet;
+            });
+          }, 600);
+        }
 
         setDraftState(newDraftState);
         setGameState((prev) => {
@@ -242,24 +258,37 @@ const GameBoard = ({
     const pickedCard = draftState.revealedCards.find((card) => card.id === cardId);
     if (!pickedCard) return;
 
+    // Start pick animation
+    setAnimatingCards(prev => new Set([...prev, cardId]));
+
     // Check placement scenario to see if we need to show choice modal
     const currentPlayer = gameState.players[playerIndex];
     const scenario = determinePlacementScenario(pickedCard, currentPlayer.grid);
 
-    if (scenario === PlacementScenario.DUPLICATE_NUMBER) {
-      // Show choice modal for duplicate number scenario
-      const existingCard = currentPlayer.grid[pickedCard.value - 1];
-      setCardChoiceData({
-        existingCard,
-        newCard: pickedCard,
-        targetIndex: pickedCard.value - 1, // Will be overridden based on choice
-        cardId: cardId,
+    // Delay the actual pick to allow animation to play
+    setTimeout(() => {
+      if (scenario === PlacementScenario.DUPLICATE_NUMBER) {
+        // Show choice modal for duplicate number scenario
+        const existingCard = currentPlayer.grid[pickedCard.value - 1];
+        setCardChoiceData({
+          existingCard,
+          newCard: pickedCard,
+          targetIndex: pickedCard.value - 1, // Will be overridden based on choice
+          cardId: cardId,
+        });
+        setShowCardChoice(true);
+      } else {
+        // Send pick-and-place to server immediately
+        socketService.pickCard(cardId);
+      }
+      
+      // Clear animation state
+      setAnimatingCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cardId);
+        return newSet;
       });
-      setShowCardChoice(true);
-    } else {
-      // Send pick-and-place to server immediately
-      socketService.pickCard(cardId);
-    }
+    }, 600); // Match animation duration
   };
 
   const handleCardSelect = (card) => {
@@ -359,7 +388,8 @@ const GameBoard = ({
 
               return pickableCards.map((cardData) => {
                 const canPlayerPick = isMyTurn && cardData.pickable.canPick;
-                const cardClass = `revealed-card ${canPlayerPick ? "can-pick" : "waiting"}`;
+                const isAnimating = animatingCards.has(cardData.id);
+                const cardClass = `revealed-card ${canPlayerPick ? "can-pick" : "waiting"} ${isAnimating ? "card-picking" : ""}`;
                 const tooltipText = !cardData.pickable.canPick
                   ? cardData.pickable.reason === "all_cards_validated"
                     ? "All cards would violate validation rule - can place face-down"
@@ -371,7 +401,7 @@ const GameBoard = ({
                     <Card
                       card={cardData}
                       onClick={() => {
-                        if (canPlayerPick) {
+                        if (canPlayerPick && !isAnimating) {
                           handleDraftCardPick(cardData.id);
                         }
                       }}
@@ -406,6 +436,7 @@ const GameBoard = ({
             onCardPlace={handleCardPlace}
             canPlace={false} // Placement happens automatically after pick
             selectedCard={gameState.selectedCard}
+            placingCards={placingCards}
           />
         </div>
 
@@ -416,6 +447,7 @@ const GameBoard = ({
             onCardPlace={() => {}}
             canPlace={false}
             isOpponent={true}
+            placingCards={placingCards}
           />
         </div>
       </div>

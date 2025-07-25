@@ -2,7 +2,7 @@ import React from 'react'
 import './Card.css'
 import { COLORS, getCardImagePath, getCardBackImagePath } from '../data/cards.js'
 
-const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false }) => {
+const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false, className = '' }) => {
   const getColorClass = (color) => {
     const colorMap = {
       blue: 'card-blue',
@@ -30,7 +30,7 @@ const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false })
   if (showBack) {
     const backImagePath = getCardBackImagePath()
     return (
-      <div className="card card-back">
+      <div className={`card card-back ${className}`}>
         <img 
           src={`/cards/backs/${backImagePath}`} 
           alt="Card back"
@@ -48,14 +48,14 @@ const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false })
   }
 
   if (!card) {
-    return <div className="card card-empty"></div>
+    return <div className={`card card-empty ${className}`}></div>
   }
 
   const frontImagePath = getCardImagePath(card)
 
   return (
     <div 
-      className={`card ${getColorClass(card.color)} ${isSelected ? 'selected' : ''} ${isPlaced ? 'placed' : ''} ${card.validated ? 'validated' : ''}`}
+      className={`card ${getColorClass(card.color)} ${isSelected ? 'selected' : ''} ${isPlaced ? 'placed' : ''} ${card.validated ? 'validated' : ''} ${className}`}
       onClick={onClick}
     >
       {frontImagePath ? (
