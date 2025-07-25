@@ -5,6 +5,7 @@ import CardChoiceModal from "./CardChoiceModal";
 import RoundCompleteModal from "./RoundCompleteModal";
 import ScoreBoard from "./ScoreBoard";
 import { PlacementScenario, determinePlacementScenario, getPickableCards } from "../game/placement";
+import AudioService from "../services/audio";
 import "./GameBoard.css";
 
 const GameBoard = ({
@@ -37,7 +38,40 @@ const GameBoard = ({
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [animatingCards, setAnimatingCards] = useState(new Set());
   const [placingCards, setPlacingCards] = useState(new Set());
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [musicEnabled, setMusicEnabled] = useState(true);
   const playerIndex = gameInfo?.playerIndex || 0;
+
+  // Initialize audio when component mounts
+  useEffect(() => {
+    // Play place_cards sound when game board loads
+    if (soundEnabled) {
+      AudioService.playSound('placeCards');
+    }
+    
+    // Start background music
+    if (musicEnabled) {
+      AudioService.startBackgroundMusic();
+    }
+    
+    return () => {
+      // Stop music when component unmounts
+      AudioService.stopBackgroundMusic();
+    };
+  }, []);
+
+  // Handle sound/music toggle changes
+  useEffect(() => {
+    if (soundEnabled !== AudioService.isSoundEffectsEnabled()) {
+      AudioService.toggleSoundEffects();
+    }
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    if (musicEnabled !== AudioService.isMusicEnabled()) {
+      AudioService.toggleMusic();
+    }
+  }, [musicEnabled]);
 
   // Notify parent component of state changes
   useEffect(() => {
@@ -69,6 +103,11 @@ const GameBoard = ({
     socketService.onCardPickedAndPlaced(
       ({ playerIndex: pickingPlayer, cardId, placedCard, newGrid, draftState: newDraftState, placementResult }) => {
         console.log(`Player ${pickingPlayer} picked and placed card ${cardId}`);
+
+        // Play card sound effect
+      if (soundEnabled) {
+        AudioService.playSound('playCard');
+      }
 
         // Trigger placement animation for the placed card
         if (placedCard) {
@@ -149,6 +188,11 @@ const GameBoard = ({
     socketService.onCardPlaced(
       ({ playerIndex: placingPlayer, cardId, gridIndex, choice, newGrid, currentPlayer, placementResult }) => {
         console.log(`Player ${placingPlayer} placed card ${cardId}`);
+
+        // Play card sound effect
+         if (soundEnabled) {
+           AudioService.playSound('playCard');
+         }
 
         setGameState((prev) => {
           const newPlayers = [...prev.players];
@@ -471,6 +515,43 @@ const GameBoard = ({
         nextRound={roundCompleteData?.nextRound}
         onContinue={handleRoundContinue}
       />
+
+      {/* Audio control buttons */}
+      <button 
+        className="header-score-button audio-toggle-button" 
+        onClick={() => setSoundEnabled(!soundEnabled)} 
+        title={soundEnabled ? "Disable Sound Effects" : "Enable Sound Effects"}
+        style={{ bottom: '140px' }}
+      >
+        <img 
+          src="/effects.svg" 
+          alt="Sound Effects" 
+          style={{ 
+            width: '30px', 
+            height: '30px', 
+            marginLeft: '5px',
+            opacity: soundEnabled ? 1 : 0.5 
+          }} 
+        />
+      </button>
+
+      <button 
+        className="header-score-button audio-toggle-button" 
+        onClick={() => setMusicEnabled(!musicEnabled)} 
+        title={musicEnabled ? "Disable Music" : "Enable Music"}
+        style={{ bottom: '90px' }}
+      >
+        <img 
+          src="/music.svg" 
+          alt="Music" 
+          style={{ 
+            width: '30px', 
+            height: '30px', 
+            marginLeft: '5px',
+            opacity: musicEnabled ? 1 : 0.5 
+          }} 
+        />
+      </button>
 
       {/* Floating scoreboard button */}
       <button className="header-score-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard">

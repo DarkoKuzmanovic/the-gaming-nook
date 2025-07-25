@@ -396,6 +396,21 @@
   background: #218838;
 }
 
+/* Audio toggle buttons */
+.audio-toggle-button {
+  transition: all 0.3s ease;
+}
+
+.audio-toggle-button:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.audio-toggle-button img {
+  transition: opacity 0.3s ease;
+}
+
 @media (max-width: 768px) {
   .revealed-cards {
     flex-wrap: wrap;
@@ -410,5 +425,19 @@
   .player-grid-section,
   .opponent-grid-section {
     margin: 15px 0;
+  }
+
+  .audio-toggle-button {
+    width: 50px !important;
+    height: 50px !important;
+    right: 1rem !important;
+  }
+
+  .audio-toggle-button[style*="bottom: 140px"] {
+    bottom: 120px !important;
+  }
+
+  .audio-toggle-button[style*="bottom: 90px"] {
+    bottom: 75px !important;
   }
 }
