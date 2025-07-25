@@ -18,26 +18,14 @@ const CardChoiceModal = ({
         <p>You already have a face-up card with number {newCard.number}. Choose which one to keep face-up:</p>
         
         <div className="card-choices">
-          <div className="choice-option">
+          <div className="choice-option" onClick={() => onChoose('keep-existing')}>
             <h4>Keep Existing Card</h4>
             <Card card={existingCard} />
-            <button 
-              className="choice-button"
-              onClick={() => onChoose('keep-existing')}
-            >
-              Choose This
-            </button>
           </div>
           
-          <div className="choice-option">
+          <div className="choice-option" onClick={() => onChoose('keep-new')}>
             <h4>Use New Card</h4>
             <Card card={newCard} />
-            <button 
-              className="choice-button"
-              onClick={() => onChoose('keep-new')}
-            >
-              Choose This
-            </button>
           </div>
         </div>
         

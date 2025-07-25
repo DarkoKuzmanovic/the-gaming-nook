@@ -442,7 +442,7 @@ const GameBoard = ({
 
       {/* Floating scoreboard button */}
       <button className="header-score-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard">
-        📊
+        <img src="/scoreboard.svg" alt="Scoreboard" style={{ width: '30px', height: '30px', marginLeft: '5px' }} />
       </button>
 
       {/* Scoreboard Modal */}

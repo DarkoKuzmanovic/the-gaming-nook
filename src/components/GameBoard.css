@@ -6,7 +6,6 @@
   background-size: 200px 200px;
   position: relative;
   border-radius: var(--radius-xl);
-  min-height: 80vh;
   box-shadow: var(--shadow-lg);
 }
 
@@ -226,6 +225,16 @@
   opacity: 0.6;
   cursor: not-allowed;
   filter: grayscale(0.3);
+  /* Override .waiting class properties that interfere with card layout */
+  width: auto;
+  max-width: none;
+  display: inline-block;
+  flex-direction: unset;
+  align-items: unset;
+  justify-content: unset;
+  gap: unset;
+  text-align: unset;
+  padding: 0;
 }
 
 .card-restriction-overlay {
