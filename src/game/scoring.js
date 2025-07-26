@@ -43,22 +43,20 @@ function calculateSymbolPoints(faceUpCards, breakdown) {
   let totalPoints = 0
   let specialBonuses = 0
   
-  // Count scoring points from each card
+  // Count scoring points from ALL face-up cards (not just validated ones)
   faceUpCards.forEach(card => {
-    if (card.validated) {
-      totalPoints += card.scoring || 0
-    }
+    totalPoints += card.scoring || 0
   })
   
-  // Calculate special card bonuses
-  const specialCards = faceUpCards.filter(card => card.special && card.validated)
+  // Calculate special card bonuses from ALL face-up special cards
+  const specialCards = faceUpCards.filter(card => card.special)
   specialCards.forEach(specialCard => {
     const bonusSpirals = calculateSpecialCardBonus(specialCard, faceUpCards)
     specialBonuses += bonusSpirals
   })
   
-  breakdown.spirals = faceUpCards.filter(card => card.validated && (card.scoring > 0)).length
-  breakdown.crosses = faceUpCards.filter(card => card.validated && (card.scoring < 0)).length
+  breakdown.spirals = faceUpCards.filter(card => (card.scoring > 0)).length
+  breakdown.crosses = faceUpCards.filter(card => (card.scoring < 0)).length
   breakdown.specialBonuses = specialBonuses
   
   return totalPoints + specialBonuses
@@ -173,5 +171,5 @@ export function calculateTotalGameScore(player) {
 export function getScoreBreakdown(player, currentRound) {
   if (!player.grid) return null
   
-  return calculatePlayerScore(player.grid, currentRound)
+  return calculatePlayerScore(player.grid, currentRound - 1) // Fix: use 0-based round index
 }

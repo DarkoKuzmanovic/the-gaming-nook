@@ -7,7 +7,7 @@ const ScoreBoard = ({ players, currentRound, onClose }) => {
 
   const getCurrentScore = (player) => {
     if (!player.grid) return { total: 0 };
-    return calculatePlayerScore(player.grid, currentRound);
+    return calculatePlayerScore(player.grid, currentRound - 1); // Fix: use 0-based round index
   };
 
   const getTotalScore = (player) => {
@@ -60,7 +60,7 @@ const ScoreBoard = ({ players, currentRound, onClose }) => {
 };
 
 const ScoreDetails = ({ player, currentRound }) => {
-  const scoreData = getCurrentScore(player);
+  const scoreData = calculatePlayerScore(player.grid, currentRound - 1); // Fix: use 0-based round index
 
   if (!scoreData) return null;
 
@@ -106,9 +106,6 @@ const ScoreDetails = ({ player, currentRound }) => {
   );
 };
 
-function getCurrentScore(player) {
-  if (!player.grid) return { total: 0 };
-  return calculatePlayerScore(player.grid, 1); // Default to round 1 for now
-}
+// Removed duplicate getCurrentScore function that was always using round 1
 
 export default ScoreBoard;

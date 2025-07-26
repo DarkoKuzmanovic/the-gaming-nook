@@ -170,8 +170,6 @@ const GameInfo = ({ gameState, draftState }) => {
     <div className="game-info-inline">
       <h2>Round {gameState.currentRound}/3</h2>
       <p>Turn: {gameState.players[gameState.currentPlayer]?.name}</p>
-      <p>Phase: {draftState ? (draftState.phase === "reveal" ? "Revealing Cards" : "Pick & Place") : "Waiting"}</p>
-      <p>Deck: {gameState.deck?.length || 0} cards</p>
     </div>
   );
 };

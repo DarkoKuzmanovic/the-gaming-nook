@@ -468,7 +468,12 @@ function endRound(game, gameId, io) {
   const roundScores = game.players.map((player, index) => {
     const score = calculatePlayerScore(player.grid, game.currentRound);
     player.scores[game.currentRound - 1] = score;
-    return { playerIndex: index, score, totalScore: player.scores.reduce((a, b) => a + b, 0) };
+    return { 
+      playerIndex: index, 
+      playerName: player.name,
+      score, 
+      totalScore: player.scores.reduce((a, b) => a + b, 0) 
+    };
   });
 
   // Check if game is complete (3 rounds)
@@ -525,35 +530,19 @@ function endRound(game, gameId, io) {
 }
 
 function calculatePlayerScore(grid, roundNumber) {
-  let score = 0;
-
-  // 1. Validated card numbers
-  grid.forEach((cell) => {
-    if (cell && cell.faceUp && cell.validated) {
-      score += cell.value;
-    }
-  });
-
-  // 2. Symbol points (simplified - using scoring field from card data)
-  grid.forEach((cell) => {
-    if (cell && cell.faceUp) {
-      score += cell.scoring || 0;
-    }
-  });
-
-  // 3. Color zone bonus (simplified for now - would need more complex logic)
-  const colorZoneBonus = calculateColorZoneBonus(grid, roundNumber);
-  score += colorZoneBonus;
-
-  return Math.max(0, score); // Don't allow negative scores
+  // Import the proper scoring function from the client-side scoring module
+  const { calculatePlayerScore: clientCalculatePlayerScore } = require('./src/game/scoring.js');
+  
+  try {
+    const result = clientCalculatePlayerScore(grid, roundNumber - 1); // Convert to 0-based index
+    return result.total;
+  } catch (error) {
+    console.error('Error calculating player score:', error);
+    return 0;
+  }
 }
 
-function calculateColorZoneBonus(grid, roundNumber) {
-  // Simplified color zone calculation
-  // In a real implementation, this would use flood-fill to find connected color groups
-  const multiplier = roundNumber + 1; // Round 1: 2x, Round 2: 3x, Round 3: 4x
-  return 0; // Placeholder - would need complex adjacency checking
-}
+// Color zone calculation is now handled by the proper scoring module
 
 function checkRoundEndCondition(game) {
   // Check if any player has filled all 9 spaces

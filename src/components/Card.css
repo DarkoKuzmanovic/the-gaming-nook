@@ -258,3 +258,24 @@
   padding: 0.1rem 0.2rem;
   border-radius: 2px;
 }
+
+.card-revealing {
+  animation: cardReveal 0.5s ease-out forwards;
+  opacity: 0;
+  transform: scale(0.8) rotateX(-90deg);
+}
+
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotateX(-90deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.05) rotateX(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateX(0deg);
+  }
+}

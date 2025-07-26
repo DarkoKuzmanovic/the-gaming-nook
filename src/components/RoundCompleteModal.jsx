@@ -15,7 +15,7 @@ const RoundCompleteModal = ({ isOpen, roundNumber, roundScores, nextRound, onCon
           <h3>Round {roundNumber} Scores:</h3>
           {roundScores.map((scoreData, index) => (
             <div key={index} className="player-round-score">
-              <span className="player-name">Player {scoreData.playerIndex + 1}:</span>
+              <span className="player-name">{scoreData.playerName}:</span>
               <span className="round-score">+{scoreData.score} points</span>
               <span className="total-score">(Total: {scoreData.totalScore})</span>
             </div>

@@ -2,7 +2,6 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-4);
-  background: url("/background.jpg") repeat;
   background-size: 200px 200px;
   position: relative;
   border-radius: var(--radius-xl);

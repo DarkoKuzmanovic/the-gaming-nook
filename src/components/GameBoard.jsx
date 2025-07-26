@@ -294,7 +294,7 @@ const GameBoard = ({
         setGameState((prev) => {
           const newPlayers = [...prev.players];
           roundScores.forEach(({ playerIndex, score }) => {
-            newPlayers[playerIndex].scores[roundNumber] = score;
+            newPlayers[playerIndex].scores[roundNumber - 1] = score; // Fix: use 0-based indexing
           });
 
           // Clear grids for new round
@@ -537,6 +537,7 @@ const GameBoard = ({
                         }
                       }}
                       isSelected={false}
+                      className={revealedCardIds.has(cardData.id) ? 'card-revealing' : ''}
                     />
                     {!cardData.pickable.canPick && isRevealed && (
                       <div className="card-restriction-overlay">
@@ -610,10 +611,10 @@ const GameBoard = ({
         className="header-score-button audio-toggle-button" 
         onClick={() => setSoundEnabled(!soundEnabled)} 
         title={soundEnabled ? "Disable Sound Effects" : "Enable Sound Effects"}
-        style={{ bottom: '220px' }}
+        style={{ bottom: '190px' }}
       >
         <img 
-          src="/effects.svg" 
+          src="/icons/sound.png" 
           alt="Sound Effects" 
           style={{ 
             width: '30px', 
@@ -627,10 +628,10 @@ const GameBoard = ({
         className="header-score-button audio-toggle-button" 
         onClick={() => setMusicEnabled(!musicEnabled)} 
         title={musicEnabled ? "Disable Music" : "Enable Music"}
-        style={{ bottom: '150px' }}
+        style={{ bottom: '120px' }}
       >
         <img 
-          src="/music.svg" 
+          src="/icons/music.png" 
           alt="Music" 
           style={{ 
             width: '30px', 
@@ -641,8 +642,8 @@ const GameBoard = ({
       </button>
 
       {/* Floating scoreboard button */}
-      <button className="header-score-button scoreboard-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard" style={{ bottom: '80px' }}>
-        <img src="/scoreboard.svg" alt="Scoreboard" style={{ width: '30px', height: '30px' }} />
+      <button className="header-score-button scoreboard-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard" style={{ bottom: '50px' }}>
+        <img src="/icons/score.png" alt="Scoreboard" style={{ width: '30px', height: '30px' }} />
       </button>
 
       {/* Scoreboard Modal */}
