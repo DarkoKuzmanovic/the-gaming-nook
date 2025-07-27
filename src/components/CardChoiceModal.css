@@ -1,3 +1,4 @@
+/* ===== MODAL OVERLAY ===== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -12,6 +13,7 @@
   backdrop-filter: blur(4px);
 }
 
+/* ===== MODAL CONTENT ===== */
 .modal-content {
   background: url("/background.jpg") repeat;
   background-size: 200px 200px;
@@ -45,6 +47,7 @@
   z-index: 1;
 }
 
+/* ===== MODAL TEXT ELEMENTS ===== */
 .modal-content h3 {
   margin: 0 0 1.5rem 0;
   color: #333;
@@ -60,6 +63,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+/* ===== CARD CHOICES ===== */
 .card-choices {
   display: flex;
   gap: 2rem;
@@ -91,6 +95,13 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
+.choice-option:focus {
+  outline: none;
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(102, 126, 234, 0.5);
+}
+
 .choice-option h4 {
   margin: 0.5rem 0;
   color: #333;
@@ -99,8 +110,7 @@
   font-weight: 500;
 }
 
-/* Removed choice-button styles as buttons are no longer used */
-
+/* ===== MODAL ACTIONS ===== */
 .modal-actions {
   display: flex;
   justify-content: center;
@@ -135,13 +145,7 @@
     0 0 0 3px rgba(102, 126, 234, 0.5);
 }
 
-.choice-option:focus {
-  outline: none;
-  box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.15),
-    0 0 0 3px rgba(102, 126, 234, 0.5);
-}
-
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   .card-choices {
     flex-direction: column;

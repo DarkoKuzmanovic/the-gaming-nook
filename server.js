@@ -180,11 +180,16 @@ io.on("connection", (socket) => {
       const placementResult = executeServerCardPlacement(pickedCard, gridIndex, pickerPlayer.grid, finalChoice);
       pickerPlayer.grid = placementResult.grid;
 
+      // Set validated property on the placed card if it was validated
+      const wasValidated = placementResult.validated.includes(gridIndex) || 
+                          (scenario === "duplicate" && placementResult.validated.length > 0);
+      const placedCardWithValidation = { ...pickedCard, validated: wasValidated };
+
       // Broadcast the pick-and-place to all players
       io.to(gameId).emit("card-picked-and-placed", {
         playerIndex,
         cardId,
-        placedCard: pickedCard,
+        placedCard: placedCardWithValidation,
         newGrid: pickerPlayer.grid,
         draftState: game.draftState,
         placementResult,
@@ -245,6 +250,10 @@ io.on("connection", (socket) => {
       // Update player grid
       currentPlayer.grid = placementResult.grid;
 
+      // Set validated property on the placed card if it was validated
+      const wasValidated = placementResult.validated.includes(gridIndex);
+      const placedCardWithValidation = { ...card, validated: wasValidated };
+
       // Remove card from player's hand
       if (game.draftState?.playerHands[playerIndex]) {
         game.draftState.playerHands[playerIndex] = game.draftState.playerHands[playerIndex].filter(
@@ -261,6 +270,7 @@ io.on("connection", (socket) => {
         cardId,
         gridIndex,
         choice,
+        placedCard: placedCardWithValidation,
         newGrid: currentPlayer.grid,
         currentPlayer: game.currentPlayer,
         placementResult,
@@ -453,22 +463,25 @@ function executeServerCardPlacement(card, gridIndex, grid, choice) {
 }
 
 function determineServerPlacementScenario(card, grid) {
-  const targetIndex = card.value - 1;
-  const targetCard = grid[targetIndex];
-
-  if (!targetCard || !targetCard.faceUp) {
+  const cardValue = card.value;
+  
+  // Find if there's already a face-up card with this value ANYWHERE in the grid
+  const existingFaceUpCard = grid.find(gridCard => 
+    gridCard && gridCard.faceUp && gridCard.value === cardValue
+  );
+  
+  // Check if the value is already validated ANYWHERE in the grid
+  const isValidated = grid.some(gridCard => 
+    gridCard && gridCard.faceUp && gridCard.value === cardValue && gridCard.validated
+  );
+  
+  if (isValidated) {
+    return "validated";
+  } else if (existingFaceUpCard) {
+    return "duplicate";
+  } else {
     return "empty";
   }
-
-  if (targetCard.faceUp && !targetCard.validated) {
-    return "duplicate";
-  }
-
-  if (targetCard.validated) {
-    return "validated";
-  }
-
-  return "empty";
 }
 
 // Round management
@@ -478,7 +491,7 @@ function endRound(game, gameId, io) {
   // Calculate scores for this round
   const roundScores = game.players.map((player, index) => {
     const score = calculatePlayerScore(player.grid, game.currentRound - 1); // Fix: use 0-based round index
-    player.scores[game.currentRound - 1] = score;
+    player.scores[game.currentRound - 1] = score.total; // Store total score, not full object
     return {
       playerIndex: index,
       playerName: player.name,

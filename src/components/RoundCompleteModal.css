@@ -1,3 +1,4 @@
+/* ===== OVERLAY AND MODAL CONTAINER ===== */
 .round-complete-overlay {
   position: fixed;
   top: 0;
@@ -19,8 +20,8 @@
   -webkit-backdrop-filter: blur(20px);
   padding: var(--space-8);
   border-radius: var(--radius-xl);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3), 
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.2),
     0 4px 16px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -33,6 +34,7 @@
   position: relative;
 }
 
+/* ===== HEADER ===== */
 .round-complete-header {
   text-align: center;
   margin-bottom: var(--space-8);
@@ -46,6 +48,7 @@
   text-shadow: 0 2px 2px rgba(0, 0, 0, 0.8);
 }
 
+/* ===== ROUND SCORES SECTION ===== */
 .round-scores {
   margin-bottom: var(--space-8);
 }
@@ -91,6 +94,7 @@
   text-shadow: 0 2px 2px rgba(0, 0, 0, 0.8);
 }
 
+/* ===== NEXT ROUND / GAME COMPLETE INFO ===== */
 .next-round-info {
   text-align: center;
   margin-bottom: var(--space-8);
@@ -126,6 +130,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
+/* ===== BUTTONS ===== */
 .continue-button {
   display: block;
   width: 100%;
@@ -153,11 +158,12 @@
 
 .continue-button:focus {
   outline: none;
-  box-shadow: 
+  box-shadow:
     var(--shadow-md),
     0 0 0 3px rgba(102, 126, 234, 0.5);
 }
 
+/* ===== KEYFRAMES ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -178,6 +184,7 @@
   }
 }
 
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 600px) {
   .round-complete-modal {
     padding: 1.5rem;

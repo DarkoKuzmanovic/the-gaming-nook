@@ -1,5 +1,4 @@
-/* Placement Choice Modal Styles */
-
+/* ===== OVERLAY AND MODAL CONTAINER ===== */
 .placement-modal-overlay {
   position: fixed;
   top: 0;
@@ -19,10 +18,7 @@
   background-size: 200px 200px;
   padding: 2rem;
   border-radius: 20px;
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.3),
-    0 8px 25px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 8px 25px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
   max-width: 500px;
   width: 90%;
   text-align: center;
@@ -47,6 +43,7 @@
   z-index: 1;
 }
 
+/* ===== HEADINGS AND TEXT ===== */
 .placement-modal-content h3 {
   margin: 0 0 1rem 0;
   color: #333;
@@ -63,6 +60,7 @@
   font-size: 1.1rem;
 }
 
+/* ===== PLACEMENT GRID ===== */
 .placement-grid-container {
   margin-bottom: 2rem;
   display: flex;
@@ -120,7 +118,7 @@
 
 .position-number {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   color: #333;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
@@ -145,6 +143,7 @@
   letter-spacing: 0.5px;
 }
 
+/* ===== ACTIONS BUTTONS ===== */
 .placement-modal-actions {
   display: flex;
   justify-content: center;
@@ -173,11 +172,10 @@
 
 .placement-cancel-button:focus {
   outline: none;
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    0 0 0 3px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(102, 126, 234, 0.5);
 }
 
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   .placement-modal-content {
     padding: 1.5rem;
@@ -196,29 +194,5 @@
 
   .position-number {
     font-size: 0.8rem;
-  }
-
-  .card-preview {
-    font-size: 1rem;
-  }
-
-  .click-hint {
-    font-size: 0.65rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .placement-modal-content {
-    padding: 1.25rem;
-  }
-
-  .placement-grid {
-    max-width: 180px;
-    gap: 4px;
-    padding: 10px;
-  }
-
-  .placement-slot {
-    min-height: 45px;
   }
 }

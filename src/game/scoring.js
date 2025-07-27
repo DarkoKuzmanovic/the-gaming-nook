@@ -78,7 +78,7 @@ function calculateSpecialCardBonus(specialCard, faceUpCards) {
 }
 
 function calculateColorZoneBonus(grid, currentRound, breakdown) {
-  const roundMultiplier = currentRound + 1 // Round 1=2x, Round 2=3x, Round 3=4x
+  const roundMultiplier = currentRound + 2 // Round 0=2x, Round 1=3x, Round 2=4x (0-based rounds)
   
   // Convert 1D grid to 2D for easier adjacency checking
   const grid2D = []

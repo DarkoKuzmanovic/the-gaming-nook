@@ -10,13 +10,14 @@ function App() {
   const [gameState, setGameState] = useState("menu"); // 'menu', 'waiting', 'playing', 'finished'
   const [playerName, setPlayerName] = useState(() => {
     // Load saved player name from localStorage
-    return localStorage.getItem('vetrolisci-player-name') || '';
+    return localStorage.getItem("vetrolisci-player-name") || "";
   });
   const [gameInfo, setGameInfo] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const [currentGameState, setCurrentGameState] = useState(null);
   const [currentDraftState, setCurrentDraftState] = useState(null);
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Update page title based on game state
   useEffect(() => {
@@ -37,7 +38,7 @@ function App() {
   // Save player name to localStorage whenever it changes
   useEffect(() => {
     if (playerName.trim()) {
-      localStorage.setItem('vetrolisci-player-name', playerName.trim());
+      localStorage.setItem("vetrolisci-player-name", playerName.trim());
     }
   }, [playerName]);
 
@@ -45,7 +46,7 @@ function App() {
     // Check for cached game state on app start
     const cachedState = gameStateCache.loadGameState();
     if (cachedState) {
-      console.log('Restoring game from cache:', cachedState);
+      console.log("Restoring game from cache:", cachedState);
       setGameState("playing");
       setGameInfo(cachedState.gameInfo);
       setCurrentGameState(cachedState.gameState);
@@ -54,13 +55,14 @@ function App() {
     }
 
     // Preload card images on app start
-    imagePreloader.preloadAllCardImages()
+    imagePreloader
+      .preloadAllCardImages()
       .then((result) => {
-        console.log('Card images preloaded:', result);
+        console.log("Card images preloaded:", result);
         setImagesPreloaded(true);
       })
       .catch((error) => {
-        console.error('Failed to preload images:', error);
+        console.error("Failed to preload images:", error);
         setImagesPreloaded(true); // Continue anyway
       });
 
@@ -125,6 +127,40 @@ function App() {
     }
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement
+        .requestFullscreen()
+        .then(() => {
+          setIsFullscreen(true);
+        })
+        .catch((err) => {
+          console.log("Error attempting to enable fullscreen:", err);
+        });
+    } else {
+      document
+        .exitFullscreen()
+        .then(() => {
+          setIsFullscreen(false);
+        })
+        .catch((err) => {
+          console.log("Error attempting to exit fullscreen:", err);
+        });
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
   if (gameState === "menu") {
     return (
       <div className="app">
@@ -144,10 +180,12 @@ function App() {
                 onChange={(e) => setPlayerName(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && startGame()}
               />
-              <button 
-                onClick={startGame} 
+              <button
+                onClick={startGame}
                 disabled={!playerName.trim() || connectionStatus !== "connected"}
-                title={connectionStatus !== "connected" ? "Waiting for connection..." : "Start searching for another player"}
+                title={
+                  connectionStatus !== "connected" ? "Waiting for connection..." : "Start searching for another player"
+                }
               >
                 Find Game
               </button>
@@ -155,6 +193,24 @@ function App() {
             <p className="instructions">Enter your name and click "Find Game" to be matched with another player</p>
             <div className="version-footer">
               <small>v1.0.0</small>
+              <button
+                onClick={toggleFullscreen}
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  right: "20px",
+                  background: "rgba(255, 255, 255, 0.15)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  cursor: "pointer",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                }}
+              >
+                <img src="/icons/fullscreen.png" alt="Fullscreen" style={{ width: "20px", height: "20px" }} />
+              </button>
             </div>
           </div>
         </div>

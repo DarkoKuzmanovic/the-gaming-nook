@@ -6,7 +6,12 @@ import PlacementChoiceModal from "./PlacementChoiceModal";
 import RoundCompleteModal from "./RoundCompleteModal";
 import ScoreBoard from "./ScoreBoard";
 import SkeletonLoader from "./SkeletonLoader";
-import { PlacementScenario, determinePlacementScenario, getPickableCards, getValidPlacementPositions } from "../game/placement";
+import {
+  PlacementScenario,
+  determinePlacementScenario,
+  getPickableCards,
+  getValidPlacementPositions,
+} from "../game/placement";
 import AudioService from "../services/audio";
 import imagePreloader from "../services/imagePreloader";
 import "./GameBoard.css";
@@ -47,14 +52,17 @@ const GameBoard = ({
   const [revealedCardIds, setRevealedCardIds] = useState(new Set());
   const [flyingCards, setFlyingCards] = useState(new Map());
   const [newlyPlacedCards, setNewlyPlacedCards] = useState(new Set());
+  const [glowingCards, setGlowingCards] = useState(new Set());
+  const [confettiCards, setConfettiCards] = useState(new Set());
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     // Load saved sound preference from localStorage, default to true
-    const saved = localStorage.getItem('vetrolisci-sound-enabled');
+    const saved = localStorage.getItem("vetrolisci-sound-enabled");
     return saved ? JSON.parse(saved) : true;
   });
   const [musicEnabled, setMusicEnabled] = useState(() => {
     // Load saved music preference from localStorage, default to true
-    const saved = localStorage.getItem('vetrolisci-music-enabled');
+    const saved = localStorage.getItem("vetrolisci-music-enabled");
     return saved ? JSON.parse(saved) : true;
   });
   const [imagesLoading, setImagesLoading] = useState(true);
@@ -63,23 +71,23 @@ const GameBoard = ({
   // Effect to handle staggered card reveal animation
   useEffect(() => {
     if (draftState && draftState.revealedCards && draftState.revealedCards.length > 0) {
-      const currentCardIds = new Set(draftState.revealedCards.map(card => card.id));
+      const currentCardIds = new Set(draftState.revealedCards.map((card) => card.id));
       const previousCardIds = revealedCardIds;
-      
+
       // Check if we have new cards to reveal
-      const newCards = draftState.revealedCards.filter(card => !previousCardIds.has(card.id));
-      
+      const newCards = draftState.revealedCards.filter((card) => !previousCardIds.has(card.id));
+
       if (newCards.length > 0) {
         setRevealingCards(true);
         setRevealedCardIds(new Set());
-        
+
         // Stagger the reveal of each card
         newCards.forEach((card, index) => {
           setTimeout(() => {
-            setRevealedCardIds(prev => new Set([...prev, card.id]));
+            setRevealedCardIds((prev) => new Set([...prev, card.id]));
           }, index * 200); // 200ms delay between each card
         });
-        
+
         // End revealing state after all cards are shown
         setTimeout(() => {
           setRevealingCards(false);
@@ -108,14 +116,14 @@ const GameBoard = ({
 
     // Play place_cards sound when game board loads
     if (soundEnabled) {
-      AudioService.playSound('placeCards');
+      AudioService.playSound("placeCards");
     }
-    
+
     // Start background music
     if (musicEnabled) {
       AudioService.startBackgroundMusic();
     }
-    
+
     return () => {
       clearInterval(interval);
       // Stop music when component unmounts
@@ -125,11 +133,11 @@ const GameBoard = ({
 
   // Save sound/music preferences to localStorage
   useEffect(() => {
-    localStorage.setItem('vetrolisci-sound-enabled', JSON.stringify(soundEnabled));
+    localStorage.setItem("vetrolisci-sound-enabled", JSON.stringify(soundEnabled));
   }, [soundEnabled]);
 
   useEffect(() => {
-    localStorage.setItem('vetrolisci-music-enabled', JSON.stringify(musicEnabled));
+    localStorage.setItem("vetrolisci-music-enabled", JSON.stringify(musicEnabled));
   }, [musicEnabled]);
 
   // Handle sound/music toggle changes
@@ -161,17 +169,17 @@ const GameBoard = ({
   // Handle ESC key for score modal
   useEffect(() => {
     const handleEscape = (event) => {
-      if (event.key === 'Escape' && showScoreModal) {
+      if (event.key === "Escape" && showScoreModal) {
         setShowScoreModal(false);
       }
     };
 
     if (showScoreModal) {
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener("keydown", handleEscape);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [showScoreModal]);
 
@@ -192,34 +200,86 @@ const GameBoard = ({
     socketService.onCardPickedAndPlaced(
       ({ playerIndex: pickingPlayer, cardId, placedCard, newGrid, draftState: newDraftState, placementResult }) => {
         console.log(`Player ${pickingPlayer} picked and placed card ${cardId}`);
+        console.log("🔍 GRID UPDATE DEBUG:", {
+          cardId,
+          placedCard,
+          placedCardId: placedCard?.id,
+          newGrid: newGrid.map(card => card ? {id: card.id, value: card.value, validated: card.validated} : null)
+        });
 
         // Play card sound effect
-      if (soundEnabled) {
-        AudioService.playSound('playCard');
-      }
+        if (soundEnabled) {
+          AudioService.playSound("playCard");
+        }
 
         // Trigger placement animation for the placed card
         if (placedCard) {
-          setPlacingCards(prev => new Set([...prev, placedCard.id]));
-          setNewlyPlacedCards(prev => new Set([...prev, placedCard.id]));
-          
+          setPlacingCards((prev) => new Set([...prev, placedCard.id]));
+          setNewlyPlacedCards((prev) => new Set([...prev, placedCard.id]));
+          setGlowingCards((prev) => new Set([...prev, placedCard.id]));
+
+          // Check if card was validated for confetti
+          if (placedCard.validated) {
+            // Find the actual card in the new grid that was validated
+            const validatedCardInGrid = newGrid.find(gridCard => 
+              gridCard && gridCard.validated && gridCard.value === placedCard.value
+            );
+            
+            console.log("🎉 CONFETTI DEBUG - onCardPickedAndPlaced:", {
+              cardId,
+              placedCardId: placedCard.id,
+              validatedCardInGrid: validatedCardInGrid?.id,
+              validated: placedCard.validated,
+              eventType: "onCardPickedAndPlaced"
+            });
+            
+            if (validatedCardInGrid) {
+              setConfettiCards((prev) => {
+                // Prevent duplicate additions - use the grid card ID
+                if (prev.has(validatedCardInGrid.id)) {
+                  console.log("🎉 Confetti already exists for card:", validatedCardInGrid.id);
+                  return prev;
+                }
+                const newSet = new Set([...prev, validatedCardInGrid.id]);
+                console.log("🎉 Setting confetti cards:", Array.from(newSet));
+                return newSet;
+              });
+              setTimeout(() => {
+                setConfettiCards((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(validatedCardInGrid.id);
+                  return newSet;
+                });
+              }, 1500);
+            }
+          }
+
           // Clear placement animation after duration
           setTimeout(() => {
-            setPlacingCards(prev => {
+            setPlacingCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(placedCard.id);
               return newSet;
             });
           }, 600);
-          
+
           // Clear fade-in animation after duration
           setTimeout(() => {
-            setNewlyPlacedCards(prev => {
+            setNewlyPlacedCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(placedCard.id);
               return newSet;
             });
           }, 500);
+
+          // Clear glow effect after 5 seconds
+          setTimeout(() => {
+            setGlowingCards((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(placedCard.id);
+              return newSet;
+            });
+          }, 5000);
         }
 
         setDraftState(newDraftState);
@@ -285,25 +345,63 @@ const GameBoard = ({
 
     // Handle card placement events
     socketService.onCardPlaced(
-      ({ playerIndex: placingPlayer, cardId, gridIndex, choice, newGrid, currentPlayer, placementResult }) => {
+      ({ playerIndex: placingPlayer, cardId, gridIndex, choice, placedCard, newGrid, currentPlayer, placementResult }) => {
         console.log(`Player ${placingPlayer} placed card ${cardId}`);
 
         // Play card sound effect
-         if (soundEnabled) {
-           AudioService.playSound('playCard');
-         }
+        if (soundEnabled) {
+          AudioService.playSound("playCard");
+        }
 
         // Add fade-in animation for the placed card
-        setNewlyPlacedCards(prev => new Set([...prev, cardId]));
-        
+        setNewlyPlacedCards((prev) => new Set([...prev, cardId]));
+        setGlowingCards((prev) => new Set([...prev, cardId]));
+
+        // Check if card was validated for confetti
+        if (placedCard && placedCard.validated) {
+          console.log("🎉 CONFETTI DEBUG - onCardPlaced:", {
+            cardId,
+            placedCardId: placedCard.id,
+            validated: placedCard.validated,
+            eventType: "onCardPlaced",
+            idsMatch: cardId === placedCard.id
+          });
+          setConfettiCards((prev) => {
+            // Prevent duplicate additions
+            if (prev.has(cardId)) {
+              console.log("🎉 Confetti already exists for card:", cardId);
+              return prev;
+            }
+            const newSet = new Set([...prev, cardId]);
+            console.log("🎉 Setting confetti cards (onCardPlaced):", Array.from(newSet));
+            return newSet;
+          });
+          setTimeout(() => {
+            setConfettiCards((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(cardId);
+              return newSet;
+            });
+          }, 1500);
+        }
+
         // Clear fade-in animation after duration
         setTimeout(() => {
-          setNewlyPlacedCards(prev => {
+          setNewlyPlacedCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardId);
             return newSet;
           });
         }, 500);
+
+        // Clear glow effect after 5 seconds
+        setTimeout(() => {
+          setGlowingCards((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(cardId);
+            return newSet;
+          });
+        }, 5000);
 
         setGameState((prev) => {
           const newPlayers = [...prev.players];
@@ -414,15 +512,15 @@ const GameBoard = ({
     if (!pickedCard) return;
 
     // Start pick animation
-    setAnimatingCards(prev => new Set([...prev, cardId]));
+    setAnimatingCards((prev) => new Set([...prev, cardId]));
 
     // Play card sound effect
     if (soundEnabled) {
-      AudioService.playSound('playCard');
+      AudioService.playSound("playCard");
     }
 
     // Start fade out animation for the drafted card
-    setFlyingCards(prev => new Map([...prev, [cardId, { fadeOut: true }]]));
+    setFlyingCards((prev) => new Map([...prev, [cardId, { fadeOut: true }]]));
 
     // Check placement scenario to see if we need to show choice modal
     const currentPlayer = gameState.players[playerIndex];
@@ -446,21 +544,21 @@ const GameBoard = ({
         setPlacementChoiceData({
           card: pickedCard,
           cardId: cardId,
-          availablePositions: availablePositions
+          availablePositions: availablePositions,
         });
         setShowPlacementChoice(true);
       } else {
         // Send pick-and-place to server immediately
         socketService.pickCard(cardId);
       }
-      
+
       // Clear animation state
-      setAnimatingCards(prev => {
+      setAnimatingCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(cardId);
         return newSet;
       });
-      setFlyingCards(prev => {
+      setFlyingCards((prev) => {
         const newMap = new Map(prev);
         newMap.delete(cardId);
         return newMap;
@@ -538,6 +636,40 @@ const GameBoard = ({
     setRoundCompleteData(null);
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement
+        .requestFullscreen()
+        .then(() => {
+          setIsFullscreen(true);
+        })
+        .catch((err) => {
+          console.log("Error attempting to enable fullscreen:", err);
+        });
+    } else {
+      document
+        .exitFullscreen()
+        .then(() => {
+          setIsFullscreen(false);
+        })
+        .catch((err) => {
+          console.log("Error attempting to exit fullscreen:", err);
+        });
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
   // Show game completion screen
   if (gameState.phase === "finished") {
     return (
@@ -586,11 +718,13 @@ const GameBoard = ({
                 const isFlying = flyingCards.has(cardData.id);
                 const isRevealed = revealedCardIds.has(cardData.id) || !revealingCards;
                 const canPick = canPlayerPick && !isAnimating && isRevealed;
-                
+
                 const fadeData = flyingCards.get(cardData.id);
                 const isFadingOut = fadeData?.fadeOut;
-                
-                const cardClass = `revealed-card ${canPick ? "can-pick" : "waiting"} ${isAnimating ? "card-picking" : ""} ${isFadingOut ? "card-fade-out" : ""} ${!isRevealed ? "card-revealing" : ""}`;
+
+                const cardClass = `revealed-card ${canPick ? "can-pick" : "waiting"} ${
+                  isAnimating ? "card-picking" : ""
+                } ${isFadingOut ? "card-fade-out" : ""} ${!isRevealed ? "card-revealing" : ""}`;
                 const tooltipText = !cardData.pickable.canPick
                   ? cardData.pickable.reason === "all_cards_validated"
                     ? "All cards would violate validation rule - can place face-down"
@@ -598,14 +732,14 @@ const GameBoard = ({
                   : "";
 
                 return (
-                  <div 
-                    key={cardData.id} 
+                  <div
+                    key={cardData.id}
                     data-card-id={cardData.id}
-                    className={cardClass} 
-                    title={tooltipText} 
-                    style={{ 
+                    className={cardClass}
+                    title={tooltipText}
+                    style={{
                       position: "relative",
-                      animationDelay: !isRevealed ? `${index * 200}ms` : '0ms'
+                      animationDelay: !isRevealed ? `${index * 200}ms` : "0ms",
                     }}
                   >
                     <Card
@@ -616,11 +750,9 @@ const GameBoard = ({
                         }
                       }}
                       isSelected={false}
-                      className={revealedCardIds.has(cardData.id) ? 'card-revealing' : ''}
+                      className={revealedCardIds.has(cardData.id) ? "card-revealing" : ""}
                     />
-                    {!cardData.pickable.canPick && isRevealed && (
-                      <div className="card-restriction-overlay"></div>
-                    )}
+                    {!cardData.pickable.canPick && isRevealed && <div className="card-restriction-overlay"></div>}
                   </div>
                 );
               });
@@ -650,6 +782,15 @@ const GameBoard = ({
               selectedCard={gameState.selectedCard}
               placingCards={placingCards}
               newlyPlacedCards={newlyPlacedCards}
+              glowingCards={glowingCards}
+              confettiCards={confettiCards}
+              onConfettiComplete={(cardId) => {
+                setConfettiCards((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(cardId);
+                  return newSet;
+                });
+              }}
             />
           )}
         </div>
@@ -666,6 +807,15 @@ const GameBoard = ({
               isOpponent={true}
               placingCards={placingCards}
               newlyPlacedCards={newlyPlacedCards}
+              glowingCards={glowingCards}
+              confettiCards={confettiCards}
+              onConfettiComplete={(cardId) => {
+                setConfettiCards((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(cardId);
+                  return newSet;
+                });
+              }}
             />
           )}
         </div>
@@ -699,51 +849,77 @@ const GameBoard = ({
         onContinue={handleRoundContinue}
       />
 
-      {/* Audio control buttons */}
-      <button 
-        className="header-score-button audio-toggle-button" 
-        onClick={() => setSoundEnabled(!soundEnabled)} 
-        title={soundEnabled ? "Disable Sound Effects" : "Enable Sound Effects"}
-        style={{ bottom: '190px' }}
+      {/* Control buttons */}
+      <button
+        className="header-score-button audio-toggle-button"
+        onClick={toggleFullscreen}
+        title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+        style={{ bottom: "260px" }}
       >
-        <img 
-          src="/icons/sound.png" 
-          alt="Sound Effects" 
-          style={{ 
-            width: '30px', 
-            height: '30px',
-            opacity: soundEnabled ? 1 : 0.5 
-          }} 
+        <img
+          src="/icons/fullscreen.png"
+          alt="Fullscreen"
+          style={{
+            width: "30px",
+            height: "30px",
+            opacity: 1,
+          }}
         />
       </button>
 
-      <button 
-        className="header-score-button audio-toggle-button" 
-        onClick={() => setMusicEnabled(!musicEnabled)} 
-        title={musicEnabled ? "Disable Music" : "Enable Music"}
-        style={{ bottom: '120px' }}
+      <button
+        className="header-score-button audio-toggle-button"
+        onClick={() => setSoundEnabled(!soundEnabled)}
+        title={soundEnabled ? "Disable Sound Effects" : "Enable Sound Effects"}
+        style={{ bottom: "190px" }}
       >
-        <img 
-          src="/icons/music.png" 
-          alt="Music" 
-          style={{ 
-            width: '30px', 
-            height: '30px',
-            opacity: musicEnabled ? 1 : 0.5 
-          }} 
+        <img
+          src="/icons/sound.png"
+          alt="Sound Effects"
+          style={{
+            width: "30px",
+            height: "30px",
+            opacity: soundEnabled ? 1 : 0.5,
+          }}
+        />
+      </button>
+
+      <button
+        className="header-score-button audio-toggle-button"
+        onClick={() => setMusicEnabled(!musicEnabled)}
+        title={musicEnabled ? "Disable Music" : "Enable Music"}
+        style={{ bottom: "120px" }}
+      >
+        <img
+          src="/icons/music.png"
+          alt="Music"
+          style={{
+            width: "30px",
+            height: "30px",
+            opacity: musicEnabled ? 1 : 0.5,
+          }}
         />
       </button>
 
       {/* Floating scoreboard button */}
-      <button className="header-score-button scoreboard-button" onClick={() => setShowScoreModal(true)} title="View Scoreboard" style={{ bottom: '50px' }}>
-        <img src="/icons/score.png" alt="Scoreboard" style={{ width: '30px', height: '30px' }} />
+      <button
+        className="header-score-button scoreboard-button"
+        onClick={() => setShowScoreModal(true)}
+        title="View Scoreboard"
+        style={{ bottom: "50px" }}
+      >
+        <img src="/icons/score.png" alt="Scoreboard" style={{ width: "30px", height: "30px" }} />
       </button>
 
       {/* Scoreboard Modal */}
       {showScoreModal && (
         <div className="score-modal-overlay" onClick={() => setShowScoreModal(false)}>
           <div className="score-modal-content" onClick={(e) => e.stopPropagation()}>
-            <ScoreBoard players={gameState.players} currentRound={gameState.currentRound} onClose={() => setShowScoreModal(false)} />
+            <ScoreBoard
+              players={gameState.players}
+              currentRound={gameState.currentRound}
+              onClose={() => setShowScoreModal(false)}
+            />
           </div>
         </div>
       )}

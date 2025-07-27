@@ -1,12 +1,10 @@
-/* Skeleton Loader Styles */
-
+/* ===== BASE SKELETON STYLES AND ANIMATION ===== */
 .skeleton-loader {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-/* Base skeleton animation */
 @keyframes skeleton-loading {
   0% {
     background-position: -200px 0;
@@ -17,9 +15,9 @@
 }
 
 .skeleton-base {
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.1) 25%, 
-    rgba(255, 255, 255, 0.2) 50%, 
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.2) 50%,
     rgba(255, 255, 255, 0.1) 75%
   );
   background-size: 200px 100%;
@@ -27,7 +25,21 @@
   border-radius: 4px;
 }
 
-/* Card skeleton */
+/* Apply skeleton animation to all skeleton elements */
+.skeleton-line,
+.skeleton-circle,
+.skeleton-card-mini,
+.skeleton-card-small {
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 75%
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+}
+
+/* ===== CARD SKELETONS ===== */
 .skeleton-card {
   width: 120px;
   height: 160px;
@@ -60,11 +72,10 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Skeleton elements */
+/* ===== SKELETON ELEMENTS (LINES, CIRCLES) ===== */
 .skeleton-line {
   height: 12px;
   border-radius: 4px;
-  @extend .skeleton-base;
 }
 
 .skeleton-line.skeleton-header {
@@ -96,7 +107,6 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  @extend .skeleton-base;
 }
 
 .skeleton-circle.skeleton-center {
@@ -105,7 +115,7 @@
   align-self: center;
 }
 
-/* Grid skeleton */
+/* ===== SKELETON LAYOUTS (GRID, HAND, SCORE) ===== */
 .skeleton-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -127,7 +137,6 @@
   border: 1px dashed rgba(255, 255, 255, 0.2);
 }
 
-/* Hand skeleton */
 .skeleton-hand {
   display: flex;
   gap: 8px;
@@ -139,7 +148,6 @@
   flex-wrap: wrap;
 }
 
-/* Score skeleton */
 .skeleton-score {
   padding: 16px;
   background: rgba(255, 255, 255, 0.05);
@@ -151,21 +159,7 @@
   max-width: 300px;
 }
 
-/* Apply skeleton animation to all skeleton elements */
-.skeleton-line,
-.skeleton-circle,
-.skeleton-card-mini,
-.skeleton-card-small {
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.1) 25%, 
-    rgba(255, 255, 255, 0.2) 50%, 
-    rgba(255, 255, 255, 0.1) 75%
-  );
-  background-size: 200px 100%;
-  animation: skeleton-loading 1.5s infinite linear;
-}
-
-/* Responsive adjustments */
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 768px) {
   .skeleton-card {
     width: 100px;

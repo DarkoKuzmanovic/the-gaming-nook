@@ -59,12 +59,8 @@ const PlacementChoiceModal = ({
                   onClick={isAvailable ? () => onChoose(index) : undefined}
                   title={isAvailable ? `Click to place on position ${index + 1}` : `Position ${index + 1} is occupied`}
                 >
-                  <span className="position-number">{index + 1}</span>
                   {isAvailable && (
-                    <div className="available-indicator">
-                      <span className="card-preview">📄</span>
-                      <span className="click-hint">Click</span>
-                    </div>
+                    <span className="position-number">{index + 1}</span>
                   )}
                 </div>
               )
