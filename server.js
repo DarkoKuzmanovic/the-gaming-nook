@@ -12,7 +12,7 @@ const io = socketIo(server, {
   cors: {
     origin: true, // Allow all origins for network access
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   },
 });
 
@@ -479,11 +479,11 @@ function endRound(game, gameId, io) {
   const roundScores = game.players.map((player, index) => {
     const score = calculatePlayerScore(player.grid, game.currentRound - 1); // Fix: use 0-based round index
     player.scores[game.currentRound - 1] = score;
-    return { 
-      playerIndex: index, 
+    return {
+      playerIndex: index,
       playerName: player.name,
-      score, 
-      totalScore: player.scores.reduce((a, b) => a + b, 0) 
+      score,
+      totalScore: player.scores.reduce((a, b) => a + b, 0),
     };
   });
 
@@ -542,13 +542,13 @@ function endRound(game, gameId, io) {
 
 function calculatePlayerScore(grid, roundNumber) {
   // Import the proper scoring function from the client-side scoring module
-  const { calculatePlayerScore: clientCalculatePlayerScore } = require('./src/game/scoring.js');
-  
+  const { calculatePlayerScore: clientCalculatePlayerScore } = require("./src/game/scoring.js");
+
   try {
     const result = clientCalculatePlayerScore(grid, roundNumber - 1); // Convert to 0-based index
     return result.total;
   } catch (error) {
-    console.error('Error calculating player score:', error);
+    console.error("Error calculating player score:", error);
     return 0;
   }
 }
@@ -565,7 +565,6 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", games: games.size, players: players.size });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT} and accessible from network`);
 });
-

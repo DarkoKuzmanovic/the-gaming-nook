@@ -1,6 +1,6 @@
 .card {
-  width: 96px;
-  height: 144px;
+  width: 84px;
+  height: 120px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-md);
   background: var(--color-bg-primary);
@@ -58,8 +58,6 @@
 .card.placed {
   width: 100%;
   height: 100%;
-  max-width: 120px;
-  max-height: 180px;
   margin: 0 auto;
   border-color: var(--color-success);
   background: rgba(72, 187, 120, 0.05);
@@ -73,42 +71,42 @@
 
 /* Color themes */
 .card-blue {
-  background: url('/background.jpg') repeat, rgba(227, 242, 253, 0.8);
+  background: url("/background.jpg") repeat, rgba(227, 242, 253, 0.8);
   background-size: 50px 50px, cover;
   background-blend-mode: overlay;
 }
 .card-green {
-  background: url('/background.jpg') repeat, rgba(232, 245, 232, 0.8);
+  background: url("/background.jpg") repeat, rgba(232, 245, 232, 0.8);
   background-size: 50px 50px, cover;
   background-blend-mode: overlay;
 }
 .card-yellow {
-  background: url('/background.jpg') repeat, rgba(255, 248, 225, 0.8);
+  background: url("/background.jpg") repeat, rgba(255, 248, 225, 0.8);
   background-size: 50px 50px, cover;
   background-blend-mode: overlay;
 }
 .card-orange {
-  background: url('/background.jpg') repeat, rgba(255, 243, 224, 0.8);
+  background: url("/background.jpg") repeat, rgba(255, 243, 224, 0.8);
   background-size: 50px 50px, cover;
   background-blend-mode: overlay;
 }
 .card-red {
-  background: url('/background.jpg') repeat, rgba(255, 235, 238, 0.8);
+  background: url("/background.jpg") repeat, rgba(255, 235, 238, 0.8);
   background-size: 50px 50px, cover;
   background-blend-mode: overlay;
 }
 .card-purple {
-  background: url('/background.jpg') repeat, rgba(243, 229, 245, 0.8);
+  background: url("/background.jpg") repeat, rgba(243, 229, 245, 0.8);
   background-size: 50px 50px, cover;
   background-blend-mode: overlay;
 }
 .card-brown {
-  background: url('/background.jpg') repeat, rgba(239, 235, 233, 0.8);
+  background: url("/background.jpg") repeat, rgba(239, 235, 233, 0.8);
   background-size: 50px 50px, cover;
   background-blend-mode: overlay;
 }
 .card-multi {
-  background: url('/background.jpg') repeat, rgba(240, 248, 240, 0.8);
+  background: url("/background.jpg") repeat, rgba(240, 248, 240, 0.8);
   background-size: 50px 50px, cover;
   background-blend-mode: overlay;
 }
@@ -176,19 +174,18 @@
 
 .validation-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 20px;
-  height: 20px;
-  background: #4caf50;
-  color: white;
+  top: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
+  background: rgba(76, 175, 80, 0.4) url("/icons/validation-check.png") no-repeat center center;
+  background-size: 24px 24px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: bold;
   z-index: 10;
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.6);
 }
 
 .stacked-indicator {
@@ -207,7 +204,7 @@
 }
 
 .card-back {
-  background: url('/background.jpg') repeat;
+  background: url("/background.jpg") repeat;
   background-size: 50px 50px;
   position: relative;
   color: white;
@@ -216,7 +213,7 @@
 }
 
 .card-back::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;

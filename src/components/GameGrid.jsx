@@ -42,7 +42,7 @@ const GameGrid = ({
           className={`grid-space ${getPlacementHint(index)?.type || ""}`}
           onClick={() => handleGridClick(index)}
         >
-          <div className="space-number">{index + 1}</div>
+          {!card && <div className="space-number">{index + 1}</div>}
           {card && (
             <Card
               card={card}

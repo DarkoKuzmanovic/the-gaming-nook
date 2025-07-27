@@ -180,23 +180,32 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 15px;
+  padding: 15px 15px 15px 45px;
   border-radius: 12px;
   margin: 15px 0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .revealed-cards-section h3 {
-  text-align: center;
-  margin-bottom: 10px;
+  position: absolute;
+  left: 0px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: center;
+  margin: 0;
+  margin-left: -35px;
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
 }
 
 .revealed-cards {
   display: flex;
   justify-content: center;
   gap: 12px;
+  align-items: center;
+  min-height: 176px;
 }
 
 /* Card animation keyframes */
@@ -285,6 +294,14 @@
   cursor: pointer;
   transition: all 0.2s;
   display: inline-block;
+  width: 123px;
+  height: 176px;
+}
+
+/* Override Card component size within revealed cards */
+.revealed-card .card {
+  width: 123px !important;
+  height: 176px !important;
 }
 
 .revealed-card.can-pick {
@@ -318,7 +335,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: url('/icons/restricted.png') no-repeat center center;
+  background: url("/icons/restricted.png") no-repeat center center;
   background-size: contain;
   width: 40px;
   height: 40px;
@@ -431,8 +448,19 @@
   }
 
   .revealed-card {
-    min-width: 100px;
-    padding: 10px;
+    width: 86.24px;
+    height: 123.2px;
+    padding: 0;
+  }
+
+  /* Override Card component size within revealed cards on mobile */
+  .revealed-card .card {
+    width: 86.24px !important;
+    height: 123.2px !important;
+  }
+
+  .revealed-cards-section {
+    padding: 15px 15px 15px 35px;
   }
 
   .player-grid-section,
