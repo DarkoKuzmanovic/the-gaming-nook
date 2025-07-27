@@ -180,26 +180,27 @@ io.on("connection", (socket) => {
         placementResult,
       });
 
+      // Check if round should end immediately after placement
+      const roundShouldEnd = checkRoundEndCondition(game);
+      if (roundShouldEnd) {
+        endRound(game, gameId, io);
+        return; // Exit early if round ended
+      }
+
       // Check if all cards in this turn are picked
       if (game.draftState.revealedCards.length === 0) {
         // Turn complete - the last picker becomes first player for next turn
         const lastPicker = game.draftState.pickOrder[game.draftState.currentPickIndex - 1];
         game.currentPlayer = lastPicker;
 
-        // Check if round should end
-        const roundShouldEnd = checkRoundEndCondition(game);
-        if (roundShouldEnd) {
-          endRound(game, gameId, io);
-        } else {
-          // Start new turn using remaining deck
-          game.draftState = initializeTurnPhase(game.draftState.remainingDeck, lastPicker);
-          // Update the main deck reference
-          game.deck = game.draftState.remainingDeck;
-          io.to(gameId).emit("new-turn", {
-            currentPlayer: game.currentPlayer,
-            draftState: game.draftState,
-          });
-        }
+        // Start new turn using remaining deck
+        game.draftState = initializeTurnPhase(game.draftState.remainingDeck, lastPicker);
+        // Update the main deck reference
+        game.deck = game.draftState.remainingDeck;
+        io.to(gameId).emit("new-turn", {
+          currentPlayer: game.currentPlayer,
+          draftState: game.draftState,
+        });
       }
     } catch (error) {
       console.error("Pick card error:", error);
@@ -466,7 +467,7 @@ function endRound(game, gameId, io) {
 
   // Calculate scores for this round
   const roundScores = game.players.map((player, index) => {
-    const score = calculatePlayerScore(player.grid, game.currentRound);
+    const score = calculatePlayerScore(player.grid, game.currentRound - 1); // Fix: use 0-based round index
     player.scores[game.currentRound - 1] = score;
     return { 
       playerIndex: index, 

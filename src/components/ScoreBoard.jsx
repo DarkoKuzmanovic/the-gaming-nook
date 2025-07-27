@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { calculatePlayerScore, calculateTotalGameScore } from "../game/scoring";
 import "./ScoreBoard.css";
 
-const ScoreBoard = ({ players, currentRound, onClose }) => {
+const ScoreBoard = memo(({ players, currentRound, onClose }) => {
   const [expandedPlayer, setExpandedPlayer] = useState(null);
 
   const getCurrentScore = (player) => {
@@ -23,7 +23,7 @@ const ScoreBoard = ({ players, currentRound, onClose }) => {
       <div className="scoreboard-header">
         <h3>Scoreboard</h3>
         {onClose && (
-          <button className="scoreboard-close" onClick={onClose}>
+          <button className="scoreboard-close" onClick={onClose} title="Close scoreboard (Esc)">
             ✕
           </button>
         )}
@@ -57,9 +57,9 @@ const ScoreBoard = ({ players, currentRound, onClose }) => {
       </div>
     </div>
   );
-};
+});
 
-const ScoreDetails = ({ player, currentRound }) => {
+const ScoreDetails = memo(({ player, currentRound }) => {
   const scoreData = calculatePlayerScore(player.grid, currentRound - 1); // Fix: use 0-based round index
 
   if (!scoreData) return null;
@@ -104,7 +104,7 @@ const ScoreDetails = ({ player, currentRound }) => {
       </div>
     </div>
   );
-};
+});
 
 // Removed duplicate getCurrentScore function that was always using round 1
 

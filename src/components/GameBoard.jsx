@@ -4,8 +4,10 @@ import Card from "./Card";
 import CardChoiceModal from "./CardChoiceModal";
 import RoundCompleteModal from "./RoundCompleteModal";
 import ScoreBoard from "./ScoreBoard";
+import SkeletonLoader from "./SkeletonLoader";
 import { PlacementScenario, determinePlacementScenario, getPickableCards } from "../game/placement";
 import AudioService from "../services/audio";
+import imagePreloader from "../services/imagePreloader";
 import "./GameBoard.css";
 
 const GameBoard = ({
@@ -42,8 +44,17 @@ const GameBoard = ({
   const [revealedCardIds, setRevealedCardIds] = useState(new Set());
   const [flyingCards, setFlyingCards] = useState(new Map());
   const [newlyPlacedCards, setNewlyPlacedCards] = useState(new Set());
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [musicEnabled, setMusicEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    // Load saved sound preference from localStorage, default to true
+    const saved = localStorage.getItem('vetrolisci-sound-enabled');
+    return saved ? JSON.parse(saved) : true;
+  });
+  const [musicEnabled, setMusicEnabled] = useState(() => {
+    // Load saved music preference from localStorage, default to true
+    const saved = localStorage.getItem('vetrolisci-music-enabled');
+    return saved ? JSON.parse(saved) : true;
+  });
+  const [imagesLoading, setImagesLoading] = useState(true);
   const playerIndex = gameInfo?.playerIndex || 0;
 
   // Effect to handle staggered card reveal animation
@@ -80,6 +91,18 @@ const GameBoard = ({
 
   // Initialize audio when component mounts
   useEffect(() => {
+    // Check if images are still loading
+    const checkImageLoading = () => {
+      const stats = imagePreloader.getStats();
+      setImagesLoading(stats.loading > 0);
+    };
+
+    // Initial check
+    checkImageLoading();
+
+    // Set up interval to check loading status
+    const interval = setInterval(checkImageLoading, 500);
+
     // Play place_cards sound when game board loads
     if (soundEnabled) {
       AudioService.playSound('placeCards');
@@ -91,10 +114,20 @@ const GameBoard = ({
     }
     
     return () => {
+      clearInterval(interval);
       // Stop music when component unmounts
       AudioService.stopBackgroundMusic();
     };
-  }, []);
+  }, [soundEnabled, musicEnabled]);
+
+  // Save sound/music preferences to localStorage
+  useEffect(() => {
+    localStorage.setItem('vetrolisci-sound-enabled', JSON.stringify(soundEnabled));
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('vetrolisci-music-enabled', JSON.stringify(musicEnabled));
+  }, [musicEnabled]);
 
   // Handle sound/music toggle changes
   useEffect(() => {
@@ -121,6 +154,23 @@ const GameBoard = ({
       onDraftStateChange(draftState);
     }
   }, [draftState, onDraftStateChange]);
+
+  // Handle ESC key for score modal
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && showScoreModal) {
+        setShowScoreModal(false);
+      }
+    };
+
+    if (showScoreModal) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showScoreModal]);
 
   useEffect(() => {
     if (!socketService || !gameInfo) return;
@@ -540,9 +590,7 @@ const GameBoard = ({
                       className={revealedCardIds.has(cardData.id) ? 'card-revealing' : ''}
                     />
                     {!cardData.pickable.canPick && isRevealed && (
-                      <div className="card-restriction-overlay">
-                        {cardData.pickable.reason === "already_validated" ? "🚫" : "⬇️"}
-                      </div>
+                      <div className="card-restriction-overlay"></div>
                     )}
                   </div>
                 );
@@ -563,26 +611,34 @@ const GameBoard = ({
       <div className="game-grids">
         <div className="player-grid-section">
           <h3>Your Grid ({gameState.players[playerIndex].name})</h3>
-          <GameGrid
-            grid={gameState.players[playerIndex].grid}
-            onCardPlace={handleCardPlace}
-            canPlace={false} // Placement happens automatically after pick
-            selectedCard={gameState.selectedCard}
-            placingCards={placingCards}
-            newlyPlacedCards={newlyPlacedCards}
-          />
+          {imagesLoading ? (
+            <SkeletonLoader type="grid" />
+          ) : (
+            <GameGrid
+              grid={gameState.players[playerIndex].grid}
+              onCardPlace={handleCardPlace}
+              canPlace={false} // Placement happens automatically after pick
+              selectedCard={gameState.selectedCard}
+              placingCards={placingCards}
+              newlyPlacedCards={newlyPlacedCards}
+            />
+          )}
         </div>
 
         <div className="opponent-grid-section">
           <h3>Opponent Grid ({gameState.players[1 - playerIndex].name})</h3>
-          <GameGrid
-            grid={gameState.players[1 - playerIndex].grid}
-            onCardPlace={() => {}}
-            canPlace={false}
-            isOpponent={true}
-            placingCards={placingCards}
-            newlyPlacedCards={newlyPlacedCards}
-          />
+          {imagesLoading ? (
+            <SkeletonLoader type="grid" />
+          ) : (
+            <GameGrid
+              grid={gameState.players[1 - playerIndex].grid}
+              onCardPlace={() => {}}
+              canPlace={false}
+              isOpponent={true}
+              placingCards={placingCards}
+              newlyPlacedCards={newlyPlacedCards}
+            />
+          )}
         </div>
       </div>
 

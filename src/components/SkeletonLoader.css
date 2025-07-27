@@ -1,0 +1,193 @@
+/* Skeleton Loader Styles */
+
+.skeleton-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Base skeleton animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton-base {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 25%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 75%
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+/* Card skeleton */
+.skeleton-card {
+  width: 120px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.skeleton-card-mini {
+  width: 60px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.skeleton-card-small {
+  width: 80px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Skeleton elements */
+.skeleton-line {
+  height: 12px;
+  border-radius: 4px;
+  @extend .skeleton-base;
+}
+
+.skeleton-line.skeleton-header {
+  width: 80%;
+  height: 16px;
+}
+
+.skeleton-line.skeleton-footer {
+  width: 60%;
+  height: 12px;
+}
+
+.skeleton-line.skeleton-wide {
+  width: 100%;
+  height: 20px;
+}
+
+.skeleton-line.skeleton-medium {
+  width: 75%;
+  height: 16px;
+}
+
+.skeleton-line.skeleton-narrow {
+  width: 50%;
+  height: 14px;
+}
+
+.skeleton-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  @extend .skeleton-base;
+}
+
+.skeleton-circle.skeleton-center {
+  width: 32px;
+  height: 32px;
+  align-self: center;
+}
+
+/* Grid skeleton */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 300px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.skeleton-grid-slot {
+  aspect-ratio: 3/4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+/* Hand skeleton */
+.skeleton-hand {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Score skeleton */
+.skeleton-score {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 300px;
+}
+
+/* Apply skeleton animation to all skeleton elements */
+.skeleton-line,
+.skeleton-circle,
+.skeleton-card-mini,
+.skeleton-card-small {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 25%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 75%
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .skeleton-card {
+    width: 100px;
+    height: 130px;
+  }
+
+  .skeleton-card-small {
+    width: 70px;
+    height: 90px;
+  }
+
+  .skeleton-card-mini {
+    width: 50px;
+    height: 65px;
+  }
+
+  .skeleton-grid {
+    max-width: 250px;
+    gap: 6px;
+  }
+
+  .skeleton-hand {
+    gap: 6px;
+  }
+}

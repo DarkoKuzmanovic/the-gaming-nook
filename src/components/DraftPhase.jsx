@@ -77,9 +77,7 @@ const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames, playerGr
                       className={cardClass}
                     />
                     {!cardData.pickable.canPick && (
-                      <div className="card-restriction-overlay">
-                        {cardData.pickable.reason === 'already_validated' ? '🚫' : '⬇️'}
-                      </div>
+                      <div className="card-restriction-overlay"></div>
                     )}
                   </div>
                 )

@@ -1,7 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './RoundCompleteModal.css'
 
 const RoundCompleteModal = ({ isOpen, roundNumber, roundScores, nextRound, onContinue }) => {
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        onContinue()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen, onContinue])
+
   if (!isOpen) return null
 
   return (
@@ -36,6 +52,7 @@ const RoundCompleteModal = ({ isOpen, roundNumber, roundScores, nextRound, onCon
         <button 
           className="continue-button"
           onClick={onContinue}
+          title={nextRound <= 3 ? `Proceed to round ${nextRound} (Esc)` : 'View final game results (Esc)'}
         >
           {nextRound <= 3 ? `Continue to Round ${nextRound}` : 'View Final Results'}
         </button>

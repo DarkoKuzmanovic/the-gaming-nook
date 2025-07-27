@@ -17,7 +17,10 @@
   background-size: 200px 200px;
   padding: 2rem;
   border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 8px 25px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
   max-width: 500px;
   width: 90%;
   text-align: center;
@@ -114,12 +117,29 @@
   font-size: 1rem;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Ensure minimum tap target size */
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .cancel-button:hover {
   background: rgba(255, 255, 255, 1);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cancel-button:focus {
+  outline: none;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 0 0 3px rgba(102, 126, 234, 0.5);
+}
+
+.choice-option:focus {
+  outline: none;
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(102, 126, 234, 0.5);
 }
 
 @media (max-width: 768px) {

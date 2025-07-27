@@ -9,7 +9,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: "Atma", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Grandstander", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .app::before {
@@ -105,12 +105,23 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-md);
+  /* Ensure minimum tap target size */
+  min-height: 44px;
+}
+
+.menu-form button:focus {
+  outline: none;
+  box-shadow: 
+    var(--shadow-md),
+    0 0 0 3px rgba(102, 126, 234, 0.5);
 }
 
 .menu-form button:hover:not(:disabled) {
   background: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: 
+    var(--shadow-lg), 
+    0 0 20px rgba(102, 126, 234, 0.3);
 }
 
 .menu-form button:disabled {
@@ -135,6 +146,18 @@
   font-size: 0.9rem;
   margin-top: 1rem;
   color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.version-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.version-footer small {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
@@ -186,6 +209,11 @@
   animation: spin 2s linear infinite;
   color: var(--color-primary);
   margin: var(--space-4) 0;
+  text-shadow: 
+    0 0 10px rgba(102, 126, 234, 0.5),
+    0 0 20px rgba(102, 126, 234, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 @keyframes spin {
@@ -221,11 +249,18 @@
   border-radius: 5px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
+}
+
+.waiting button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.5);
 }
 
 .waiting button:hover {
   background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(220, 53, 69, 0.3);
 }
 
 .app-header {
@@ -473,11 +508,14 @@
   }
 
   .header-score-button {
-    width: 55px;
-    height: 55px;
+    width: 60px;
+    height: 60px;
     font-size: 1.5rem;
     right: 1rem;
     bottom: 1rem;
+    /* Enhanced tap targets for mobile */
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .score-modal-overlay {

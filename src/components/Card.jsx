@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { memo } from 'react'
+import LazyImage from './LazyImage'
 import './Card.css'
+import './LazyImage.css'
 import { COLORS, getCardImagePath, getCardBackImagePath } from '../data/cards.js'
 
-const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false, className = '' }) => {
+const Card = memo(({ card, isSelected, onClick, isPlaced = false, showBack = false, className = '' }) => {
   const getColorClass = (color) => {
     const colorMap = {
       blue: 'card-blue',
@@ -31,18 +33,14 @@ const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false, c
     const backImagePath = getCardBackImagePath()
     return (
       <div className={`card card-back ${isPlaced ? 'placed' : ''} ${className}`}>
-        <img 
+        <LazyImage 
           src={`/cards/backs/${backImagePath}`} 
           alt="Card back"
           className="card-image"
-          onError={(e) => {
-            e.target.style.display = 'none'
-            e.target.nextSibling.style.display = 'block'
+          onError={() => {
+            // Fallback will be handled by LazyImage component
           }}
         />
-        <div className="card-back-fallback" style={{display: 'none'}}>
-          <div className="card-back-pattern"></div>
-        </div>
       </div>
     )
   }
@@ -59,35 +57,31 @@ const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false, c
       onClick={onClick}
     >
       {frontImagePath ? (
-        <>
-          <img 
-            src={`/cards/fronts/${frontImagePath}`} 
-            alt={`${card.color} ${card.value}`}
-            className="card-image"
-            onError={(e) => {
-              e.target.style.display = 'none'
-              e.target.nextSibling.style.display = 'block'
-            }}
-          />
-          <div className="card-fallback" style={{display: 'none'}}>
-            <div className="card-header">
-              <div className="card-number">{card.value}</div>
-              <div className="card-symbols">
-                {getScoringSymbols(card.scoring)}
+        <LazyImage 
+          src={`/cards/fronts/${frontImagePath}`} 
+          alt={`${card.color} ${card.value}`}
+          className="card-image"
+          placeholder={
+            <div className="card-fallback">
+              <div className="card-header">
+                <div className="card-number">{card.value}</div>
+                <div className="card-symbols">
+                  {getScoringSymbols(card.scoring)}
+                </div>
+              </div>
+              
+              <div className="card-center">
+                <div className="card-color-indicator"></div>
+                {card.special && <div className="special-indicator">⭐</div>}
+              </div>
+              
+              <div className="card-footer">
+                <div className="card-scoring">{card.scoring > 0 ? `+${card.scoring}` : card.scoring}</div>
+                <div className="card-number-small">{card.value}</div>
               </div>
             </div>
-            
-            <div className="card-center">
-              <div className="card-color-indicator"></div>
-              {card.special && <div className="special-indicator">⭐</div>}
-            </div>
-            
-            <div className="card-footer">
-              <div className="card-scoring">{card.scoring > 0 ? `+${card.scoring}` : card.scoring}</div>
-              <div className="card-number-small">{card.value}</div>
-            </div>
-          </div>
-        </>
+          }
+        />
       ) : (
         <div className="card-fallback">
           <div className="card-header">
@@ -112,6 +106,6 @@ const Card = ({ card, isSelected, onClick, isPlaced = false, showBack = false, c
       {card.validated && <div className="validation-badge">✓</div>}
     </div>
   )
-}
+})
 
 export default Card
