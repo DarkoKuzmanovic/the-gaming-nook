@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import GameGrid from "./GameGrid";
 import Card from "./Card";
 import CardChoiceModal from "./CardChoiceModal";
+import PlacementChoiceModal from "./PlacementChoiceModal";
 import RoundCompleteModal from "./RoundCompleteModal";
 import ScoreBoard from "./ScoreBoard";
 import SkeletonLoader from "./SkeletonLoader";
-import { PlacementScenario, determinePlacementScenario, getPickableCards } from "../game/placement";
+import { PlacementScenario, determinePlacementScenario, getPickableCards, getValidPlacementPositions } from "../game/placement";
 import AudioService from "../services/audio";
 import imagePreloader from "../services/imagePreloader";
 import "./GameBoard.css";
@@ -35,6 +36,8 @@ const GameBoard = ({
   const [draftState, setDraftState] = useState(null);
   const [showCardChoice, setShowCardChoice] = useState(false);
   const [cardChoiceData, setCardChoiceData] = useState(null);
+  const [showPlacementChoice, setShowPlacementChoice] = useState(false);
+  const [placementChoiceData, setPlacementChoiceData] = useState(null);
   const [showRoundComplete, setShowRoundComplete] = useState(false);
   const [roundCompleteData, setRoundCompleteData] = useState(null);
   const [showScoreModal, setShowScoreModal] = useState(false);
@@ -437,6 +440,15 @@ const GameBoard = ({
           cardId: cardId,
         });
         setShowCardChoice(true);
+      } else if (scenario === PlacementScenario.ALREADY_VALIDATED) {
+        // Show placement choice modal for face-down placement
+        const availablePositions = getValidPlacementPositions(pickedCard, currentPlayer.grid);
+        setPlacementChoiceData({
+          card: pickedCard,
+          cardId: cardId,
+          availablePositions: availablePositions
+        });
+        setShowPlacementChoice(true);
       } else {
         // Send pick-and-place to server immediately
         socketService.pickCard(cardId);
@@ -502,6 +514,23 @@ const GameBoard = ({
   const handleCardChoiceCancel = () => {
     setShowCardChoice(false);
     setCardChoiceData(null);
+  };
+
+  const handlePlacementChoice = (position) => {
+    if (placementChoiceData) {
+      const { cardId } = placementChoiceData;
+
+      // Send pick with placement position to server
+      socketService.pickCard(cardId, null, position);
+
+      setShowPlacementChoice(false);
+      setPlacementChoiceData(null);
+    }
+  };
+
+  const handlePlacementChoiceCancel = () => {
+    setShowPlacementChoice(false);
+    setPlacementChoiceData(null);
   };
 
   const handleRoundContinue = () => {
@@ -652,6 +681,14 @@ const GameBoard = ({
         newCard={cardChoiceData?.newCard}
         onChoose={handleCardChoice}
         onCancel={handleCardChoiceCancel}
+      />
+
+      <PlacementChoiceModal
+        isOpen={showPlacementChoice}
+        card={placementChoiceData?.card}
+        availablePositions={placementChoiceData?.availablePositions || []}
+        onChoose={handlePlacementChoice}
+        onCancel={handlePlacementChoiceCancel}
       />
 
       <RoundCompleteModal

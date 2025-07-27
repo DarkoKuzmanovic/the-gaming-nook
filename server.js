@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
 
   // Draft phase handlers - start-draft removed as cards are now automatically revealed
 
-  socket.on("pick-card", ({ gameId, playerIndex, cardId, choice }) => {
+  socket.on("pick-card", ({ gameId, playerIndex, cardId, choice, position }) => {
     const game = games.get(gameId);
     if (!game || !game.draftState) return;
 
@@ -125,8 +125,18 @@ io.on("connection", (socket) => {
       // Handle different placement scenarios
       const scenario = determineServerPlacementScenario(pickedCard, pickerPlayer.grid);
       if (scenario === "validated") {
-        // Find first empty space for scenario 3
-        gridIndex = pickerPlayer.grid.findIndex((cell) => cell === null);
+        // Use provided position or find first empty space for scenario 3
+        if (position !== undefined && position !== null) {
+          gridIndex = position;
+          // Validate the provided position is empty
+          if (pickerPlayer.grid[gridIndex] !== null) {
+            socket.emit("error", { message: "Cannot place card on occupied space" });
+            return;
+          }
+        } else {
+          // Fallback to first empty space
+          gridIndex = pickerPlayer.grid.findIndex((cell) => cell === null);
+        }
         if (gridIndex === -1) {
           // Edge case: No empty spaces available - discard the card
           console.log(`Card ${pickedCard.id} discarded - no empty spaces available for face-down placement`);

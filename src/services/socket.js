@@ -97,13 +97,14 @@ class SocketService {
 
   // Emit events - startDraft removed as cards are now automatically revealed
 
-  pickCard(cardId, choice) {
+  pickCard(cardId, choice, position) {
     if (!this.socket) return;
     this.socket.emit("pick-card", {
       gameId: this.gameId,
       playerIndex: this.playerIndex,
       cardId,
       choice,
+      position,
     });
   }
 

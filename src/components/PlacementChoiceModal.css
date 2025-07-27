@@ -1,0 +1,224 @@
+/* Placement Choice Modal Styles */
+
+.placement-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.placement-modal-content {
+  background: url("/background.jpg") repeat;
+  background-size: 200px 200px;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 8px 25px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+}
+
+.placement-modal-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  z-index: 0;
+}
+
+.placement-modal-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+.placement-modal-content h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.placement-modal-content p {
+  margin: 0 0 2rem 0;
+  color: #333;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: 1.1rem;
+}
+
+.placement-grid-container {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.placement-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 240px;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.placement-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  min-height: 60px;
+  gap: 4px;
+}
+
+.placement-slot.available {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.4);
+  cursor: pointer;
+}
+
+.placement-slot.available:hover {
+  background: rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.placement-slot.occupied {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.position-number {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.available-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.card-preview {
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+.click-hint {
+  font-size: 0.7rem;
+  color: rgba(102, 126, 234, 0.8);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.placement-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.placement-cancel-button {
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.placement-cancel-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.placement-cancel-button:focus {
+  outline: none;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 0 0 3px rgba(102, 126, 234, 0.5);
+}
+
+@media (max-width: 768px) {
+  .placement-modal-content {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .placement-grid {
+    max-width: 200px;
+    gap: 6px;
+    padding: 12px;
+  }
+
+  .placement-slot {
+    min-height: 50px;
+  }
+
+  .position-number {
+    font-size: 0.8rem;
+  }
+
+  .card-preview {
+    font-size: 1rem;
+  }
+
+  .click-hint {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .placement-modal-content {
+    padding: 1.25rem;
+  }
+
+  .placement-grid {
+    max-width: 180px;
+    gap: 4px;
+    padding: 10px;
+  }
+
+  .placement-slot {
+    min-height: 45px;
+  }
+}
