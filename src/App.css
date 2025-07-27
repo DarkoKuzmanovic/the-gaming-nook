@@ -111,7 +111,7 @@
 
 .menu-form button:focus {
   outline: none;
-  box-shadow: 
+  box-shadow:
     var(--shadow-md),
     0 0 0 3px rgba(102, 126, 234, 0.5);
 }
@@ -119,8 +119,8 @@
 .menu-form button:hover:not(:disabled) {
   background: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 
-    var(--shadow-lg), 
+  box-shadow:
+    var(--shadow-lg),
     0 0 20px rgba(102, 126, 234, 0.3);
 }
 
@@ -209,7 +209,7 @@
   animation: spin 2s linear infinite;
   color: var(--color-primary);
   margin: var(--space-4) 0;
-  text-shadow: 
+  text-shadow:
     0 0 10px rgba(102, 126, 234, 0.5),
     0 0 20px rgba(102, 126, 234, 0.3),
     0 2px 4px rgba(0, 0, 0, 0.3);
@@ -330,18 +330,10 @@
   justify-content: center;
 }
 
-.header-score-button img {
-  /* Removed filter: invert(1) since PNG icons are already correct color */
-}
-
 .header-score-button:disabled img,
 .audio-toggle-button:disabled img {
   opacity: 0.5;
   transition: opacity 0.2s ease-in-out;
-}
-
-.header-score-button.scoreboard-button img {
-  /* Removed margin-left */
 }
 
 .header-score-button:hover {
