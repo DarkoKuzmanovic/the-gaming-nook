@@ -63,10 +63,12 @@ const GameGrid = ({
                     gridCardId: card.id,
                     confettiCards: Array.from(confettiCards),
                     hasConfetti: confettiCards.has(card.id),
-                    cardPosition: index
+                    cardPosition: index,
                   });
                 }
-                return confettiCards.has(card.id) ? <Confetti cardId={card.id} onComplete={onConfettiComplete} /> : null;
+                return confettiCards.has(card.id) ? (
+                  <Confetti cardId={card.id} onComplete={onConfettiComplete} />
+                ) : null;
               })()}
             </>
           )}

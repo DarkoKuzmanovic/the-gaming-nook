@@ -1,6 +1,6 @@
 .app {
   min-height: 100vh;
-  background: url('/background.jpg') repeat;
+  background: url("/background.jpg") repeat;
   background-size: 400px 400px;
   position: relative;
   padding: var(--space-5);
@@ -13,7 +13,7 @@
 }
 
 .app::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -67,7 +67,7 @@
 .menu p {
   color: var(--color-text-white);
   text-shadow: var(--text-shadow-sm);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-2);
   font-size: var(--font-size-lg);
 }
 
@@ -111,17 +111,13 @@
 
 .menu-form button:focus {
   outline: none;
-  box-shadow:
-    var(--shadow-md),
-    0 0 0 3px rgba(102, 126, 234, 0.5);
+  box-shadow: var(--shadow-md), 0 0 0 3px rgba(102, 126, 234, 0.5);
 }
 
 .menu-form button:hover:not(:disabled) {
   background: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow:
-    var(--shadow-lg),
-    0 0 20px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(102, 126, 234, 0.3);
 }
 
 .menu-form button:disabled {
@@ -209,10 +205,7 @@
   animation: spin 2s linear infinite;
   color: var(--color-primary);
   margin: var(--space-4) 0;
-  text-shadow:
-    0 0 10px rgba(102, 126, 234, 0.5),
-    0 0 20px rgba(102, 126, 234, 0.3),
-    0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 0 10px rgba(102, 126, 234, 0.5), 0 0 20px rgba(102, 126, 234, 0.3), 0 2px 4px rgba(0, 0, 0, 0.3);
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 

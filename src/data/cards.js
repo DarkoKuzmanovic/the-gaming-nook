@@ -2,76 +2,76 @@
 // Generated from cards.csv - 70 unique cards for the game
 
 export const CARDS = [
-  { id: 1, value: 7, color: 'multi', scoring: -1, special: false },
-  { id: 2, value: 6, color: 'green', scoring: -1, special: false },
-  { id: 3, value: 9, color: 'green', scoring: -4, special: false },
-  { id: 4, value: 4, color: 'blue', scoring: 1, special: true },
-  { id: 5, value: 3, color: 'green', scoring: 2, special: false },
-  { id: 6, value: 4, color: 'multi', scoring: 0, special: false },
-  { id: 7, value: 7, color: 'red', scoring: -4, special: false },
-  { id: 8, value: 4, color: 'yellow', scoring: -1, special: false },
-  { id: 9, value: 7, color: 'yellow', scoring: 1, special: false },
-  { id: 10, value: 5, color: 'red', scoring: 1, special: true },
-  { id: 11, value: 1, color: 'red', scoring: 1, special: true },
-  { id: 12, value: 7, color: 'red', scoring: -1, special: false },
-  { id: 13, value: 5, color: 'yellow', scoring: 0, special: false },
-  { id: 14, value: 2, color: 'yellow', scoring: 1, special: true },
-  { id: 15, value: 2, color: 'green', scoring: 3, special: false },
-  { id: 16, value: 5, color: 'blue', scoring: 1, special: true },
-  { id: 17, value: 9, color: 'blue', scoring: -6, special: false },
-  { id: 18, value: 6, color: 'red', scoring: -2, special: false },
-  { id: 19, value: 5, color: 'yellow', scoring: 1, special: true },
-  { id: 20, value: 6, color: 'multi', scoring: -1, special: false },
-  { id: 21, value: 6, color: 'red', scoring: 0, special: false },
-  { id: 22, value: 5, color: 'blue', scoring: 0, special: false },
-  { id: 23, value: 5, color: 'green', scoring: 1, special: true },
-  { id: 24, value: 1, color: 'blue', scoring: 6, special: false },
-  { id: 25, value: 6, color: 'yellow', scoring: 0, special: false },
-  { id: 26, value: 6, color: 'yellow', scoring: -3, special: false },
-  { id: 27, value: 3, color: 'multi', scoring: 0, special: false },
-  { id: 28, value: 9, color: 'yellow', scoring: -2, special: false },
-  { id: 29, value: 4, color: 'red', scoring: 2, special: false },
-  { id: 30, value: 7, color: 'yellow', scoring: -5, special: false },
-  { id: 31, value: 2, color: 'blue', scoring: 4, special: false },
-  { id: 32, value: 1, color: 'green', scoring: 5, special: false },
-  { id: 33, value: 6, color: 'blue', scoring: 1, special: false },
-  { id: 34, value: 2, color: 'multi', scoring: 0, special: false },
-  { id: 35, value: 4, color: 'red', scoring: 0, special: false },
-  { id: 36, value: 3, color: 'blue', scoring: 0, special: false },
-  { id: 37, value: 8, color: 'green', scoring: -2, special: false },
-  { id: 38, value: 8, color: 'red', scoring: 0, special: false },
-  { id: 39, value: 6, color: 'green', scoring: 1, special: false },
-  { id: 40, value: 7, color: 'green', scoring: -2, special: false },
-  { id: 41, value: 3, color: 'blue', scoring: 1, special: false },
-  { id: 42, value: 8, color: 'multi', scoring: -1, special: false },
-  { id: 43, value: 5, color: 'blue', scoring: -2, special: false },
-  { id: 44, value: 3, color: 'yellow', scoring: 5, special: false },
-  { id: 45, value: 5, color: 'red', scoring: -1, special: false },
-  { id: 46, value: 8, color: 'red', scoring: -5, special: false },
-  { id: 47, value: 5, color: 'yellow', scoring: -2, special: false },
-  { id: 48, value: 3, color: 'green', scoring: 1, special: true },
-  { id: 49, value: 3, color: 'yellow', scoring: 0, special: false },
-  { id: 50, value: 2, color: 'red', scoring: 5, special: false },
-  { id: 51, value: 1, color: 'red', scoring: 3, special: false },
-  { id: 52, value: 4, color: 'yellow', scoring: 3, special: false },
-  { id: 53, value: 4, color: 'green', scoring: 4, special: false },
-  { id: 54, value: 4, color: 'blue', scoring: 0, special: false },
-  { id: 55, value: 1, color: 'yellow', scoring: 4, special: false },
-  { id: 56, value: 5, color: 'green', scoring: -1, special: false },
-  { id: 57, value: 2, color: 'yellow', scoring: 2, special: false },
-  { id: 58, value: 3, color: 'red', scoring: 4, special: false },
-  { id: 59, value: 9, color: 'blue', scoring: -1, special: false },
-  { id: 60, value: 9, color: 'red', scoring: 0, special: false },
-  { id: 61, value: 8, color: 'blue', scoring: -3, special: false },
-  { id: 62, value: 8, color: 'yellow', scoring: -1, special: false },
-  { id: 63, value: 6, color: 'blue', scoring: -1, special: false },
-  { id: 64, value: 6, color: 'green', scoring: -4, special: false },
-  { id: 65, value: 5, color: 'red', scoring: 0, special: false },
-  { id: 66, value: 5, color: 'green', scoring: 0, special: false },
-  { id: 67, value: 4, color: 'green', scoring: -1, special: false },
-  { id: 68, value: 4, color: 'blue', scoring: 1, special: false },
-  { id: 69, value: 7, color: 'blue', scoring: -3, special: false },
-  { id: 70, value: 7, color: 'green', scoring: 0, special: false }
+  { id: 1, value: 7, color: 'multi', scoring: -1, special: false }, // multi-7.png
+  { id: 2, value: 6, color: 'green', scoring: -1, special: false }, // green-6-alt.png
+  { id: 3, value: 9, color: 'green', scoring: -4, special: false }, // green-9.png
+  { id: 4, value: 4, color: 'blue', scoring: 1, special: true }, // blue-4-alt2.png
+  { id: 5, value: 3, color: 'green', scoring: 2, special: false }, // green-3.png
+  { id: 6, value: 4, color: 'multi', scoring: 0, special: false }, // multi-4.png
+  { id: 7, value: 7, color: 'red', scoring: -4, special: false }, // red-7.png
+  { id: 8, value: 4, color: 'yellow', scoring: -1, special: false }, // yellow-4.png
+  { id: 9, value: 7, color: 'yellow', scoring: 1, special: false }, // yellow-7.png
+  { id: 10, value: 5, color: 'red', scoring: 1, special: true }, // red-5-special.png
+  { id: 11, value: 1, color: 'red', scoring: 1, special: true }, // red-1-special.png
+  { id: 12, value: 7, color: 'red', scoring: -1, special: false }, // red-7-alt.png
+  { id: 13, value: 5, color: 'yellow', scoring: 0, special: false }, // yellow-5-alt.png
+  { id: 14, value: 2, color: 'yellow', scoring: 1, special: true }, // yellow-2-special.png
+  { id: 15, value: 2, color: 'green', scoring: 3, special: false }, // green-2.png
+  { id: 16, value: 5, color: 'blue', scoring: 1, special: true }, // blue-5-special.png
+  { id: 17, value: 9, color: 'blue', scoring: -6, special: false }, // blue-9.png
+  { id: 18, value: 6, color: 'red', scoring: -2, special: false }, // red-6.png
+  { id: 19, value: 5, color: 'yellow', scoring: 1, special: true }, // yellow-5-special.png
+  { id: 20, value: 6, color: 'multi', scoring: -1, special: false }, // multi-6.png
+  { id: 21, value: 6, color: 'red', scoring: 0, special: false }, // red-6-alt.png
+  { id: 22, value: 5, color: 'blue', scoring: 0, special: false }, // blue-5-alt.png
+  { id: 23, value: 5, color: 'green', scoring: 1, special: true }, // green-5-special.png
+  { id: 24, value: 1, color: 'blue', scoring: 6, special: false }, // blue-1.png
+  { id: 25, value: 6, color: 'yellow', scoring: 0, special: false }, // yellow-6.png
+  { id: 26, value: 6, color: 'yellow', scoring: -3, special: false }, // yellow-6-alt.png
+  { id: 27, value: 3, color: 'multi', scoring: 0, special: false }, // multi-3.png
+  { id: 28, value: 9, color: 'yellow', scoring: -2, special: false }, // yellow-9.png
+  { id: 29, value: 4, color: 'red', scoring: 2, special: false }, // red-4.png
+  { id: 30, value: 7, color: 'yellow', scoring: -5, special: false }, // yellow-7-alt.png
+  { id: 31, value: 2, color: 'blue', scoring: 4, special: false }, // blue-2.png
+  { id: 32, value: 1, color: 'green', scoring: 5, special: false }, // green-1.png
+  { id: 33, value: 6, color: 'blue', scoring: 1, special: false }, // blue-6.png
+  { id: 34, value: 2, color: 'multi', scoring: 0, special: false }, // multi-2.png
+  { id: 35, value: 4, color: 'red', scoring: 0, special: false }, // red-4-alt.png
+  { id: 36, value: 3, color: 'blue', scoring: 0, special: false }, // blue-3.png
+  { id: 37, value: 8, color: 'green', scoring: -2, special: false }, // green-8.png
+  { id: 38, value: 8, color: 'red', scoring: 0, special: false }, // red-8.png
+  { id: 39, value: 6, color: 'green', scoring: 1, special: false }, // green-6.png
+  { id: 40, value: 7, color: 'green', scoring: -2, special: false }, // green-7.png
+  { id: 41, value: 3, color: 'blue', scoring: 1, special: false }, // blue-3-alt.png
+  { id: 42, value: 8, color: 'multi', scoring: -1, special: false }, // multi-8.png
+  { id: 43, value: 5, color: 'blue', scoring: -2, special: false }, // blue-5-alt2.png
+  { id: 44, value: 3, color: 'yellow', scoring: 5, special: false }, // yellow-3.png
+  { id: 45, value: 5, color: 'red', scoring: -1, special: false }, // red-5-alt.png
+  { id: 46, value: 8, color: 'red', scoring: -5, special: false }, // red-8-alt.png
+  { id: 47, value: 5, color: 'yellow', scoring: -2, special: false }, // yellow-5-alt2.png
+  { id: 48, value: 3, color: 'green', scoring: 1, special: true }, // green-3-special.png
+  { id: 49, value: 3, color: 'yellow', scoring: 0, special: false }, // yellow-3-alt.png
+  { id: 50, value: 2, color: 'red', scoring: 5, special: false }, // red-2.png
+  { id: 51, value: 1, color: 'red', scoring: 3, special: false }, // red-1-alt.png
+  { id: 52, value: 4, color: 'yellow', scoring: 3, special: false }, // yellow-4-alt.png
+  { id: 53, value: 4, color: 'green', scoring: 4, special: false }, // green-4.png
+  { id: 54, value: 4, color: 'blue', scoring: 0, special: false }, // blue-4-alt.png
+  { id: 55, value: 1, color: 'yellow', scoring: 4, special: false }, // yellow-1.png
+  { id: 56, value: 5, color: 'green', scoring: -1, special: false }, // green-5-alt.png
+  { id: 57, value: 2, color: 'yellow', scoring: 2, special: false }, // yellow-2-alt.png
+  { id: 58, value: 3, color: 'red', scoring: 4, special: false }, // red-3.png
+  { id: 59, value: 9, color: 'blue', scoring: -1, special: false }, // blue-9-alt.png
+  { id: 60, value: 9, color: 'red', scoring: 0, special: false }, // red-9.png
+  { id: 61, value: 8, color: 'blue', scoring: -3, special: false }, // blue-8.png
+  { id: 62, value: 8, color: 'yellow', scoring: -1, special: false }, // yellow-8.png
+  { id: 63, value: 6, color: 'blue', scoring: -1, special: false }, // blue-6-alt.png
+  { id: 64, value: 6, color: 'green', scoring: -4, special: false }, // green-6-alt2.png
+  { id: 65, value: 5, color: 'red', scoring: 0, special: false }, // red-5.png
+  { id: 66, value: 5, color: 'green', scoring: 0, special: false }, // green-5-alt2.png
+  { id: 67, value: 4, color: 'green', scoring: -1, special: false }, // green-4-alt.png
+  { id: 68, value: 4, color: 'blue', scoring: 1, special: false }, // blue-4.png
+  { id: 69, value: 7, color: 'blue', scoring: -3, special: false }, // blue-7.png
+  { id: 70, value: 7, color: 'green', scoring: 0, special: false } // green-7-alt.png
 ];
 
 // Utility functions for card management

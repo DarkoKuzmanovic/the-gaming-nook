@@ -491,12 +491,33 @@ function endRound(game, gameId, io) {
   // Calculate scores for this round
   const roundScores = game.players.map((player, index) => {
     const score = calculatePlayerScore(player.grid, game.currentRound - 1); // Fix: use 0-based round index
-    player.scores[game.currentRound - 1] = score.total; // Store total score, not full object
+    
+    console.log(`🔍 ENDROUND DEBUG - Player ${index} (${player.name}):`, {
+      currentRound: game.currentRound,
+      calculatedScore: score,
+      gridCards: player.grid.filter(Boolean).length,
+      faceUpCards: player.grid.filter(card => card && card.faceUp).length
+    });
+    
+    // Store detailed breakdown for each round
+    if (!player.scoreBreakdowns) {
+      player.scoreBreakdowns = [];
+    }
+    player.scoreBreakdowns[game.currentRound - 1] = score;
+    player.scores[game.currentRound - 1] = score.total; // Store total score for backward compatibility
+    
+    const totalScore = player.scores.reduce((a, b) => a + b, 0);
+    console.log(`🔍 ENDROUND DEBUG - Player ${index} final:`, {
+      thisRoundScore: score.total,
+      allRoundScores: player.scores,
+      totalScore
+    });
+    
     return {
       playerIndex: index,
       playerName: player.name,
       score,
-      totalScore: player.scores.reduce((a, b) => a + b, 0),
+      totalScore,
     };
   });
 
@@ -504,6 +525,19 @@ function endRound(game, gameId, io) {
   if (game.currentRound >= 3) {
     // Game complete
     const winner = roundScores.reduce((prev, current) => (current.totalScore > prev.totalScore ? current : prev));
+    
+    console.log(`🔍 WINNER DEBUG:`, {
+      roundScores: roundScores.map(rs => ({
+        playerIndex: rs.playerIndex, 
+        playerName: rs.playerName, 
+        totalScore: rs.totalScore
+      })),
+      winner: {
+        playerIndex: winner.playerIndex,
+        playerName: winner.playerName, 
+        totalScore: winner.totalScore
+      }
+    });
 
     game.gameState = "finished";
     io.to(gameId).emit("game-complete", {

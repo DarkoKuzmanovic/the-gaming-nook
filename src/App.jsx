@@ -192,7 +192,7 @@ function App() {
             </div>
             <p className="instructions">Enter your name and click "Find Game" to be matched with another player</p>
             <div className="version-footer">
-              <small>v1.0.0</small>
+              <small>by: Darko Kuzmanović - v1.0.0</small>
               <button
                 onClick={toggleFullscreen}
                 title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}

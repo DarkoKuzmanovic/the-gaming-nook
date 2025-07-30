@@ -35,14 +35,40 @@ const ScoreBoard = memo(({ players, currentRound, onClose }) => {
             <div className="score-breakdown">
               <div className="round-scores">
                 {player.scores.map((score, roundIndex) => (
-                  <div key={roundIndex} className="round-score">
-                    <span>R{roundIndex + 1}:</span>
-                    <span>{score}</span>
+                  <div key={roundIndex} className="round-score-detailed">
+                    <div className="round-header">
+                      <strong>Round {roundIndex + 1}: {score}</strong>
+                    </div>
+                    {player.scoreBreakdowns && player.scoreBreakdowns[roundIndex] && (
+                      <div className="round-breakdown">
+                        <span className="breakdown-item">
+                          Validated: {player.scoreBreakdowns[roundIndex].validatedNumbers}
+                        </span>
+                        <span className="breakdown-item">
+                          Symbols: {player.scoreBreakdowns[roundIndex].symbols}
+                        </span>
+                        <span className="breakdown-item">
+                          Zone: {player.scoreBreakdowns[roundIndex].colorZone}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ))}
-                <div className="round-score current">
-                  <span>R{currentRound}:</span>
-                  <span>{getCurrentScore(player).total}</span>
+                <div className="round-score-detailed current">
+                  <div className="round-header">
+                    <strong>Round {currentRound}: {getCurrentScore(player).total}</strong>
+                  </div>
+                  <div className="round-breakdown">
+                    <span className="breakdown-item">
+                      Validated: {getCurrentScore(player).validatedNumbers}
+                    </span>
+                    <span className="breakdown-item">
+                      Symbols: {getCurrentScore(player).symbols}
+                    </span>
+                    <span className="breakdown-item">
+                      Zone: {getCurrentScore(player).colorZone}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="total-score" onClick={() => toggleExpanded(index)}>
