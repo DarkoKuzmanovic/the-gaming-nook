@@ -1,14 +1,17 @@
-const express = require("express");
-const http = require("http");
-const socketIo = require("socket.io");
-const cors = require("cors");
-const path = require("path");
-const { CARDS, shuffleDeck, dealRoundCards, dealTurnCards, createGameDeck } = require("./src/data/cards.js");
-const { canPickCard } = require("./src/game/placement.js");
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { CARDS, shuffleDeck, dealRoundCards, dealTurnCards, createGameDeck } from './src/data/cards.js';
+import { canPickCard } from './src/game/placement.js';
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const server = http.createServer(app);
-const io = socketIo(server, {
+const io = new Server(server, {
   cors: {
     origin: true, // Allow all origins for network access
     methods: ["GET", "POST"],
@@ -21,7 +24,7 @@ const PORT = process.env.PORT || 8001;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "dist")));
 
 // Game state storage
 const games = new Map();

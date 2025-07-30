@@ -18,6 +18,9 @@ class AudioService {
     // Sound effects
     this.soundEffects.placeCards = new Audio('/audio/place_cards.mp3');
     this.soundEffects.playCard = new Audio('/audio/play_card.mp3');
+    this.soundEffects.win = new Audio('/audio/win.mp3');
+    this.soundEffects.lose = new Audio('/audio/lose.mp3');
+    this.soundEffects.validate = new Audio('/audio/validate.mp3');
     
     // Set volume for sound effects
     Object.values(this.soundEffects).forEach(audio => {

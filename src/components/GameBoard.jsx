@@ -114,10 +114,7 @@ const GameBoard = ({
     // Set up interval to check loading status
     const interval = setInterval(checkImageLoading, 500);
 
-    // Play place_cards sound when game board loads
-    if (soundEnabled) {
-      AudioService.playSound("placeCards");
-    }
+    // Note: Removed place_cards sound on game board load as it was unintended
 
     // Start background music
     if (musicEnabled) {
@@ -129,7 +126,7 @@ const GameBoard = ({
       // Stop music when component unmounts
       AudioService.stopBackgroundMusic();
     };
-  }, [soundEnabled, musicEnabled]);
+  }, []);
 
   // Save sound/music preferences to localStorage
   useEffect(() => {
@@ -204,7 +201,7 @@ const GameBoard = ({
           cardId,
           placedCard,
           placedCardId: placedCard?.id,
-          newGrid: newGrid.map(card => card ? {id: card.id, value: card.value, validated: card.validated} : null)
+          newGrid: newGrid.map((card) => (card ? { id: card.id, value: card.value, validated: card.validated } : null)),
         });
 
         // Play card sound effect
@@ -220,19 +217,24 @@ const GameBoard = ({
 
           // Check if card was validated for confetti
           if (placedCard.validated) {
+            // Play validation sound effect
+            if (soundEnabled) {
+              AudioService.playSound("validate");
+            }
+
             // Find the actual card in the new grid that was validated
-            const validatedCardInGrid = newGrid.find(gridCard => 
-              gridCard && gridCard.validated && gridCard.value === placedCard.value
+            const validatedCardInGrid = newGrid.find(
+              (gridCard) => gridCard && gridCard.validated && gridCard.value === placedCard.value
             );
-            
+
             console.log("🎉 CONFETTI DEBUG - onCardPickedAndPlaced:", {
               cardId,
               placedCardId: placedCard.id,
               validatedCardInGrid: validatedCardInGrid?.id,
               validated: placedCard.validated,
-              eventType: "onCardPickedAndPlaced"
+              eventType: "onCardPickedAndPlaced",
             });
-            
+
             if (validatedCardInGrid) {
               setConfettiCards((prev) => {
                 // Prevent duplicate additions - use the grid card ID
@@ -345,13 +347,17 @@ const GameBoard = ({
 
     // Handle card placement events
     socketService.onCardPlaced(
-      ({ playerIndex: placingPlayer, cardId, gridIndex, choice, placedCard, newGrid, currentPlayer, placementResult }) => {
+      ({
+        playerIndex: placingPlayer,
+        cardId,
+        gridIndex,
+        choice,
+        placedCard,
+        newGrid,
+        currentPlayer,
+        placementResult,
+      }) => {
         console.log(`Player ${placingPlayer} placed card ${cardId}`);
-
-        // Play card sound effect
-        if (soundEnabled) {
-          AudioService.playSound("playCard");
-        }
 
         // Add fade-in animation for the placed card
         setNewlyPlacedCards((prev) => new Set([...prev, cardId]));
@@ -359,12 +365,17 @@ const GameBoard = ({
 
         // Check if card was validated for confetti
         if (placedCard && placedCard.validated) {
+          // Play validation sound effect
+          if (soundEnabled) {
+            AudioService.playSound("validate");
+          }
+
           console.log("🎉 CONFETTI DEBUG - onCardPlaced:", {
             cardId,
             placedCardId: placedCard.id,
             validated: placedCard.validated,
             eventType: "onCardPlaced",
-            idsMatch: cardId === placedCard.id
+            idsMatch: cardId === placedCard.id,
           });
           setConfettiCards((prev) => {
             // Prevent duplicate additions
@@ -471,6 +482,15 @@ const GameBoard = ({
     // Handle game completion
     socketService.onGameComplete(({ finalScores, winner, playerScores }) => {
       console.log("Game completed! Winner:", winner);
+
+      // Play win/lose sound effect
+      if (soundEnabled) {
+        if (winner === playerIndex) {
+          AudioService.playSound("win");
+        } else {
+          AudioService.playSound("lose");
+        }
+      }
 
       setGameState((prev) => ({
         ...prev,

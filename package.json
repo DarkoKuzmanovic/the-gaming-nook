@@ -2,6 +2,7 @@
   "name": "vetrolisci",
   "version": "1.0.0",
   "description": "Digital implementation of Pixies card game",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
