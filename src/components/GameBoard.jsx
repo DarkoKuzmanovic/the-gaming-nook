@@ -4,6 +4,7 @@ import Card from "./Card";
 import CardChoiceModal from "./CardChoiceModal";
 import PlacementChoiceModal from "./PlacementChoiceModal";
 import RoundCompleteModal from "./RoundCompleteModal";
+import BackToMenuModal from "./BackToMenuModal";
 import ScoreBoard from "./ScoreBoard";
 import SkeletonLoader from "./SkeletonLoader";
 import {
@@ -22,6 +23,7 @@ const GameBoard = ({
   socketService,
   onGameStateChange,
   onDraftStateChange,
+  onReturnToMenu,
   hideScoreBoard = false,
   hideTurnIndicator = false,
 }) => {
@@ -46,6 +48,7 @@ const GameBoard = ({
   const [showRoundComplete, setShowRoundComplete] = useState(false);
   const [roundCompleteData, setRoundCompleteData] = useState(null);
   const [showScoreModal, setShowScoreModal] = useState(false);
+  const [showBackToMenuModal, setShowBackToMenuModal] = useState(false);
   const [animatingCards, setAnimatingCards] = useState(new Set());
   const [placingCards, setPlacingCards] = useState(new Set());
   const [revealingCards, setRevealingCards] = useState(false);
@@ -656,6 +659,23 @@ const GameBoard = ({
     setRoundCompleteData(null);
   };
 
+  const handleBackToMenuClick = () => {
+    setShowBackToMenuModal(true);
+  };
+
+  const handleBackToMenuConfirm = () => {
+    // Disconnect from the game
+    socketService.disconnect();
+    // Return to main menu
+    if (onReturnToMenu) {
+      onReturnToMenu();
+    }
+  };
+
+  const handleBackToMenuCancel = () => {
+    setShowBackToMenuModal(false);
+  };
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement
@@ -930,6 +950,22 @@ const GameBoard = ({
       >
         <img src="/icons/score.png" alt="Scoreboard" style={{ width: "30px", height: "30px" }} />
       </button>
+
+      {/* Back to Main Menu button */}
+      <button
+        className="header-score-button audio-toggle-button"
+        onClick={handleBackToMenuClick}
+        title="Back to Main Menu"
+        style={{ bottom: "50px", left: "20px", right: "auto" }}
+      >
+        <img src="/icons/back-to-menu.svg" alt="Back to Menu" style={{ width: "30px", height: "30px" }} />
+      </button>
+
+      <BackToMenuModal
+        isOpen={showBackToMenuModal}
+        onConfirm={handleBackToMenuConfirm}
+        onCancel={handleBackToMenuCancel}
+      />
 
       {/* Scoreboard Modal */}
       {showScoreModal && (

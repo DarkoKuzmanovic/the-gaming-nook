@@ -109,6 +109,15 @@ function App() {
     }
   }, [gameState, gameInfo, currentGameState, currentDraftState]);
 
+  const handleReturnToMenu = () => {
+    console.log("Returning to main menu");
+    gameStateCache.clearGameState();
+    setGameState("menu");
+    setGameInfo(null);
+    setCurrentGameState(null);
+    setCurrentDraftState(null);
+  };
+
   const startGame = async () => {
     if (playerName.trim() && socketService.isConnected()) {
       try {
@@ -169,7 +178,14 @@ function App() {
             <h1>Vetrolisci</h1>
             <p>A strategic card placement game for 2 players</p>
             <div className="connection-status">
-              Status: {connectionStatus === "connected" ? "🟢 Connected" : "🔴 Disconnected"}
+              <div className="status-content">
+                <span>Status: {connectionStatus === "connected" ? "🟢 Connected" : "🔴 Disconnected"}</span>
+                {connectionStatus !== "connected" && (
+                  <button className="refresh-button" onClick={() => window.location.reload()} title="Refresh page">
+                    <img src="/icons/refresh.svg" alt="Refresh" width="16" height="16" />
+                  </button>
+                )}
+              </div>
               {!imagesPreloaded && <div>🖼️ Loading images...</div>}
             </div>
             <div className="menu-form">
@@ -192,7 +208,9 @@ function App() {
             </div>
             <p className="instructions">Enter your name and click "Find Game" to be matched with another player</p>
             <div className="version-footer">
-              <small>by: Darko Kuzmanović - v1.0.0</small>
+              <small>
+                Copyright &copy; 2025 &mdash; Darko Kuzmanović <span class="connection-status">v1.0.0</span>
+              </small>
               <button
                 onClick={toggleFullscreen}
                 title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
@@ -275,6 +293,7 @@ function App() {
         socketService={socketService}
         onGameStateChange={setCurrentGameState}
         onDraftStateChange={setCurrentDraftState}
+        onReturnToMenu={handleReturnToMenu}
         hideScoreBoard={true}
         hideTurnIndicator={true}
       />

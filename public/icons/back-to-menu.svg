@@ -1,0 +1,7 @@
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Placeholder SVG for back to menu icon -->
+  <!-- Arrow pointing left with door/exit symbol -->
+  <path d="M8 15L2 15M2 15L5 12M2 15L5 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 4H24C25.1046 4 26 4.89543 26 6V24C26 25.1046 25.1046 26 24 26H10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 15H15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg>

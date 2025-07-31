@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
 
   // Draft phase handlers - start-draft removed as cards are now automatically revealed
 
-  socket.on("pick-card", ({ gameId, playerIndex, cardId, choice, position }) => {
+  socket.on("pick-card", async ({ gameId, playerIndex, cardId, choice, position }) => {
     const game = games.get(gameId);
     if (!game || !game.draftState) return;
 
@@ -160,15 +160,23 @@ io.on("connection", (socket) => {
 
             const roundShouldEnd = checkRoundEndCondition(game);
             if (roundShouldEnd) {
-              endRound(game, gameId, io);
+              await endRound(game, gameId, io);
             } else {
-              game.draftState = initializeTurnPhase(game.draftState.remainingDeck, lastPicker);
+              game.draftState = initializeTurnPhase(game.draftState.remainingDeck, lastPicker, game.draftState.turnNumber);
               game.deck = game.draftState.remainingDeck;
               io.to(gameId).emit("new-turn", {
                 currentPlayer: game.currentPlayer,
                 draftState: game.draftState,
               });
             }
+            
+            // Track that both players completed this turn
+            if (!game.playerTurnCounts) {
+              game.playerTurnCounts = [0, 0];
+            }
+            // Both players get a turn each time we complete a full turn cycle
+            game.playerTurnCounts[0]++;
+            game.playerTurnCounts[1]++;
           }
           return; // Exit early, card was discarded
         }
@@ -201,7 +209,7 @@ io.on("connection", (socket) => {
       // Check if round should end immediately after placement
       const roundShouldEnd = checkRoundEndCondition(game);
       if (roundShouldEnd) {
-        endRound(game, gameId, io);
+        await endRound(game, gameId, io);
         return; // Exit early if round ended
       }
 
@@ -212,9 +220,18 @@ io.on("connection", (socket) => {
         game.currentPlayer = lastPicker;
 
         // Start new turn using remaining deck
-        game.draftState = initializeTurnPhase(game.draftState.remainingDeck, lastPicker);
+        game.draftState = initializeTurnPhase(game.draftState.remainingDeck, lastPicker, game.draftState.turnNumber);
         // Update the main deck reference
         game.deck = game.draftState.remainingDeck;
+        
+        // Track that both players completed this turn
+        if (!game.playerTurnCounts) {
+          game.playerTurnCounts = [0, 0];
+        }
+        // Both players get a turn each time we complete a full turn cycle
+        game.playerTurnCounts[0]++;
+        game.playerTurnCounts[1]++;
+        
         io.to(gameId).emit("new-turn", {
           currentPlayer: game.currentPlayer,
           draftState: game.draftState,
@@ -227,7 +244,7 @@ io.on("connection", (socket) => {
   });
 
   // Card placement handlers
-  socket.on("place-card", ({ gameId, playerIndex, cardId, gridIndex, choice }) => {
+  socket.on("place-card", async ({ gameId, playerIndex, cardId, gridIndex, choice }) => {
     const game = games.get(gameId);
     if (!game || game.phase !== "place") return;
 
@@ -286,7 +303,7 @@ io.on("connection", (socket) => {
 
       if (allCardsPlaced) {
         // End current round
-        endRound(game, gameId, io);
+        await endRound(game, gameId, io);
       }
 
       console.log(`Player ${playerIndex} placed card ${cardId} at position ${gridIndex}`);
@@ -347,11 +364,12 @@ function initializeDraftPhase(deck, roundNumber) {
     currentPickIndex: 0,
     remainingDeck,
     completedPicks: 0,
+    turnNumber: 1, // Track which turn this is in the round
   };
 }
 
 // Initialize a new turn using remaining deck
-function initializeTurnPhase(remainingDeck, lastPicker) {
+function initializeTurnPhase(remainingDeck, lastPicker, currentTurnNumber = 1) {
   const { turnCards, remainingDeck: newRemainingDeck } = dealTurnCards(remainingDeck);
 
   // The last picker becomes the first picker of the next turn
@@ -366,6 +384,7 @@ function initializeTurnPhase(remainingDeck, lastPicker) {
     currentPickIndex: 0,
     remainingDeck: newRemainingDeck,
     completedPicks: 0,
+    turnNumber: currentTurnNumber + 1, // Increment turn number
   };
 }
 
@@ -488,12 +507,12 @@ function determineServerPlacementScenario(card, grid) {
 }
 
 // Round management
-function endRound(game, gameId, io) {
+async function endRound(game, gameId, io) {
   console.log(`Round ${game.currentRound} ended for game ${gameId}`);
 
   // Calculate scores for this round
-  const roundScores = game.players.map((player, index) => {
-    const score = calculatePlayerScore(player.grid, game.currentRound - 1); // Fix: use 0-based round index
+  const roundScores = await Promise.all(game.players.map(async (player, index) => {
+    const score = await calculatePlayerScore(player.grid, game.currentRound - 1); // Fix: use 0-based round index
     
     console.log(`🔍 ENDROUND DEBUG - Player ${index} (${player.name}):`, {
       currentRound: game.currentRound,
@@ -507,11 +526,11 @@ function endRound(game, gameId, io) {
       player.scoreBreakdowns = [];
     }
     player.scoreBreakdowns[game.currentRound - 1] = score;
-    player.scores[game.currentRound - 1] = score.total; // Store total score for backward compatibility
+    player.scores[game.currentRound - 1] = score; // Store total score (score is already the total number)
     
     const totalScore = player.scores.reduce((a, b) => a + b, 0);
     console.log(`🔍 ENDROUND DEBUG - Player ${index} final:`, {
-      thisRoundScore: score.total,
+      thisRoundScore: score,
       allRoundScores: player.scores,
       totalScore
     });
@@ -519,10 +538,10 @@ function endRound(game, gameId, io) {
     return {
       playerIndex: index,
       playerName: player.name,
-      score,
+      score: { total: score }, // Wrap score in object for compatibility
       totalScore,
     };
-  });
+  }));
 
   // Check if game is complete (3 rounds)
   if (game.currentRound >= 3) {
@@ -579,6 +598,9 @@ function endRound(game, gameId, io) {
 
     // Initialize new draft phase
     game.draftState = initializeDraftPhase(game.deck, game.currentRound);
+    
+    // Reset turn counts for the new round
+    game.playerTurnCounts = [0, 0];
 
     io.to(gameId).emit("round-complete", {
       roundNumber: game.currentRound - 1,
@@ -590,9 +612,9 @@ function endRound(game, gameId, io) {
   }
 }
 
-function calculatePlayerScore(grid, roundNumber) {
+async function calculatePlayerScore(grid, roundNumber) {
   // Import the proper scoring function from the client-side scoring module
-  const { calculatePlayerScore: clientCalculatePlayerScore } = require("./src/game/scoring.js");
+  const { calculatePlayerScore: clientCalculatePlayerScore } = await import("./src/game/scoring.js");
 
   try {
     const result = clientCalculatePlayerScore(grid, roundNumber - 1); // Convert to 0-based index
@@ -607,7 +629,27 @@ function calculatePlayerScore(grid, roundNumber) {
 
 function checkRoundEndCondition(game) {
   // Check if any player has filled all 9 spaces
-  return game.players.some((player) => player.grid.every((cell) => cell !== null));
+  const anyPlayerFilled = game.players.some((player) => player.grid.every((cell) => cell !== null));
+  
+  if (!anyPlayerFilled) {
+    return false; // Round continues if no one has filled their grid
+  }
+  
+  // If someone filled their grid, check if both players have had equal turns
+  if (!game.playerTurnCounts) {
+    // Initialize turn counts if not present (for backward compatibility)
+    game.playerTurnCounts = [0, 0];
+    return true; // Allow round to end if no turn tracking yet (backward compatibility)
+  }
+  
+  // Round ends only if both players have had equal number of turns
+  const player0Turns = game.playerTurnCounts[0];
+  const player1Turns = game.playerTurnCounts[1];
+  
+  console.log(`🔍 ROUND END CHECK: Player 0 turns: ${player0Turns}, Player 1 turns: ${player1Turns}`);
+  
+  // Both players must have completed the same number of turns
+  return player0Turns === player1Turns;
 }
 
 // Health check endpoint
