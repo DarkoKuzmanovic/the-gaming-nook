@@ -1,1 +1,0 @@
-[ ] On round complete current total score is missing in span class "total-score"

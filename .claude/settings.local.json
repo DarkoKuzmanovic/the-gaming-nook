@@ -8,7 +8,9 @@
       "Bash(node server.js)",
       "Bash(node:*)",
       "Bash(curl:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
