@@ -60,6 +60,17 @@
   font-size: 1.1rem;
 }
 
+.keyboard-hint {
+  font-size: 0.9rem !important;
+  color: #666 !important;
+  margin: 0 0 1.5rem 0 !important;
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 /* ===== PLACEMENT GRID ===== */
 .placement-grid-container {
   margin-bottom: 2rem;

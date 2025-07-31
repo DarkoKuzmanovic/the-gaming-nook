@@ -9,20 +9,34 @@ const PlacementChoiceModal = ({
   onCancel 
 }) => {
   useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === 'Escape' && isOpen) {
+    const handleKeydown = (event) => {
+      if (!isOpen) return
+      
+      if (event.key === 'Escape') {
         onCancel()
+        return
+      }
+      
+      // Handle number keys 1-9 for grid placement
+      const numKey = parseInt(event.key)
+      if (numKey >= 1 && numKey <= 9) {
+        const gridIndex = numKey - 1 // Convert to 0-based index
+        const isAvailable = availablePositions.some(pos => pos.index === gridIndex)
+        
+        if (isAvailable) {
+          onChoose(gridIndex)
+        }
       }
     }
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleKeydown)
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
+      document.removeEventListener('keydown', handleKeydown)
     }
-  }, [isOpen, onCancel])
+  }, [isOpen, onCancel, onChoose, availablePositions])
 
   if (!isOpen) return null
 
@@ -46,6 +60,7 @@ const PlacementChoiceModal = ({
       <div className="placement-modal-content">
         <h3>Choose placement position</h3>
         <p>Place {card?.color} {card?.value} face-down on any empty space:</p>
+        <p className="keyboard-hint">💡 Use number keys 1-9 for quick placement</p>
         
         <div className="placement-grid-container">
           <div className="placement-grid">

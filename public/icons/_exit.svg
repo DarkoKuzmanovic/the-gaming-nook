@@ -1,0 +1,18 @@
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Exit icon in style of back-to-menu.svg -->
+  <!-- Door frame -->
+  <rect x="4" y="5" width="18" height="20" rx="1" stroke="white" stroke-width="2" fill="none"/>
+  
+  <!-- Door opening -->
+  <path d="M12 5V25" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Door handle -->
+  <circle cx="18" cy="15" r="1.5" fill="white"/>
+  
+  <!-- Exit arrow pointing out -->
+  <path d="M8 15L2 15M2 15L5 12M2 15L5 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Person silhouette exiting -->
+  <path d="M9 11C9 10.4477 9.44772 10 10 10C10.5523 10 11 10.4477 11 11C11 11.5523 10.5523 12 10 12C9.44772 12 9 11.5523 9 11Z" fill="white"/>
+  <path d="M8.5 13H11.5V19H10.5V16H9.5V19H8.5V13Z" fill="white"/>
+</svg>

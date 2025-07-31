@@ -34,7 +34,7 @@
 /* ===== GRID SPACES ===== */
 .grid-space {
   position: relative;
-  border: 3px solid #e0e6ed;
+  border: 2px solid rgba(224, 230, 237, 0.6);
   border-radius: 12px;
   width: 123.2px;
   height: 176px;
@@ -44,43 +44,44 @@
   cursor: pointer;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 8px rgba(0, 0, 0, 0.1), 0 0 8px rgba(224, 230, 237, 0.3);
 }
 
 .grid-space:hover {
-  border-color: #667eea;
+  border-color: rgba(102, 126, 234, 0.4);
   transform: translateY(-2px);
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 6px 16px rgba(102, 126, 234, 0.2);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 6px 16px rgba(0, 0, 0, 0.15),
+    0 0 12px rgba(102, 126, 234, 0.3), 0 0 24px rgba(102, 126, 234, 0.1);
 }
 
 .grid-space.primary {
-  border-color: #4caf50;
-  background: rgba(76, 175, 80, 0.2);
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(76, 175, 80, 0.3);
+  border-color: rgba(76, 175, 80, 0.6);
+  background: rgba(76, 175, 80, 0.15);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 12px rgba(76, 175, 80, 0.4),
+    0 0 24px rgba(76, 175, 80, 0.2);
 }
 
 .grid-space.secondary {
-  border-color: #ff9800;
-  background: rgba(255, 152, 0, 0.2);
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(255, 152, 0, 0.3);
+  border-color: rgba(255, 152, 0, 0.6);
+  background: rgba(255, 152, 0, 0.15);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 12px rgba(255, 152, 0, 0.4),
+    0 0 24px rgba(255, 152, 0, 0.2);
 }
 
 /* ===== GRID SPACE ELEMENTS ===== */
 .space-number {
   position: absolute;
-  top: 4px;
-  left: 6px;
-  font-size: 0.8rem;
-  color: #64748b;
+  top: 50%;
+  left: 50%;
+  font-size: 3rem;
+  color: #8b796533;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 0px;
+  height: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .placement-hint {
@@ -102,7 +103,8 @@
 }
 
 .game-grid.opponent .grid-space:hover {
-  border-color: #ddd;
+  border-color: rgba(221, 221, 221, 0.8);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 8px rgba(0, 0, 0, 0.1), 0 0 6px rgba(221, 221, 221, 0.4);
 }
 
 /* ===== ANIMATIONS ===== */
@@ -118,5 +120,30 @@
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* ===== CARD GLOW EFFECTS IN GRID ===== */
+.card-glow {
+  box-shadow: 0 0 8px rgba(78, 205, 196, 0.4), 0 0 16px rgba(78, 205, 196, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.card-placing {
+  animation: cardPlacing 0.6s ease-out;
+}
+
+@keyframes cardPlacing {
+  0% {
+    transform: scale(1.1) rotate(2deg);
+    box-shadow: 0 0 15px rgba(78, 205, 196, 0.6), 0 0 30px rgba(78, 205, 196, 0.3);
+  }
+  50% {
+    transform: scale(1.05) rotate(-1deg);
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.5), 0 0 20px rgba(78, 205, 196, 0.2);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 5px rgba(78, 205, 196, 0.3), 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }

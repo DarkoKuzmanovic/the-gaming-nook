@@ -49,6 +49,10 @@ const GameBoard = ({
   const [roundCompleteData, setRoundCompleteData] = useState(null);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showBackToMenuModal, setShowBackToMenuModal] = useState(false);
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+  const [selectedCardIndex, setSelectedCardIndex] = useState(0);
+  const [keyboardNavigationStarted, setKeyboardNavigationStarted] = useState(false);
+  const [invalidActionCards, setInvalidActionCards] = useState(new Set());
   const [animatingCards, setAnimatingCards] = useState(new Set());
   const [placingCards, setPlacingCards] = useState(new Set());
   const [revealingCards, setRevealingCards] = useState(false);
@@ -71,6 +75,18 @@ const GameBoard = ({
   const [imagesLoading, setImagesLoading] = useState(true);
   const playerIndex = gameInfo?.playerIndex || 0;
 
+  // Function to trigger shake animation for invalid actions
+  const triggerInvalidAction = (cardId) => {
+    setInvalidActionCards((prev) => new Set([...prev, cardId]));
+    setTimeout(() => {
+      setInvalidActionCards((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(cardId);
+        return newSet;
+      });
+    }, 500); // Remove after animation completes
+  };
+
   // Effect to handle staggered card reveal animation
   useEffect(() => {
     if (draftState && draftState.revealedCards && draftState.revealedCards.length > 0) {
@@ -84,24 +100,43 @@ const GameBoard = ({
         setRevealingCards(true);
         setRevealedCardIds(new Set());
 
-        // Stagger the reveal of each card
+        // Stagger the reveal of each card with enhanced timing
         newCards.forEach((card, index) => {
           setTimeout(() => {
             setRevealedCardIds((prev) => new Set([...prev, card.id]));
-          }, index * 200); // 200ms delay between each card
+            // Play a subtle card reveal sound
+            if (soundEnabled && index % 2 === 0) {
+              // Only every other card to avoid noise
+              AudioService.playSound("playCard");
+            }
+          }, index * 300); // Increased to 300ms for better effect
         });
 
         // End revealing state after all cards are shown
         setTimeout(() => {
           setRevealingCards(false);
           setRevealedCardIds(currentCardIds);
-        }, newCards.length * 200 + 500);
+        }, newCards.length * 300 + 800); // Longer delay for final state
       } else if (!revealingCards) {
         // If not revealing and no new cards, make sure all current cards are marked as revealed
         setRevealedCardIds(currentCardIds);
       }
     }
   }, [draftState?.revealedCards, revealingCards]);
+
+  // Reset selected card index and navigation state when draft state changes
+  useEffect(() => {
+    if (draftState && draftState.revealedCards) {
+      const pickableCards = getPickableCards(gameState.players[playerIndex].grid, draftState.revealedCards);
+      // Reset to 0 if no cards, or ensure index is within bounds
+      setSelectedCardIndex((prevIndex) => {
+        if (pickableCards.length === 0) return 0;
+        return Math.min(prevIndex, pickableCards.length - 1);
+      });
+      // Reset keyboard navigation state when new cards are revealed
+      setKeyboardNavigationStarted(false);
+    }
+  }, [draftState?.revealedCards, gameState.players, playerIndex]);
 
   // Initialize audio when component mounts
   useEffect(() => {
@@ -166,22 +201,152 @@ const GameBoard = ({
     }
   }, [draftState, onDraftStateChange]);
 
-  // Handle ESC key for score modal
+  // Handle keyboard shortcuts
   useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === "Escape" && showScoreModal) {
-        setShowScoreModal(false);
+    const handleKeyDown = (event) => {
+      // Prevent shortcuts when typing in input fields
+      if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") {
+        return;
+      }
+
+      switch (event.key.toLowerCase()) {
+        case "escape":
+          // Close any open modal in priority order
+          if (showKeyboardHelp) {
+            setShowKeyboardHelp(false);
+          } else if (showScoreModal) {
+            setShowScoreModal(false);
+          } else if (showCardChoice) {
+            handleCardChoiceCancel();
+          } else if (showPlacementChoice) {
+            handlePlacementChoiceCancel();
+          } else if (showRoundComplete) {
+            handleRoundContinue();
+          } else if (showBackToMenuModal) {
+            handleBackToMenuCancel();
+          }
+          break;
+
+        case " ":
+        case "spacebar":
+          event.preventDefault(); // Prevent page scroll
+          // Auto-pick first available card during draft phase
+          if (draftState && draftState.revealedCards && draftState.revealedCards.length > 0) {
+            const pickableCards = getPickableCards(gameState.players[playerIndex].grid, draftState.revealedCards);
+            const isMyTurn = draftState.pickOrder[draftState.currentPickIndex] === playerIndex;
+            const firstPickableCard = pickableCards.find((card) => card.pickable.canPick);
+
+            if (isMyTurn && firstPickableCard && !animatingCards.has(firstPickableCard.id)) {
+              handleDraftCardPick(firstPickableCard.id);
+            }
+          }
+          break;
+
+        case "arrowleft":
+        case "arrowright":
+          event.preventDefault();
+          // Navigate between drafted cards
+          if (draftState && draftState.revealedCards && draftState.revealedCards.length > 0) {
+            const pickableCards = getPickableCards(gameState.players[playerIndex].grid, draftState.revealedCards);
+            const isMyTurn = draftState.pickOrder[draftState.currentPickIndex] === playerIndex;
+
+            if (isMyTurn && pickableCards.length > 0) {
+              // Mark that keyboard navigation has been started
+              setKeyboardNavigationStarted(true);
+
+              const direction = event.key.toLowerCase() === "arrowleft" ? -1 : 1;
+              setSelectedCardIndex((prevIndex) => {
+                const newIndex = prevIndex + direction;
+                if (newIndex < 0) return pickableCards.length - 1;
+                if (newIndex >= pickableCards.length) return 0;
+                return newIndex;
+              });
+            }
+          }
+          break;
+
+        case "enter":
+          event.preventDefault();
+          // Pick the currently selected card
+          if (draftState && draftState.revealedCards && draftState.revealedCards.length > 0) {
+            const pickableCards = getPickableCards(gameState.players[playerIndex].grid, draftState.revealedCards);
+            const isMyTurn = draftState.pickOrder[draftState.currentPickIndex] === playerIndex;
+
+            if (isMyTurn && pickableCards.length > 0) {
+              const selectedCard = pickableCards[selectedCardIndex];
+              if (selectedCard && selectedCard.pickable.canPick && !animatingCards.has(selectedCard.id)) {
+                handleDraftCardPick(selectedCard.id);
+              }
+            }
+          }
+          break;
+
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+          // Quick grid placement using number keys
+          const gridIndex = parseInt(event.key) - 1;
+          if (gameState.selectedCard && gameState.phase === "place" && gameState.currentPlayer === playerIndex) {
+            handleCardPlace(gridIndex);
+          } else if (showPlacementChoice && placementChoiceData) {
+            // Use number keys for placement choice modal
+            const availablePositions = placementChoiceData.availablePositions;
+            if (availablePositions.includes(gridIndex)) {
+              handlePlacementChoice(gridIndex);
+            }
+          }
+          break;
+
+        case "r":
+          // Show restart/back to menu confirmation
+          if (!showBackToMenuModal) {
+            handleBackToMenuClick();
+          }
+          break;
+
+        case "s":
+          // Toggle scoreboard
+          if (!showScoreModal) {
+            setShowScoreModal(true);
+          }
+          break;
+
+        case "h":
+        case "?":
+          // Toggle keyboard help
+          setShowKeyboardHelp(!showKeyboardHelp);
+          break;
+
+        default:
+          break;
       }
     };
 
-    if (showScoreModal) {
-      document.addEventListener("keydown", handleEscape);
-    }
-
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showScoreModal]);
+  }, [
+    showScoreModal,
+    showCardChoice,
+    showPlacementChoice,
+    showRoundComplete,
+    showBackToMenuModal,
+    showKeyboardHelp,
+    selectedCardIndex,
+    keyboardNavigationStarted,
+    draftState,
+    gameState,
+    playerIndex,
+    animatingCards,
+    placementChoiceData,
+  ]);
 
   useEffect(() => {
     if (!socketService || !gameInfo) return;
@@ -527,12 +692,24 @@ const GameBoard = ({
     const currentPickingPlayer = draftState.pickOrder[draftState.currentPickIndex];
     if (currentPickingPlayer !== playerIndex) {
       console.log("Not your turn to pick");
+      triggerInvalidAction(cardId);
       return;
     }
 
     // Find the picked card
     const pickedCard = draftState.revealedCards.find((card) => card.id === cardId);
-    if (!pickedCard) return;
+    if (!pickedCard) {
+      triggerInvalidAction(cardId);
+      return;
+    }
+
+    // Check if card can be picked
+    const pickableCards = getPickableCards(gameState.players[playerIndex].grid, draftState.revealedCards);
+    const cardData = pickableCards.find((card) => card.id === cardId);
+    if (!cardData || !cardData.pickable.canPick) {
+      triggerInvalidAction(cardId);
+      return;
+    }
 
     // Start pick animation
     setAnimatingCards((prev) => new Set([...prev, cardId]));
@@ -758,13 +935,17 @@ const GameBoard = ({
                 const isFlying = flyingCards.has(cardData.id);
                 const isRevealed = revealedCardIds.has(cardData.id) || !revealingCards;
                 const canPick = canPlayerPick && !isAnimating && isRevealed;
+                const isKeyboardSelected = isMyTurn && index === selectedCardIndex && keyboardNavigationStarted;
+                const hasInvalidAction = invalidActionCards.has(cardData.id);
 
                 const fadeData = flyingCards.get(cardData.id);
                 const isFadingOut = fadeData?.fadeOut;
 
                 const cardClass = `revealed-card ${canPick ? "can-pick" : "waiting"} ${
                   isAnimating ? "card-picking" : ""
-                } ${isFadingOut ? "card-fade-out" : ""} ${!isRevealed ? "card-revealing" : ""}`;
+                } ${isFadingOut ? "card-fade-out" : ""} ${isKeyboardSelected ? "keyboard-selected" : ""} ${
+                  hasInvalidAction ? "invalid-action" : ""
+                }`;
                 const tooltipText = !cardData.pickable.canPick
                   ? cardData.pickable.reason === "all_cards_validated"
                     ? "All cards would violate validation rule - can place face-down"
@@ -779,7 +960,7 @@ const GameBoard = ({
                     title={tooltipText}
                     style={{
                       position: "relative",
-                      animationDelay: !isRevealed ? `${index * 200}ms` : "0ms",
+                      animationDelay: !isRevealed ? `${index * 300}ms` : "0ms",
                     }}
                   >
                     <Card
@@ -790,7 +971,13 @@ const GameBoard = ({
                         }
                       }}
                       isSelected={false}
-                      className={revealedCardIds.has(cardData.id) ? "card-revealing" : ""}
+                      className={
+                        revealingCards && !revealedCardIds.has(cardData.id)
+                          ? "card-revealing"
+                          : revealingCards && revealedCardIds.has(cardData.id)
+                          ? "card-revealed"
+                          : ""
+                      }
                     />
                     {!cardData.pickable.canPick && isRevealed && <div className="card-restriction-overlay"></div>}
                   </div>
@@ -800,9 +987,22 @@ const GameBoard = ({
           </div>
           {!hideTurnIndicator && (
             <div className="turn-indicator">
-              {draftState.pickOrder[draftState.currentPickIndex] === playerIndex
-                ? "Your turn to pick!"
-                : `Waiting for ${gameState.players[draftState.pickOrder[draftState.currentPickIndex]]?.name}...`}
+              {draftState.pickOrder[draftState.currentPickIndex] === playerIndex ? (
+                keyboardNavigationStarted ? (
+                  "Your turn to pick! Use ← → to navigate, Enter to select"
+                ) : (
+                  "Your turn to pick!"
+                )
+              ) : (
+                <span>
+                  Waiting for {gameState.players[draftState.pickOrder[draftState.currentPickIndex]]?.name}
+                  <span className="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </span>
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -958,7 +1158,17 @@ const GameBoard = ({
         title="Back to Main Menu"
         style={{ bottom: "50px", left: "20px", right: "auto" }}
       >
-        <img src="/icons/back-to-menu.svg" alt="Back to Menu" style={{ width: "30px", height: "30px" }} />
+        <img src="/icons/exit.svg" alt="Exit to Menu" style={{ width: "30px", height: "30px" }} />
+      </button>
+
+      {/* Keyboard Help button */}
+      <button
+        className="header-score-button audio-toggle-button"
+        onClick={() => setShowKeyboardHelp(true)}
+        title="Keyboard Shortcuts (H)"
+        style={{ bottom: "120px", left: "20px", right: "auto" }}
+      >
+        <img src="/icons/keyboard.svg" alt="Keyboard shortcuts" style={{ width: "30px", height: "30px" }} />
       </button>
 
       <BackToMenuModal
@@ -976,6 +1186,84 @@ const GameBoard = ({
               currentRound={gameState.currentRound}
               onClose={() => setShowScoreModal(false)}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard Help Modal */}
+      {showKeyboardHelp && (
+        <div className="score-modal-overlay" onClick={() => setShowKeyboardHelp(false)}>
+          <div className="score-modal-content keyboard-help-content" onClick={(e) => e.stopPropagation()}>
+            <div className="keyboard-help">
+              <div className="keyboard-help-header">
+                <h3>
+                  <img
+                    src="/icons/keyboard.svg"
+                    alt="Keyboard"
+                    style={{ width: "24px", height: "24px", marginRight: "8px", verticalAlign: "middle" }}
+                  />
+                  Keyboard Shortcuts
+                </h3>
+                <button
+                  className="keyboard-help-close"
+                  onClick={() => setShowKeyboardHelp(false)}
+                  title="Close help (Esc)"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="keyboard-help-sections">
+                <div className="keyboard-help-section">
+                  <h4>🎮 Gameplay</h4>
+                  <div className="keyboard-shortcut">
+                    <kbd>←</kbd>
+                    <kbd>→</kbd>
+                    <span>Navigate between drafted cards</span>
+                  </div>
+                  <div className="keyboard-shortcut">
+                    <kbd>Enter</kbd>
+                    <span>Pick selected card</span>
+                  </div>
+                  <div className="keyboard-shortcut">
+                    <kbd>Space</kbd>
+                    <span>Auto-pick first available card</span>
+                  </div>
+                  <div className="keyboard-shortcut">
+                    <kbd>1</kbd>-<kbd>9</kbd>
+                    <span>Quick placement on grid positions & modal selection</span>
+                  </div>
+                </div>
+
+                <div className="keyboard-help-section">
+                  <h4>🎯 Interface</h4>
+                  <div className="keyboard-shortcut">
+                    <kbd>Esc</kbd>
+                    <span>Close any modal/overlay</span>
+                  </div>
+                  <div className="keyboard-shortcut">
+                    <kbd>S</kbd>
+                    <span>Open scoreboard</span>
+                  </div>
+                  <div className="keyboard-shortcut">
+                    <kbd>H</kbd> or <kbd>?</kbd>
+                    <span>Show/hide this help</span>
+                  </div>
+                </div>
+
+                <div className="keyboard-help-section">
+                  <h4>⚙️ Controls</h4>
+                  <div className="keyboard-shortcut">
+                    <kbd>R</kbd>
+                    <span>Return to main menu</span>
+                  </div>
+                </div>
+              </div>
+              <div className="keyboard-help-footer">
+                <p>
+                  <small>💡 Tip: These shortcuts work when you're not typing in input fields</small>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}

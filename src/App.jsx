@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import GameBoard from "./components/GameBoard";
 import ScoreBoard from "./components/ScoreBoard";
 import socketService from "./services/socket";
@@ -243,7 +243,14 @@ function App() {
           <div className="waiting-content">
             <h1>Vetrolisci</h1>
             <div className="spinner">⟳</div>
-            <h2>Waiting for another player...</h2>
+            <h2>
+              Waiting for another player
+              <span className="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            </h2>
             <p>Game ID: {gameInfo?.gameId}</p>
             <p>You are Player {(gameInfo?.playerIndex || 0) + 1}</p>
             <button
@@ -266,7 +273,16 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-header-left">
-          <h1>Vetrolisci</h1>
+          <h1 style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <img
+              src="/icons/favicon-96x96.png"
+              alt="Vetrolisci logo"
+              width={24}
+              height={24}
+              style={{ marginTop: "-5px" }}
+            />
+            Vetrolisci
+          </h1>
           <p>
             Player: {playerName} | Game: {gameInfo?.gameId}
           </p>
@@ -277,13 +293,12 @@ function App() {
 
         {/* Floating turn indicator in center bottom */}
         {currentDraftState && (
-          <div className="header-turn-indicator">
-            {currentDraftState.pickOrder[currentDraftState.currentPickIndex] === gameInfo?.playerIndex
-              ? "Your turn to pick!"
-              : `Waiting for ${
-                  currentGameState?.players[currentDraftState.pickOrder[currentDraftState.currentPickIndex]]?.name
-                }...`}
-          </div>
+          <HeaderTurnIndicator
+            isMyTurn={currentDraftState.pickOrder[currentDraftState.currentPickIndex] === gameInfo?.playerIndex}
+            opponentName={
+              currentGameState?.players[currentDraftState.pickOrder[currentDraftState.currentPickIndex]]?.name
+            }
+          />
         )}
       </header>
 
@@ -297,6 +312,53 @@ function App() {
         hideScoreBoard={true}
         hideTurnIndicator={true}
       />
+    </div>
+  );
+}
+
+// HeaderTurnIndicator and waiting synonyms
+const WAITING_SYNONYMS = [
+  "Summoning",
+  "Consulting the oracle for",
+  "Staring intensely at",
+  "Manifesting a move from",
+  "Politely nudging",
+];
+
+const YOUR_TURN_SYNONYMS = [
+  "Your moment of glory!",
+  "It's showtime!",
+  "The spotlight's on you!",
+  "Unleash your strategy!",
+  "Your move, maestro!",
+];
+
+function HeaderTurnIndicator({ isMyTurn, opponentName }) {
+  const waitingPhrase = React.useMemo(() => {
+    if (!opponentName) return "Waiting for";
+    const idx = Math.floor(Math.random() * WAITING_SYNONYMS.length);
+    return WAITING_SYNONYMS[idx];
+  }, [opponentName]);
+
+  const yourTurnPhrase = React.useMemo(() => {
+    const idx = Math.floor(Math.random() * YOUR_TURN_SYNONYMS.length);
+    return YOUR_TURN_SYNONYMS[idx];
+  }, [isMyTurn]);
+
+  return (
+    <div className="header-turn-indicator">
+      {isMyTurn ? (
+        <>{yourTurnPhrase}</>
+      ) : (
+        <>
+          {`${waitingPhrase} ${opponentName}`}
+          <span className="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </>
+      )}
     </div>
   );
 }
