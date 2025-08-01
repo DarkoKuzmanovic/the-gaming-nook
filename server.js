@@ -512,7 +512,7 @@ async function endRound(game, gameId, io) {
 
   // Calculate scores for this round
   const roundScores = await Promise.all(game.players.map(async (player, index) => {
-    const score = await calculatePlayerScore(player.grid, game.currentRound - 1); // Fix: use 0-based round index
+    const score = await calculatePlayerScore(player.grid, game.currentRound - 1); // 0-based round index for scoring
     
     console.log(`🔍 ENDROUND DEBUG - Player ${index} (${player.name}):`, {
       currentRound: game.currentRound,
@@ -568,6 +568,9 @@ async function endRound(game, gameId, io) {
       playerScores: game.players.map((p) => p.scores),
     });
   } else {
+    // Store the completed round number before incrementing
+    const completedRound = game.currentRound;
+    
     // Start next round
     game.currentRound++;
     game.phase = "draft";
@@ -603,7 +606,7 @@ async function endRound(game, gameId, io) {
     game.playerTurnCounts = [0, 0];
 
     io.to(gameId).emit("round-complete", {
-      roundNumber: game.currentRound - 1,
+      roundNumber: completedRound,
       roundScores,
       nextRound: game.currentRound,
       draftState: game.draftState,
@@ -617,7 +620,7 @@ async function calculatePlayerScore(grid, roundNumber) {
   const { calculatePlayerScore: clientCalculatePlayerScore } = await import("./src/game/scoring.js");
 
   try {
-    const result = clientCalculatePlayerScore(grid, roundNumber - 1); // Convert to 0-based index
+    const result = clientCalculatePlayerScore(grid, roundNumber); // roundNumber is already 0-based
     return result.total;
   } catch (error) {
     console.error("Error calculating player score:", error);

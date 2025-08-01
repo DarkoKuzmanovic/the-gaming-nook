@@ -624,7 +624,7 @@ const GameBoard = ({
         setGameState((prev) => {
           const newPlayers = [...prev.players];
           roundScores.forEach(({ playerIndex, score }) => {
-            newPlayers[playerIndex].scores[roundNumber - 1] = score; // Fix: use 0-based indexing
+            newPlayers[playerIndex].scores[roundNumber - 1] = score.total; // roundNumber is 1-based, convert to 0-based
           });
 
           // Clear grids for new round
