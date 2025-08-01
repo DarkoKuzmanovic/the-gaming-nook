@@ -78,10 +78,24 @@
   gap: 20px;
 }
 
+.title-with-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-2);
+}
+
+.title-with-logo .logo {
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  margin-top: -5px;
+}
+
 .menu h1 {
   color: var(--color-text-white);
   text-shadow: var(--text-shadow-md);
-  margin-bottom: var(--space-2);
+  margin-bottom: 0;
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
 }
@@ -258,7 +272,7 @@
 .waiting h1 {
   color: var(--color-text-white);
   text-shadow: var(--text-shadow-md);
-  margin-bottom: var(--space-8);
+  margin-bottom: 0;
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
 }

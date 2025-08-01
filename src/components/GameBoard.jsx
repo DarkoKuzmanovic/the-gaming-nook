@@ -968,6 +968,8 @@ const GameBoard = ({
                       onClick={() => {
                         if (canPick) {
                           handleDraftCardPick(cardData.id);
+                        } else {
+                          triggerInvalidAction(cardData.id);
                         }
                       }}
                       isSelected={false}

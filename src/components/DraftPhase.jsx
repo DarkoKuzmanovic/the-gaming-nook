@@ -1,10 +1,24 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Card from './Card'
 import { getDraftPhaseStatus, getUpcomingPickOrder } from '../game/draft'
 import { getPickableCards } from '../game/placement'
 import './DraftPhase.css'
 
 const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames, playerGrid }) => {
+  // State for shake animation on restricted cards
+  const [shakingCards, setShakingCards] = useState(new Set())
+
+  // Function to trigger shake animation for restricted cards
+  const triggerShakeAnimation = (cardId) => {
+    setShakingCards(prev => new Set([...prev, cardId]))
+    setTimeout(() => {
+      setShakingCards(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(cardId)
+        return newSet
+      })
+    }, 500) // Remove after animation completes
+  }
   const status = getDraftPhaseStatus(draftState)
   const upcomingPicks = getUpcomingPickOrder(draftState)
   const currentPlayerName = playerNames[status.currentPickingPlayer] || `Player ${status.currentPickingPlayer + 1}`
@@ -68,11 +82,14 @@ const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames, playerGr
                     'All cards would violate validation rule - can place face-down' : 
                     'You already have a validated card with this number') : ''
                 
+                const isShaking = shakingCards.has(cardData.id)
+                const containerClass = `card-container ${isShaking ? 'shake-animation' : ''}`
+                
                 return (
-                  <div key={cardData.id} className="card-container" title={tooltipText}>
+                  <div key={cardData.id} className={containerClass} title={tooltipText}>
                     <Card 
                       card={cardData}
-                      onClick={() => canPlayerPick ? onCardPick(cardData.id) : null}
+                      onClick={() => canPlayerPick ? onCardPick(cardData.id) : triggerShakeAnimation(cardData.id)}
                       isSelected={false}
                       className={cardClass}
                     />

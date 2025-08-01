@@ -175,7 +175,10 @@ function App() {
       <div className="app">
         <div className="menu">
           <div className="menu-content">
-            <h1>Vetrolisci</h1>
+            <div className="title-with-logo">
+              <img src="/icons/favicon.svg" alt="Vetrolisci Logo" className="logo" />
+              <h1>Vetrolisci</h1>
+            </div>
             <p>A strategic card placement game for 2 players</p>
             <div className="connection-status">
               <div className="status-content">
@@ -241,7 +244,10 @@ function App() {
       <div className="app">
         <div className="waiting">
           <div className="waiting-content">
-            <h1>Vetrolisci</h1>
+            <div className="title-with-logo">
+              <img src="/icons/favicon.svg" alt="Vetrolisci Logo" className="logo" />
+              <h1>Vetrolisci</h1>
+            </div>
             <div className="spinner">⟳</div>
             <h2>
               Waiting for another player
