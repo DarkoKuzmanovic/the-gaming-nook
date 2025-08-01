@@ -1,16 +1,20 @@
-import React, { useState, useEffect, useMemo } from "react";
-import GameBoard from "./components/GameBoard";
-import ScoreBoard from "./components/ScoreBoard";
+import React, { useState, useEffect } from "react";
+import GameSelection from "./components/lobby/GameSelection";
+import GameBoard from "./components/games/GameBoard";
 import socketService from "./services/socket";
 import imagePreloader from "./services/imagePreloader";
 import gameStateCache from "./services/gameStateCache";
 import "./App.css";
 
+// Import game registrations
+import "./games/vetrolisci/index.js";
+
 function App() {
-  const [gameState, setGameState] = useState("menu"); // 'menu', 'waiting', 'playing', 'finished'
+  const [appState, setAppState] = useState("menu"); // 'menu', 'game-selection', 'waiting', 'playing', 'finished'
+  const [selectedGame, setSelectedGame] = useState(null);
   const [playerName, setPlayerName] = useState(() => {
     // Load saved player name from localStorage
-    return localStorage.getItem("vetrolisci-player-name") || "";
+    return localStorage.getItem("gaming-nook-player-name") || "";
   });
   const [gameInfo, setGameInfo] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
@@ -19,26 +23,28 @@ function App() {
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Update page title based on game state
+  // Update page title based on app state
   useEffect(() => {
-    if (gameState === "menu") {
-      document.title = "Vetrolisci - Digital Pixies Card Game";
-    } else if (gameState === "waiting") {
-      document.title = "Waiting for Player - Vetrolisci";
-    } else if (gameState === "playing" && currentGameState) {
+    if (appState === "menu") {
+      document.title = "The Gaming Nook - Choose Your Adventure";
+    } else if (appState === "game-selection") {
+      document.title = "Game Selection - The Gaming Nook";
+    } else if (appState === "waiting") {
+      document.title = `Waiting for Player - ${selectedGame?.displayName || 'Game'}`;
+    } else if (appState === "playing" && currentGameState && selectedGame) {
       const isMyTurn = currentDraftState?.pickOrder[currentDraftState.currentPickIndex] === gameInfo?.playerIndex;
       if (isMyTurn) {
-        document.title = `Your Turn - Round ${currentGameState.currentRound} - Vetrolisci`;
+        document.title = `Your Turn - ${selectedGame.displayName}`;
       } else {
-        document.title = `Round ${currentGameState.currentRound} - Vetrolisci`;
+        document.title = `Playing - ${selectedGame.displayName}`;
       }
     }
-  }, [gameState, currentGameState, currentDraftState, gameInfo?.playerIndex]);
+  }, [appState, currentGameState, currentDraftState, gameInfo?.playerIndex, selectedGame]);
 
   // Save player name to localStorage whenever it changes
   useEffect(() => {
     if (playerName.trim()) {
-      localStorage.setItem("vetrolisci-player-name", playerName.trim());
+      localStorage.setItem("gaming-nook-player-name", playerName.trim());
     }
   }, [playerName]);
 
@@ -47,11 +53,11 @@ function App() {
     const cachedState = gameStateCache.loadGameState();
     if (cachedState) {
       console.log("Restoring game from cache:", cachedState);
-      setGameState("playing");
+      setAppState("playing");
       setGameInfo(cachedState.gameInfo);
       setCurrentGameState(cachedState.gameState);
       setCurrentDraftState(cachedState.draftState);
-      // Note: We'll need to reconnect to the socket with the cached game ID
+      // Note: We'll need to restore the selected game as well
     }
 
     // Preload card images on app start
@@ -82,7 +88,7 @@ function App() {
     // Handle game started event
     socketService.onGameStarted((game) => {
       console.log("Game started event received:", game);
-      setGameState("playing");
+      setAppState("playing");
       setGameInfo((prevInfo) => ({ ...prevInfo, ...game }));
     });
 
@@ -90,9 +96,10 @@ function App() {
     socketService.onPlayerDisconnected((playerIndex) => {
       console.log("Player disconnected:", playerIndex);
       gameStateCache.clearGameState(); // Clear cache when game ends
-      alert("The other player has disconnected. Returning to menu.");
-      setGameState("menu");
+      alert("The other player has disconnected. Returning to game selection.");
+      setAppState("game-selection");
       setGameInfo(null);
+      setSelectedGame(null);
     });
 
     return () => {
@@ -102,36 +109,53 @@ function App() {
 
   // Cache game state when playing and state changes
   useEffect(() => {
-    if (gameState === "playing" && gameInfo && currentGameState) {
+    if (appState === "playing" && gameInfo && currentGameState) {
       gameStateCache.saveGameState(currentGameState, gameInfo, currentDraftState);
-    } else if (gameState === "menu" || gameState === "finished") {
+    } else if (appState === "menu" || appState === "finished") {
       gameStateCache.clearGameState();
     }
-  }, [gameState, gameInfo, currentGameState, currentDraftState]);
+  }, [appState, gameInfo, currentGameState, currentDraftState]);
 
   const handleReturnToMenu = () => {
     console.log("Returning to main menu");
     gameStateCache.clearGameState();
-    setGameState("menu");
+    setAppState("menu");
     setGameInfo(null);
     setCurrentGameState(null);
     setCurrentDraftState(null);
+    setSelectedGame(null);
   };
 
-  const startGame = async () => {
+  const handleReturnToGameSelection = () => {
+    console.log("Returning to game selection");
+    gameStateCache.clearGameState();
+    setAppState("game-selection");
+    setGameInfo(null);
+    setCurrentGameState(null);
+    setCurrentDraftState(null);
+    setSelectedGame(null);
+  };
+
+  const handlePlayerNameSubmit = () => {
+    if (playerName.trim() && connectionStatus === "connected") {
+      setAppState("game-selection");
+    }
+  };
+
+  const handleGameSelect = async (game) => {
+    setSelectedGame(game);
+    
     if (playerName.trim() && socketService.isConnected()) {
       try {
-        setGameState("waiting");
-        const { gameId, playerIndex } = await socketService.joinGame(playerName.trim());
-        console.log("Joined game successfully:", { gameId, playerIndex });
-        setGameInfo({ gameId, playerIndex });
-
-        // If this is the second player, the game will start automatically
-        // If this is the first player, we wait for another player
+        setAppState("waiting");
+        // Pass the selected game type to the server
+        const { gameId, playerIndex } = await socketService.joinGame(playerName.trim(), game.id);
+        console.log("Joined game successfully:", { gameId, playerIndex, gameType: game.id });
+        setGameInfo({ gameId, playerIndex, gameType: game.id });
       } catch (error) {
         console.error("Failed to join game:", error);
         alert("Failed to join game. Please try again.");
-        setGameState("menu");
+        setAppState("game-selection");
       }
     }
   };
@@ -170,16 +194,17 @@ function App() {
     };
   }, []);
 
-  if (gameState === "menu") {
+  // Main Menu - Player Name Entry
+  if (appState === "menu") {
     return (
       <div className="app">
         <div className="menu">
           <div className="menu-content">
             <div className="title-with-logo">
-              <img src="/icons/favicon.svg" alt="Vetrolisci Logo" className="logo" />
-              <h1>Vetrolisci</h1>
+              <img src="/icons/favicon.svg" alt="The Gaming Nook Logo" className="logo" />
+              <h1>The Gaming Nook</h1>
             </div>
-            <p>A strategic card placement game for 2 players</p>
+            <p>Your destination for strategic 2-player games</p>
             <div className="connection-status">
               <div className="status-content">
                 <span>Status: {connectionStatus === "connected" ? "🟢 Connected" : "🔴 Disconnected"}</span>
@@ -197,22 +222,22 @@ function App() {
                 placeholder="Enter your name"
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && startGame()}
+                onKeyPress={(e) => e.key === "Enter" && handlePlayerNameSubmit()}
               />
               <button
-                onClick={startGame}
+                onClick={handlePlayerNameSubmit}
                 disabled={!playerName.trim() || connectionStatus !== "connected"}
                 title={
-                  connectionStatus !== "connected" ? "Waiting for connection..." : "Start searching for another player"
+                  connectionStatus !== "connected" ? "Waiting for connection..." : "Continue to game selection"
                 }
               >
-                Find Game
+                Continue
               </button>
             </div>
-            <p className="instructions">Enter your name and click "Find Game" to be matched with another player</p>
+            <p className="instructions">Enter your name to access the game lobby</p>
             <div className="version-footer">
               <small>
-                Copyright &copy; 2025 &mdash; Darko Kuzmanović <span class="connection-status">v1.0.0</span>
+                Copyright &copy; 2025 &mdash; The Gaming Nook <span className="connection-status">v2.0.0</span>
               </small>
               <button
                 onClick={toggleFullscreen}
@@ -239,14 +264,47 @@ function App() {
     );
   }
 
-  if (gameState === "waiting") {
+  // Game Selection Screen
+  if (appState === "game-selection") {
+    return (
+      <div className="app">
+        <div className="game-selection-container">
+          <GameSelection 
+            onGameSelect={handleGameSelect} 
+            playerName={playerName}
+          />
+          <button 
+            className="back-button"
+            onClick={handleReturnToMenu}
+            style={{
+              position: "absolute",
+              top: "20px",
+              left: "20px",
+              background: "rgba(255, 255, 255, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              borderRadius: "8px",
+              padding: "10px 15px",
+              cursor: "pointer",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+            }}
+          >
+            ← Back to Menu
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Waiting for Player Screen
+  if (appState === "waiting") {
     return (
       <div className="app">
         <div className="waiting">
           <div className="waiting-content">
             <div className="title-with-logo">
-              <img src="/icons/favicon.svg" alt="Vetrolisci Logo" className="logo" />
-              <h1>Vetrolisci</h1>
+              <img src={selectedGame?.thumbnail || "/icons/favicon.svg"} alt="Game Logo" className="logo" />
+              <h1>{selectedGame?.displayName || "Game"}</h1>
             </div>
             <div className="spinner">⟳</div>
             <h2>
@@ -262,10 +320,11 @@ function App() {
             <button
               onClick={() => {
                 socketService.disconnect();
-                setGameState("menu");
+                setAppState("game-selection");
                 setGameInfo(null);
+                setSelectedGame(null);
               }}
-              title="Return to main menu"
+              title="Return to game selection"
             >
               Cancel
             </button>
@@ -275,19 +334,20 @@ function App() {
     );
   }
 
+  // Game Playing Screen
   return (
     <div className="app">
       <header className="app-header">
         <div className="app-header-left">
           <h1 style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <img
-              src="/icons/favicon-96x96.png"
-              alt="Vetrolisci logo"
+              src={selectedGame?.thumbnail || "/icons/favicon.svg"}
+              alt="Game logo"
               width={24}
               height={24}
               style={{ marginTop: "-5px" }}
             />
-            Vetrolisci
+            {selectedGame?.displayName || "Game"}
           </h1>
           <p>
             Player: {playerName} | Game: {gameInfo?.gameId}
@@ -314,7 +374,7 @@ function App() {
         socketService={socketService}
         onGameStateChange={setCurrentGameState}
         onDraftStateChange={setCurrentDraftState}
-        onReturnToMenu={handleReturnToMenu}
+        onReturnToMenu={handleReturnToGameSelection}
         hideScoreBoard={true}
         hideTurnIndicator={true}
       />
