@@ -273,7 +273,6 @@ function App() {
         <div className="menu">
           <div className="menu-content">
             <div className="title-with-logo">
-              <img src="/icons/favicon.svg" alt="The Gaming Nook Logo" className="logo" />
               <h1>The Gaming Nook</h1>
             </div>
             <p>Your destination for strategic 2-player games</p>
@@ -316,7 +315,6 @@ function App() {
         <div className="menu">
           <div className="menu-content">
             <div className="title-with-logo">
-              <img src="/icons/favicon.svg" alt="The Gaming Nook Logo" className="logo" />
               <h1>The Gaming Nook</h1>
             </div>
             <p>Your destination for strategic 2-player games</p>
@@ -474,7 +472,6 @@ function App() {
         <div className="waiting">
           <div className="waiting-content">
             <div className="title-with-logo">
-              <img src={selectedGame?.thumbnail || "/icons/favicon.svg"} alt="Game Logo" className="logo" />
               <h1>{selectedGame?.displayName || "Game"}</h1>
             </div>
             <div className="spinner">⟳</div>

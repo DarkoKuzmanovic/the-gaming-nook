@@ -251,7 +251,6 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, defaultMode = 'login', embe
         <button className="auth-modal-close" onClick={onClose}>×</button>
         
         <div className="auth-modal-header">
-          <img src="/icons/favicon.svg" alt="The Gaming Nook" className="auth-logo" />
           <h2>
             {mode === 'login' && 'Welcome Back!'}
             {mode === 'register' && 'Join The Gaming Nook'}
@@ -393,11 +392,9 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, defaultMode = 'login', embe
               </p>
             </>
           )}
-        </div>
-
-        <div className="auth-benefits">
-          <div className="auth-benefits-header">
-            <h4>Account Benefits</h4>
+          
+          <div className="auth-benefits-compact">
+            <span>Account Benefits</span>
             <button type="button" className="benefits-info-btn" title="Hover to see benefits">
               ?
             </button>

@@ -355,7 +355,8 @@
   z-index: 1000;
 }
 
-.auth-benefits-header:hover .benefits-tooltip {
+.auth-benefits-header:hover .benefits-tooltip,
+.auth-benefits-compact:hover .benefits-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(4px);
@@ -383,6 +384,23 @@
 
 .benefits-tooltip li:last-child {
   padding-bottom: 0;
+}
+
+.auth-benefits-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.auth-benefits-compact span {
+  font-weight: 500;
 }
 
 /* Responsive design */
