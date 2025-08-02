@@ -270,17 +270,6 @@ function App() {
   if (appState === "auth") {
     return (
       <div className="app">
-        <AuthModal
-          isOpen={showAuthModal}
-          onClose={() => {
-            // Don't allow closing if not authenticated
-            if (authService.isAuthenticated()) {
-              setShowAuthModal(false);
-            }
-          }}
-          onAuthSuccess={handleAuthSuccess}
-          defaultMode="guest"
-        />
         <div className="menu">
           <div className="menu-content">
             <div className="title-with-logo">
@@ -288,6 +277,7 @@ function App() {
               <h1>The Gaming Nook</h1>
             </div>
             <p>Your destination for strategic 2-player games</p>
+            
             <div className="connection-status">
               <div className="status-content">
                 <span>Status: {connectionStatus === "connected" ? "🟢 Connected" : "🔴 Disconnected"}</span>
@@ -299,7 +289,20 @@ function App() {
               </div>
               {!imagesPreloaded && <div>🖼️ Loading images...</div>}
             </div>
-            <p className="instructions">Please sign in or continue as guest to play</p>
+
+            {/* Integrated Auth Form */}
+            <AuthModal
+              isOpen={true}
+              onClose={() => {
+                // Don't allow closing if not authenticated
+                if (authService.isAuthenticated()) {
+                  setShowAuthModal(false);
+                }
+              }}
+              onAuthSuccess={handleAuthSuccess}
+              defaultMode="guest"
+              embedded={true}
+            />
           </div>
         </div>
       </div>

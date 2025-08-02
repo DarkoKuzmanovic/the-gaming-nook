@@ -79,9 +79,32 @@
 }
 
 .player-section.current-player {
-  background: var(--color-success-light);
-  border-color: var(--color-success);
-  box-shadow: 0 0 0 2px rgba(72, 187, 120, 0.2), var(--shadow-md);
+  background: var(--color-bg-overlay);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1), var(--shadow-lg);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* ===== PLAYERS SECTION ===== */
+.players-section {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+  margin: var(--space-6) 0;
+}
+
+.players-section .player-section {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .players-section {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
 }
 
 /* ===== GRID SECTIONS ===== */

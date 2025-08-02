@@ -1055,10 +1055,10 @@ const VetrolisciBoard = ({
         </div>
       )}
 
-        {/* Players section */}
-        <div className="players-section">
-          {/* Current player (you) */}
-          <div className="player-section current-player">
+      {/* Players section */}
+      <div className="players-section">
+        {/* Current player (you) */}
+        <div className="player-section current-player">
             <div className="player-header">
               <h3>{currentPlayer.name} (You)</h3>
               {!hideScoreBoard && (
@@ -1095,26 +1095,25 @@ const VetrolisciBoard = ({
             )}
           </div>
 
-          {/* Opponent */}
-          <div className="player-section opponent">
-            <div className="player-header">
-              <h3>{opponent.name}</h3>
-              {!hideScoreBoard && (
-                <div className="current-scores">
-                  Round Scores: {opponent.scores.join(" - ")} (Total: {opponent.scores.reduce((sum, score) => sum + score, 0)})
-                </div>
-              )}
-            </div>
-            <GameGrid
-              grid={opponent.grid}
-              className="opponent-grid"
-              readOnly={true}
-              newlyPlacedCards={newlyPlacedCards}
-              glowingCards={glowingCards}
-              confettiCards={confettiCards}
-              placingCards={placingCards}
-            />
+        {/* Opponent */}
+        <div className="player-section opponent">
+          <div className="player-header">
+            <h3>{opponent.name}</h3>
+            {!hideScoreBoard && (
+              <div className="current-scores">
+                Round Scores: {opponent.scores.join(" - ")} (Total: {opponent.scores.reduce((sum, score) => sum + score, 0)})
+              </div>
+            )}
           </div>
+          <GameGrid
+            grid={opponent.grid}
+            className="opponent-grid"
+            readOnly={true}
+            newlyPlacedCards={newlyPlacedCards}
+            glowingCards={glowingCards}
+            confettiCards={confettiCards}
+            placingCards={placingCards}
+          />
         </div>
       </div>
 
