@@ -45,6 +45,10 @@
     "react",
     "node"
   ],
-  "author": "",
+  "author": {
+    "name": "Darko Kuzmanovic",
+    "email": "darko@quz.ma",
+    "url": "https://quz.ma"
+  },
   "license": "MIT"
 }
