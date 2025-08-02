@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
-import imagePreloader from '../services/imagePreloader';
+import imagePreloader from '../../services/imagePreloader';
 
 const LazyImage = memo(({ 
   src, 

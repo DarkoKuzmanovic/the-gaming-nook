@@ -1,5 +1,5 @@
 import React, { useState, memo } from "react";
-import { calculatePlayerScore, calculateTotalGameScore } from "../game/scoring";
+import { calculatePlayerScore, calculateTotalGameScore } from "../../games/vetrolisci/scoring";
 import "./ScoreBoard.css";
 
 const ScoreBoard = memo(({ players, currentRound, onClose }) => {

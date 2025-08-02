@@ -1,7 +1,7 @@
 // Image Preloader Service
 // Preloads all card images to prevent loading delays during gameplay
 
-import { CARDS, getCardImagePath, getCardBackImagePath } from '../data/cards.js';
+import { CARDS, getCardImagePath, getCardBackImagePath } from '../games/vetrolisci/cards.js';
 
 class ImagePreloader {
   constructor() {
@@ -54,14 +54,14 @@ class ImagePreloader {
     // Add card back image
     const backImagePath = getCardBackImagePath();
     if (backImagePath) {
-      imagesToLoad.push(`/cards/backs/${backImagePath}`);
+      imagesToLoad.push(backImagePath);
     }
 
     // Add all card front images
     CARDS.forEach(card => {
       const frontImagePath = getCardImagePath(card);
       if (frontImagePath) {
-        imagesToLoad.push(`/cards/fronts/${frontImagePath}`);
+        imagesToLoad.push(frontImagePath);
       }
     });
 

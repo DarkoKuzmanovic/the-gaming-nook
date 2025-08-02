@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import LazyImage from "./LazyImage";
 import "./Card.css";
 import "./LazyImage.css";
-import { COLORS, getCardImagePath, getCardBackImagePath } from "../data/cards.js";
+import { COLORS, getCardImagePath, getCardBackImagePath } from "../../games/vetrolisci/cards.js";
 
 const Card = memo(({ card, isSelected, onClick, isPlaced = false, showBack = false, className = "" }) => {
   const getColorClass = (color) => {
@@ -42,7 +42,7 @@ const Card = memo(({ card, isSelected, onClick, isPlaced = false, showBack = fal
     return (
       <div className={`card card-back ${isPlaced ? "placed" : ""} ${className}`}>
         <LazyImage
-          src={`/cards/backs/${backImagePath}`}
+          src={backImagePath}
           alt="Card back"
           className="card-image"
           onError={() => {
@@ -68,7 +68,7 @@ const Card = memo(({ card, isSelected, onClick, isPlaced = false, showBack = fal
     >
       {frontImagePath ? (
         <LazyImage
-          src={`/cards/fronts/${frontImagePath}`}
+          src={frontImagePath}
           alt={`${card.color} ${card.value}`}
           className="card-image"
           placeholder={

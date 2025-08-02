@@ -1,7 +1,7 @@
 import React from "react";
 import Card from "./Card";
 import Confetti from "./Confetti";
-import { getValidPlacementPositions } from "../game/placement";
+import { getValidPlacementPositions } from "../../games/vetrolisci/placement";
 import "./GameGrid.css";
 
 const GameGrid = ({

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "./Confetti.css";
 
 const Confetti = ({ cardId, onComplete }) => {
   const [pieces, setPieces] = useState([]);

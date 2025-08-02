@@ -2,40 +2,40 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-# Vetrolisci - Digital Pixies Card Game
+# The Gaming Nook - Digital Pixies Card Game
 
 ## Project Overview
 
-Vetrolisci is a feature-rich real-time multiplayer implementation of the Pixies card game for 2 players. Players strategically place cards in a 3x3 grid across 3 rounds, with advanced scoring based on validated card numbers, symbols, and color zones. The game includes audio effects, state persistence, image preloading, and comprehensive modal interfaces.
+The Gaming Nook is a feature-rich real-time multiplayer implementation of the Pixies card game for 2 players. Players strategically place cards in a 3x3 grid across 3 rounds, with advanced scoring based on validated card numbers, symbols, and color zones. The game includes audio effects, state persistence, image preloading, and comprehensive modal interfaces.
 
 ## Architecture
 
 ### Frontend (React + Vite + ES Modules)
-- **Entry Point**: `src/main.jsx` → `src/App.jsx`
+- **Entry Point**: `client/main.jsx` → `client/App.jsx`
 - **State Management**: React state with localStorage persistence via `gameStateCache`
-- **Components**: Comprehensive React component library in `src/components/`
-- **Game Logic**: Client-side game logic in `src/game/`
+- **Components**: Comprehensive React component library in `client/components/`
+- **Game Logic**: Client-side game logic in `client/games/`
 - **Services**: Modular services for audio, caching, image preloading, and socket communication
-- **Real-time Communication**: Socket.IO client wrapper in `src/services/socket.js`
+- **Real-time Communication**: Socket.IO client wrapper in `client/services/socket.js`
 
 ### Backend (Node.js + Express + ES Modules)
-- **Entry Point**: `server.js` - handles both HTTP and WebSocket connections
+- **Entry Point**: `server/main.js` - handles both HTTP and WebSocket connections
 - **Module System**: Full ES module support with `"type": "module"` in package.json
 - **Game State**: In-memory storage using Maps for games and players
 - **Real-time Features**: Socket.IO for live multiplayer functionality
-- **Card System**: 70-card deck with image mapping in `src/data/cards.js`
+- **Card System**: 70-card deck with image mapping in `client/games/vetrolisci/cards.js`
 
 ### Key Game Systems
-- **Draft Phase**: `src/game/draft.js` - card picking mechanics with turn-based logic
-- **Placement Logic**: `src/game/placement.js` - sophisticated card placement validation
-- **Scoring Engine**: `src/game/scoring.js` - complex scoring with validated cards, symbols, and color zones
-- **Validation**: `src/game/validation.js` - card validation rules and adjacency checks
+- **Draft Phase**: `client/games/vetrolisci/draft.js` - card picking mechanics with turn-based logic
+- **Placement Logic**: `client/games/vetrolisci/placement.js` - sophisticated card placement validation
+- **Scoring Engine**: `client/games/vetrolisci/scoring.js` - complex scoring with validated cards, symbols, and color zones
+- **Validation**: `client/games/vetrolisci/validation.js` - card validation rules and adjacency checks
 
 ### Enhanced Services
-- **Audio Service**: `src/services/audio.js` - background music and sound effects management
-- **Game State Cache**: `src/services/gameStateCache.js` - localStorage persistence for game recovery
-- **Image Preloader**: `src/services/imagePreloader.js` - preloads all card images for smooth gameplay
-- **Socket Service**: `src/services/socket.js` - WebSocket communication wrapper with error handling
+- **Audio Service**: `client/services/audio.js` - background music and sound effects management
+- **Game State Cache**: `client/services/gameStateCache.js` - localStorage persistence for game recovery
+- **Image Preloader**: `client/services/imagePreloader.js` - preloads all card images for smooth gameplay
+- **Socket Service**: `client/services/socket.js` - WebSocket communication wrapper with error handling
 
 ## Development Commands
 
@@ -85,7 +85,7 @@ npm run typecheck
 
 ## Game Rules Implementation
 
-Complete rules are in `vetrolisci-ruleset.md`. Key mechanics:
+Complete rules are in `pixies-ruleset.md`. Key mechanics:
 
 ### Card Placement Scenarios
 1. **Empty/Face-down**: Place on corresponding number position (value-1 index)
@@ -118,33 +118,51 @@ Complete rules are in `vetrolisci-ruleset.md`. Key mechanics:
 ## Project Structure
 
 ```
-src/
-├── components/              # React UI components
-│   ├── GameBoard.jsx       # Main game container with state management
-│   ├── GameGrid.jsx        # 3x3 card grid with placement logic
-│   ├── CardHand.jsx        # Available cards display
-│   ├── Card.jsx            # Individual card with lazy loading
-│   ├── ScoreBoard.jsx      # Score tracking and breakdown
-│   ├── LazyImage.jsx       # Optimized image loading
-│   ├── SkeletonLoader.jsx  # Loading state placeholders
-│   ├── Confetti.jsx        # Victory animations
-│   ├── CardChoiceModal.jsx # Card replacement selection
-│   ├── PlacementChoiceModal.jsx # Grid position selection
-│   ├── RoundCompleteModal.jsx   # Round end summary
-│   └── BackToMenuModal.jsx      # Leave game confirmation
-├── game/                   # Game logic modules
-│   ├── draft.js           # Draft phase mechanics
-│   ├── placement.js       # Card placement validation
-│   ├── scoring.js         # Comprehensive scoring calculations
-│   └── validation.js      # Card validation and adjacency rules
+client/                     # Frontend React application
+├── components/             # React UI components
+│   ├── games/             # Game-specific components
+│   │   ├── GameBoard.jsx  # Main game container with state management
+│   │   ├── GameGrid.jsx   # 3x3 card grid with placement logic
+│   │   ├── Card.jsx       # Individual card with lazy loading
+│   │   ├── LazyImage.jsx  # Optimized image loading
+│   │   ├── SkeletonLoader.jsx # Loading state placeholders
+│   │   ├── Confetti.jsx   # Victory animations
+│   │   ├── DraftPhase.jsx # Draft phase UI
+│   │   └── PlacementChoiceModal.jsx # Grid position selection
+│   ├── lobby/             # Lobby components
+│   │   └── GameSelection.jsx # Game selection interface
+│   └── shared/            # Shared components
+│       └── GameCard.jsx   # Reusable game card component
+├── games/                 # Game implementations
+│   ├── base/              # Base game framework
+│   │   ├── BaseGame.js    # Base game class
+│   │   └── GameRegistry.js # Game registration system
+│   └── vetrolisci/        # Vetrolisci game implementation
+│       ├── VetrolisciGame.js # Main game logic
+│       ├── cards.js       # Card definitions and mapping
+│       ├── draft.js       # Draft phase mechanics
+│       ├── placement.js   # Card placement validation
+│       └── validation.js  # Card validation rules
 ├── services/              # Service modules
 │   ├── socket.js         # Socket.IO client wrapper
-│   ├── audio.js          # Audio management (music + SFX)
 │   ├── gameStateCache.js # localStorage game persistence
 │   └── imagePreloader.js # Card image preloading
-├── data/
-│   └── cards.js          # 70-card deck with image mapping
-└── utils/                # Utility functions (if any)
+└── App.jsx               # Main application component
+
+server/                    # Backend Node.js application
+├── games/                # Server-side game logic
+│   ├── base/             # Base server framework
+│   │   ├── BaseGameServer.js # Base server game class
+│   │   └── GameServerRegistry.js # Server game registration
+│   └── vetrolisci/       # Vetrolisci server implementation
+│       ├── VetrolisciServer.js # Server game logic
+│       └── index.js      # Game server exports
+└── main.js               # Server entry point
+
+public/                   # Static assets
+├── cards/               # Card images
+├── icons/               # UI icons
+└── audio/               # Audio files
 ```
 
 ## Enhanced Features

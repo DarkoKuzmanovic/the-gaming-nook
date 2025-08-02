@@ -3,7 +3,7 @@ import GameCard from '../shared/GameCard';
 import GameRegistry from '../../games/base/GameRegistry';
 import './GameSelection.css';
 
-const GameSelection = ({ onGameSelect, playerName }) => {
+const GameSelection = ({ onGameSelect, user }) => {
   const [games, setGames] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [categories, setCategories] = useState([]);
@@ -11,7 +11,7 @@ const GameSelection = ({ onGameSelect, playerName }) => {
   useEffect(() => {
     // Load available games from registry
     const availableGames = GameRegistry.getAllGames();
-    const gameCategories = ['all', ...GameRegistry.getCategories()];
+    const gameCategories = ['all', ...GameRegistry.getCategories().filter(cat => cat && typeof cat === 'string')];
     
     setGames(availableGames);
     setCategories(gameCategories);
@@ -30,7 +30,7 @@ const GameSelection = ({ onGameSelect, playerName }) => {
       <div className="game-selection-header">
         <div className="welcome-section">
           <h1>Welcome to The Gaming Nook</h1>
-          <p>Hello, <strong>{playerName}</strong>! Choose a game to play:</p>
+          <p>Hello, <strong>{user?.username}</strong>! Choose a game to play:</p>
         </div>
         
         <div className="category-filter">
@@ -40,7 +40,7 @@ const GameSelection = ({ onGameSelect, playerName }) => {
               className={`category-button ${selectedCategory === category ? 'active' : ''}`}
               onClick={() => setSelectedCategory(category)}
             >
-              {category === 'all' ? 'All Games' : category.charAt(0).toUpperCase() + category.slice(1)}
+              {category === 'all' ? 'All Games' : (category || '').charAt(0).toUpperCase() + (category || '').slice(1)}
             </button>
           ))}
         </div>

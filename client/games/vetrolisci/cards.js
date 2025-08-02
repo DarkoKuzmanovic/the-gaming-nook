@@ -219,11 +219,12 @@ export const getCardImagePath = (card) => {
     70: "green-7-alt.png",
   };
 
-  return imageMap[card.id] || null;
+  const filename = imageMap[card.id];
+  return filename ? `/cards/fronts/${filename}` : null;
 };
 
 export const getCardBackImagePath = () => {
-  return "card-back.png";
+  return "/cards/backs/card-back.png";
 };
 
 // Color definitions for styling
