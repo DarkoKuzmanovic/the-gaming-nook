@@ -396,13 +396,20 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, defaultMode = 'login', embe
         </div>
 
         <div className="auth-benefits">
-          <h4>Account Benefits:</h4>
-          <ul>
-            <li>🏆 Track your game statistics</li>
-            <li>📊 See your win/loss ratios</li>
-            <li>🎮 Game history and achievements</li>
-            <li>⚡ Seamless game experience</li>
-          </ul>
+          <div className="auth-benefits-header">
+            <h4>Account Benefits</h4>
+            <button type="button" className="benefits-info-btn" title="Hover to see benefits">
+              ?
+            </button>
+            <div className="benefits-tooltip">
+              <ul>
+                <li>🏆 Track your game statistics</li>
+                <li>📊 See your win/loss ratios</li>
+                <li>🎮 Game history and achievements</li>
+                <li>⚡ Seamless game experience</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
