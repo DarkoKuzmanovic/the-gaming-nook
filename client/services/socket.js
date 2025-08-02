@@ -10,6 +10,18 @@ class SocketService {
   }
 
   connect() {
+    // Prevent multiple connections
+    if (this.socket && this.socket.connected) {
+      console.log('Socket already connected, reusing existing connection');
+      return this.socket;
+    }
+    
+    // Disconnect any existing socket first
+    if (this.socket) {
+      console.log('Disconnecting existing socket before creating new one');
+      this.socket.disconnect();
+    }
+    
     // Dynamically determine server URL based on current host
     const serverUrl = window.location.hostname === 'localhost' 
       ? 'http://localhost:8001'
@@ -35,15 +47,15 @@ class SocketService {
     return this.socket;
   }
 
-  joinGame(playerName) {
+  joinGame(playerName, gameType = 'vetrolisci', authToken = null) {
     if (!this.socket) {
       console.error("No socket connection");
       return Promise.reject(new Error("No socket connection"));
     }
 
     return new Promise((resolve, reject) => {
-      console.log("Emitting join-game with name:", playerName);
-      this.socket.emit("join-game", playerName);
+      console.log("Emitting join-game with:", { playerName, gameType, hasToken: !!authToken });
+      this.socket.emit("join-game", playerName, gameType, authToken);
 
       this.socket.once("game-joined", ({ gameId, playerIndex }) => {
         this.gameId = gameId;
@@ -155,9 +167,13 @@ class SocketService {
 
   disconnect() {
     if (this.socket) {
+      console.log('Disconnecting socket:', this.socket.id);
+      this.socket.removeAllListeners(); // Remove all event listeners
       this.socket.disconnect();
       this.socket = null;
       this.connected = false;
+      this.gameId = null;
+      this.playerIndex = null;
     }
   }
 

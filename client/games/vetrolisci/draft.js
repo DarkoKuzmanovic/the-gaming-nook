@@ -1,5 +1,5 @@
 // Draft phase mechanics for Vetrolisci
-import { dealRoundCards } from "../data/cards.js";
+import { dealRoundCards } from "./cards.js";
 
 export const DraftPhase = {
   REVEAL: "reveal",

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Card from './Card'
-import { getDraftPhaseStatus, getUpcomingPickOrder } from '../game/draft'
-import { getPickableCards } from '../game/placement'
+import { getDraftPhaseStatus, getUpcomingPickOrder } from '../../games/vetrolisci/draft'
+import { getPickableCards } from '../../games/vetrolisci/placement'
 import './DraftPhase.css'
 
 const DraftPhase = ({ draftState, onCardPick, playerIndex, playerNames, playerGrid }) => {

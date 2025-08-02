@@ -1,31 +1,74 @@
 import React, { useState, useEffect } from "react";
 import GameSelection from "./components/lobby/GameSelection";
 import GameBoard from "./components/games/GameBoard";
+import AuthModal from "./components/auth/AuthModal";
+import UserProfile from "./components/auth/UserProfile";
 import socketService from "./services/socket";
+import authService from "./services/authService";
 import imagePreloader from "./services/imagePreloader";
 import gameStateCache from "./services/gameStateCache";
 import "./App.css";
 
 // Import game registrations
 import "./games/vetrolisci/index.js";
+import "./games/connect4/index.js";
 
 function App() {
-  const [appState, setAppState] = useState("menu"); // 'menu', 'game-selection', 'waiting', 'playing', 'finished'
+  const [appState, setAppState] = useState("auth"); // 'auth', 'menu', 'game-selection', 'waiting', 'playing', 'finished'
   const [selectedGame, setSelectedGame] = useState(null);
-  const [playerName, setPlayerName] = useState(() => {
-    // Load saved player name from localStorage
-    return localStorage.getItem("gaming-nook-player-name") || "";
-  });
+  const [user, setUser] = useState(authService.getCurrentUser());
   const [gameInfo, setGameInfo] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const [currentGameState, setCurrentGameState] = useState(null);
   const [currentDraftState, setCurrentDraftState] = useState(null);
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+
+  // Check authentication status on app start
+  useEffect(() => {
+    const initializeAuth = async () => {
+      if (authService.isAuthenticated()) {
+        try {
+          // Verify token is still valid
+          const isValid = await authService.verifyToken();
+          if (isValid) {
+            setUser(authService.getCurrentUser());
+            setAppState("menu");
+          } else {
+            setAppState("auth");
+            setShowAuthModal(true);
+          }
+        } catch (error) {
+          console.error('Auth verification failed:', error);
+          setAppState("auth");
+          setShowAuthModal(true);
+        }
+      } else {
+        setAppState("auth");
+        setShowAuthModal(true);
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for auth expiration
+    const handleAuthExpired = () => {
+      setUser(null);
+      setAppState("auth");
+      setShowAuthModal(true);
+    };
+
+    window.addEventListener('auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('auth-expired', handleAuthExpired);
+  }, []);
 
   // Update page title based on app state
   useEffect(() => {
-    if (appState === "menu") {
+    if (appState === "auth") {
+      document.title = "Welcome - The Gaming Nook";
+    } else if (appState === "menu") {
       document.title = "The Gaming Nook - Choose Your Adventure";
     } else if (appState === "game-selection") {
       document.title = "Game Selection - The Gaming Nook";
@@ -40,13 +83,6 @@ function App() {
       }
     }
   }, [appState, currentGameState, currentDraftState, gameInfo?.playerIndex, selectedGame]);
-
-  // Save player name to localStorage whenever it changes
-  useEffect(() => {
-    if (playerName.trim()) {
-      localStorage.setItem("gaming-nook-player-name", playerName.trim());
-    }
-  }, [playerName]);
 
   useEffect(() => {
     // Check for cached game state on app start
@@ -102,7 +138,17 @@ function App() {
       setSelectedGame(null);
     });
 
+    // Handle page unload/refresh
+    const handleBeforeUnload = () => {
+      console.log('Page unloading, disconnecting socket');
+      socketService.disconnect();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
+      console.log('App component unmounting, disconnecting socket');
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       socketService.disconnect();
     };
   }, []);
@@ -136,20 +182,46 @@ function App() {
     setSelectedGame(null);
   };
 
-  const handlePlayerNameSubmit = () => {
-    if (playerName.trim() && connectionStatus === "connected") {
+  const handleAuthSuccess = (authenticatedUser) => {
+    setUser(authenticatedUser);
+    // Skip menu for guest users, go directly to game selection
+    if (authenticatedUser.isGuest) {
       setAppState("game-selection");
+    } else {
+      setAppState("menu");
     }
+    setShowAuthModal(false);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setAppState("auth");
+    setShowAuthModal(true);
+    // Clear any active game state
+    gameStateCache.clearGameState();
+    setCurrentGameState(null);
+    setCurrentDraftState(null);
+    setGameInfo(null);
+    setSelectedGame(null);
   };
 
   const handleGameSelect = async (game) => {
     setSelectedGame(game);
     
-    if (playerName.trim() && socketService.isConnected()) {
+    if (user) {
+      if (!socketService.isConnected()) {
+        alert("Connection lost. Please refresh the page and try again.");
+        return;
+      }
+      
       try {
         setAppState("waiting");
-        // Pass the selected game type to the server
-        const { gameId, playerIndex } = await socketService.joinGame(playerName.trim(), game.id);
+        // Pass the selected game type and auth token to the server
+        const { gameId, playerIndex } = await socketService.joinGame(
+          user.username, 
+          game.id, 
+          authService.getToken()
+        );
         console.log("Joined game successfully:", { gameId, playerIndex, gameType: game.id });
         setGameInfo({ gameId, playerIndex, gameType: game.id });
       } catch (error) {
@@ -194,10 +266,21 @@ function App() {
     };
   }, []);
 
-  // Main Menu - Player Name Entry
-  if (appState === "menu") {
+  // Authentication Screen
+  if (appState === "auth") {
     return (
       <div className="app">
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => {
+            // Don't allow closing if not authenticated
+            if (authService.isAuthenticated()) {
+              setShowAuthModal(false);
+            }
+          }}
+          onAuthSuccess={handleAuthSuccess}
+          defaultMode="guest"
+        />
         <div className="menu">
           <div className="menu-content">
             <div className="title-with-logo">
@@ -216,25 +299,66 @@ function App() {
               </div>
               {!imagesPreloaded && <div>🖼️ Loading images...</div>}
             </div>
-            <div className="menu-form">
-              <input
-                type="text"
-                placeholder="Enter your name"
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handlePlayerNameSubmit()}
-              />
-              <button
-                onClick={handlePlayerNameSubmit}
-                disabled={!playerName.trim() || connectionStatus !== "connected"}
-                title={
-                  connectionStatus !== "connected" ? "Waiting for connection..." : "Continue to game selection"
-                }
-              >
-                Continue
-              </button>
+            <p className="instructions">Please sign in or continue as guest to play</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main Menu - Authenticated User
+  if (appState === "menu") {
+    return (
+      <div className="app">
+        <div className="menu">
+          <div className="menu-content">
+            <div className="title-with-logo">
+              <img src="/icons/favicon.svg" alt="The Gaming Nook Logo" className="logo" />
+              <h1>The Gaming Nook</h1>
             </div>
-            <p className="instructions">Enter your name to access the game lobby</p>
+            <p>Your destination for strategic 2-player games</p>
+            
+            <div className="user-welcome">
+              <p>Welcome back, <strong>{user?.username}</strong>!</p>
+              {authService.isGuest() && (
+                <p className="guest-notice">
+                  Playing as guest - <button onClick={() => setShowAuthModal(true)}>Create account</button> to save progress
+                </p>
+              )}
+            </div>
+
+            <div className="connection-status">
+              <div className="status-content">
+                <span>Status: {connectionStatus === "connected" ? "🟢 Connected" : "🔴 Disconnected"}</span>
+                {connectionStatus !== "connected" && (
+                  <button className="refresh-button" onClick={() => window.location.reload()} title="Refresh page">
+                    <img src="/icons/refresh.svg" alt="Refresh" width="16" height="16" />
+                  </button>
+                )}
+              </div>
+              {!imagesPreloaded && <div>🖼️ Loading images...</div>}
+            </div>
+
+            <div className="menu-actions">
+              <button
+                onClick={() => setAppState("game-selection")}
+                disabled={connectionStatus !== "connected"}
+                className="play-button"
+                title={connectionStatus !== "connected" ? "Waiting for connection..." : "Browse and play games"}
+              >
+                Play Games
+              </button>
+              
+              <div className="menu-secondary-actions">
+                <button onClick={() => setShowProfile(true)} className="profile-button">
+                  View Profile
+                </button>
+                <button onClick={handleLogout} className="logout-button">
+                  {authService.isGuest() ? 'Switch User' : 'Logout'}
+                </button>
+              </div>
+            </div>
+
             <div className="version-footer">
               <small>
                 Copyright &copy; 2025 &mdash; The Gaming Nook <span className="connection-status">v2.0.0</span>
@@ -260,6 +384,22 @@ function App() {
             </div>
           </div>
         </div>
+
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onAuthSuccess={handleAuthSuccess}
+        />
+
+        {/* User Profile Modal */}
+        {showProfile && (
+          <UserProfile
+            user={user}
+            onClose={() => setShowProfile(false)}
+            onLogout={handleLogout}
+          />
+        )}
       </div>
     );
   }
@@ -271,7 +411,7 @@ function App() {
         <div className="game-selection-container">
           <GameSelection 
             onGameSelect={handleGameSelect} 
-            playerName={playerName}
+            user={user}
           />
           <button 
             className="back-button"
@@ -291,7 +431,35 @@ function App() {
           >
             ← Back to Menu
           </button>
+          
+          <button 
+            className="profile-button"
+            onClick={() => setShowProfile(true)}
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              background: "rgba(255, 255, 255, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              borderRadius: "8px",
+              padding: "10px 15px",
+              cursor: "pointer",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+            }}
+          >
+            {user?.username}
+          </button>
         </div>
+
+        {/* User Profile Modal */}
+        {showProfile && (
+          <UserProfile
+            user={user}
+            onClose={() => setShowProfile(false)}
+            onLogout={handleLogout}
+          />
+        )}
       </div>
     );
   }
@@ -350,7 +518,7 @@ function App() {
             {selectedGame?.displayName || "Game"}
           </h1>
           <p>
-            Player: {playerName} | Game: {gameInfo?.gameId}
+            Player: {user?.username} | Game: {gameInfo?.gameId}
           </p>
         </div>
         <div className="app-header-right">
@@ -369,7 +537,7 @@ function App() {
       </header>
 
       <GameBoard
-        playerName={playerName}
+        user={user}
         gameInfo={gameInfo}
         socketService={socketService}
         onGameStateChange={setCurrentGameState}
