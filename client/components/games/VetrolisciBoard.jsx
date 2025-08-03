@@ -6,13 +6,16 @@ import PlacementChoiceModal from "./PlacementChoiceModal";
 import RoundCompleteModal from "./RoundCompleteModal";
 import BackToMenuModal from "./BackToMenuModal";
 import ScoreBoard from "./ScoreBoard";
-import SkeletonLoader from "./SkeletonLoader";
 import {
   PlacementScenario,
   determinePlacementScenario,
   getPickableCards,
   getValidPlacementPositions,
 } from "../../games/vetrolisci/placement";
+import {
+  validateCards,
+  getValidationStatus,
+} from "../../games/vetrolisci/validation";
 import AudioService from "../../services/audio";
 import imagePreloader from "../../services/imagePreloader";
 import "./GameBoard.css";
@@ -62,6 +65,8 @@ const VetrolisciBoard = ({
   const [glowingCards, setGlowingCards] = useState(new Set());
   const [confettiCards, setConfettiCards] = useState(new Set());
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState(new Set());
+  const [timeoutRefs, setTimeoutRefs] = useState(new Set());
   const [soundEnabled, setSoundEnabled] = useState(() => {
     // Load saved sound preference from localStorage, default to true
     const saved = localStorage.getItem("vetrolisci-sound-enabled");
@@ -75,16 +80,39 @@ const VetrolisciBoard = ({
   const [imagesLoading, setImagesLoading] = useState(true);
   const playerIndex = gameInfo?.playerIndex || 0;
 
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      timeoutRefs.forEach(timeoutId => clearTimeout(timeoutId));
+    };
+  }, [timeoutRefs]);
+
+  // Clear pending requests when game changes or component unmounts
+  useEffect(() => {
+    return () => {
+      setPendingRequests(new Set());
+    };
+  }, [gameInfo?.gameId]);
+
   // Function to trigger shake animation for invalid actions
   const triggerInvalidAction = (cardId) => {
     setInvalidActionCards((prev) => new Set([...prev, cardId]));
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setInvalidActionCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(cardId);
         return newSet;
       });
+      // Remove timeout from tracking
+      setTimeoutRefs((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(timeoutId);
+        return newSet;
+      });
     }, 500); // Remove after animation completes
+    
+    // Track timeout for cleanup
+    setTimeoutRefs((prev) => new Set([...prev, timeoutId]));
   };
 
   // Effect to handle staggered card reveal animation
@@ -102,21 +130,39 @@ const VetrolisciBoard = ({
 
         // Stagger the reveal of each card with enhanced timing
         newCards.forEach((card, index) => {
-          setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             setRevealedCardIds((prev) => new Set([...prev, card.id]));
             // Play a subtle card reveal sound
             if (soundEnabled && index % 2 === 0) {
               // Only every other card to avoid noise
               AudioService.playSound("playCard");
             }
+            // Remove timeout from tracking
+            setTimeoutRefs((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(timeoutId);
+              return newSet;
+            });
           }, index * 300); // Increased to 300ms for better effect
+          
+          // Track timeout for cleanup
+          setTimeoutRefs((prev) => new Set([...prev, timeoutId]));
         });
 
         // End revealing state after all cards are shown
-        setTimeout(() => {
+        const finalTimeoutId = setTimeout(() => {
           setRevealingCards(false);
           setRevealedCardIds(currentCardIds);
+          // Remove timeout from tracking
+          setTimeoutRefs((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(finalTimeoutId);
+            return newSet;
+          });
         }, newCards.length * 300 + 800); // Longer delay for final state
+        
+        // Track timeout for cleanup
+        setTimeoutRefs((prev) => new Set([...prev, finalTimeoutId]));
       } else if (!revealingCards) {
         // If not revealing and no new cards, make sure all current cards are marked as revealed
         setRevealedCardIds(currentCardIds);
@@ -372,6 +418,13 @@ const VetrolisciBoard = ({
           newGrid: newGrid.map((card) => (card ? { id: card.id, value: card.value, validated: card.validated } : null)),
         });
 
+        // Clear pending request
+        setPendingRequests((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(cardId);
+          return newSet;
+        });
+
         // Play card sound effect
         if (soundEnabled) {
           AudioService.playSound("playCard");
@@ -414,48 +467,84 @@ const VetrolisciBoard = ({
                 console.log("🎉 Setting confetti cards:", Array.from(newSet));
                 return newSet;
               });
-              setTimeout(() => {
+              const confettiTimeoutId = setTimeout(() => {
                 setConfettiCards((prev) => {
                   const newSet = new Set(prev);
                   newSet.delete(validatedCardInGrid.id);
                   return newSet;
                 });
+                // Remove timeout from tracking
+                setTimeoutRefs((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(confettiTimeoutId);
+                  return newSet;
+                });
               }, 1500);
+              
+              // Track timeout for cleanup
+              setTimeoutRefs((prev) => new Set([...prev, confettiTimeoutId]));
             }
           }
 
           // Clear placement animation after duration
-          setTimeout(() => {
+          const placingTimeoutId = setTimeout(() => {
             setPlacingCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(placedCard.id);
               return newSet;
             });
+            // Remove timeout from tracking
+            setTimeoutRefs((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(placingTimeoutId);
+              return newSet;
+            });
           }, 600);
+          
+          // Track timeout for cleanup
+          setTimeoutRefs((prev) => new Set([...prev, placingTimeoutId]));
 
           // Clear fade-in animation after duration
-          setTimeout(() => {
+          const fadeTimeoutId = setTimeout(() => {
             setNewlyPlacedCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(placedCard.id);
               return newSet;
             });
+            // Remove timeout from tracking
+            setTimeoutRefs((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(fadeTimeoutId);
+              return newSet;
+            });
           }, 500);
+          
+          // Track timeout for cleanup
+          setTimeoutRefs((prev) => new Set([...prev, fadeTimeoutId]));
 
           // Clear glow effect after 5 seconds
-          setTimeout(() => {
+          const glowTimeoutId = setTimeout(() => {
             setGlowingCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(placedCard.id);
               return newSet;
             });
+            // Remove timeout from tracking
+            setTimeoutRefs((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(glowTimeoutId);
+              return newSet;
+            });
           }, 5000);
+          
+          // Track timeout for cleanup
+          setTimeoutRefs((prev) => new Set([...prev, glowTimeoutId]));
         }
 
         setDraftState(newDraftState);
         setGameState((prev) => {
           const newPlayers = [...prev.players];
-          // Ensure we're updating the correct player's grid with the server's authoritative state
+          // Trust server's authoritative grid state completely
           newPlayers[pickingPlayer] = {
             ...newPlayers[pickingPlayer],
             grid: [...newGrid], // Create a new array to ensure React detects the change
@@ -472,6 +561,13 @@ const VetrolisciBoard = ({
     socketService.onCardPickedAndDiscarded(
       ({ playerIndex: pickingPlayer, cardId, discardedCard, draftState: newDraftState, reason }) => {
         console.log(`Player ${pickingPlayer} picked card ${cardId} but it was discarded (${reason})`);
+
+        // Clear pending request
+        setPendingRequests((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(cardId);
+          return newSet;
+        });
 
         // Show notification to all players
         const playerName = `Player ${pickingPlayer + 1}`;
@@ -502,7 +598,7 @@ const VetrolisciBoard = ({
       setDraftState(finalDraftState);
 
       // Transition to placement phase with player's cards
-      setTimeout(() => {
+      const phaseTimeoutId = setTimeout(() => {
         const playerCards = playerHands[playerIndex];
         setGameState((prev) => ({
           ...prev,
@@ -510,7 +606,16 @@ const VetrolisciBoard = ({
           currentCards: playerCards,
           currentPlayer: currentPlayer,
         }));
+        // Remove timeout from tracking
+        setTimeoutRefs((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(phaseTimeoutId);
+          return newSet;
+        });
       }, 2000);
+      
+      // Track timeout for cleanup
+      setTimeoutRefs((prev) => new Set([...prev, phaseTimeoutId]));
     });
 
     // Handle card placement events
@@ -555,36 +660,63 @@ const VetrolisciBoard = ({
             console.log("🎉 Setting confetti cards (onCardPlaced):", Array.from(newSet));
             return newSet;
           });
-          setTimeout(() => {
+          const confettiTimeoutId2 = setTimeout(() => {
             setConfettiCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(cardId);
               return newSet;
             });
+            // Remove timeout from tracking
+            setTimeoutRefs((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(confettiTimeoutId2);
+              return newSet;
+            });
           }, 1500);
+          
+          // Track timeout for cleanup
+          setTimeoutRefs((prev) => new Set([...prev, confettiTimeoutId2]));
         }
 
         // Clear fade-in animation after duration
-        setTimeout(() => {
+        const fadeTimeoutId2 = setTimeout(() => {
           setNewlyPlacedCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardId);
             return newSet;
           });
+          // Remove timeout from tracking
+          setTimeoutRefs((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(fadeTimeoutId2);
+            return newSet;
+          });
         }, 500);
+        
+        // Track timeout for cleanup
+        setTimeoutRefs((prev) => new Set([...prev, fadeTimeoutId2]));
 
         // Clear glow effect after 5 seconds
-        setTimeout(() => {
+        const glowTimeoutId2 = setTimeout(() => {
           setGlowingCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardId);
             return newSet;
           });
+          // Remove timeout from tracking
+          setTimeoutRefs((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(glowTimeoutId2);
+            return newSet;
+          });
         }, 5000);
+        
+        // Track timeout for cleanup
+        setTimeoutRefs((prev) => new Set([...prev, glowTimeoutId2]));
 
         setGameState((prev) => {
           const newPlayers = [...prev.players];
-          // Ensure we're updating with the server's authoritative grid state
+          // Trust server's authoritative grid state completely
           newPlayers[placingPlayer] = {
             ...newPlayers[placingPlayer],
             grid: [...newGrid], // Create a new array to ensure React detects the change
@@ -683,10 +815,24 @@ const VetrolisciBoard = ({
     if (gameInfo.draftState) {
       setDraftState(gameInfo.draftState);
     }
-  }, [socketService, gameInfo, playerIndex]);
+  }, [socketService, gameInfo, playerIndex, soundEnabled]);
 
   const handleDraftCardPick = (cardId) => {
     if (!cardId || !draftState) return;
+
+    // Check if we have a pending request for this card
+    if (pendingRequests.has(cardId)) {
+      console.log("Request already pending for card:", cardId);
+      triggerInvalidAction(cardId);
+      return;
+    }
+
+    // Check socket connection
+    if (!socketService.isConnected()) {
+      console.log("Not connected to server");
+      triggerInvalidAction(cardId);
+      return;
+    }
 
     // Only allow current player to pick
     const currentPickingPlayer = draftState.pickOrder[draftState.currentPickIndex];
@@ -711,6 +857,9 @@ const VetrolisciBoard = ({
       return;
     }
 
+    // Mark request as pending
+    setPendingRequests((prev) => new Set([...prev, cardId]));
+
     // Start pick animation
     setAnimatingCards((prev) => new Set([...prev, cardId]));
 
@@ -727,7 +876,7 @@ const VetrolisciBoard = ({
     const scenario = determinePlacementScenario(pickedCard, currentPlayer.grid);
 
     // Delay the actual pick to allow animation to play
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (scenario === PlacementScenario.DUPLICATE_NUMBER) {
         // Show choice modal for duplicate number scenario
         const existingCard = currentPlayer.grid[pickedCard.value - 1];
@@ -749,7 +898,17 @@ const VetrolisciBoard = ({
         setShowPlacementChoice(true);
       } else {
         // Send pick-and-place to server immediately
-        socketService.pickCard(cardId);
+        try {
+          socketService.pickCard(cardId);
+        } catch (error) {
+          console.error("Failed to send pick card:", error);
+          // Clear pending request on error
+          setPendingRequests((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(cardId);
+            return newSet;
+          });
+        }
       }
 
       // Clear animation state
@@ -763,7 +922,17 @@ const VetrolisciBoard = ({
         newMap.delete(cardId);
         return newMap;
       });
-    }, 800); // Increased timeout to account for flying animation
+
+      // Remove timeout from tracking
+      setTimeoutRefs((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(timeoutId);
+        return newSet;
+      });
+    }, 800);
+
+    // Track timeout for cleanup
+    setTimeoutRefs((prev) => new Set([...prev, timeoutId]));
   };
 
   const handleCardSelect = (card) => {
@@ -801,8 +970,18 @@ const VetrolisciBoard = ({
     if (cardChoiceData) {
       const { cardId } = cardChoiceData;
 
-      // Send pick with choice to server (server will handle placement)
-      socketService.pickCard(cardId, choice);
+      try {
+        // Send pick with choice to server (server will handle placement)
+        socketService.pickCard(cardId, choice);
+      } catch (error) {
+        console.error("Failed to send card choice:", error);
+        // Clear pending request on error
+        setPendingRequests((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(cardId);
+          return newSet;
+        });
+      }
 
       setShowCardChoice(false);
       setCardChoiceData(null);
@@ -810,6 +989,15 @@ const VetrolisciBoard = ({
   };
 
   const handleCardChoiceCancel = () => {
+    if (cardChoiceData) {
+      const { cardId } = cardChoiceData;
+      // Clear pending request when canceling
+      setPendingRequests((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(cardId);
+        return newSet;
+      });
+    }
     setShowCardChoice(false);
     setCardChoiceData(null);
   };
@@ -818,8 +1006,18 @@ const VetrolisciBoard = ({
     if (placementChoiceData) {
       const { cardId } = placementChoiceData;
 
-      // Send pick with placement position to server
-      socketService.pickCard(cardId, null, position);
+      try {
+        // Send pick with placement position to server
+        socketService.pickCard(cardId, null, position);
+      } catch (error) {
+        console.error("Failed to send placement choice:", error);
+        // Clear pending request on error
+        setPendingRequests((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(cardId);
+          return newSet;
+        });
+      }
 
       setShowPlacementChoice(false);
       setPlacementChoiceData(null);
@@ -827,6 +1025,15 @@ const VetrolisciBoard = ({
   };
 
   const handlePlacementChoiceCancel = () => {
+    if (placementChoiceData) {
+      const { cardId } = placementChoiceData;
+      // Clear pending request when canceling
+      setPendingRequests((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(cardId);
+        return newSet;
+      });
+    }
     setShowPlacementChoice(false);
     setPlacementChoiceData(null);
   };
@@ -1200,6 +1407,7 @@ const VetrolisciBoard = ({
 
       {showBackToMenuModal && (
         <BackToMenuModal
+          isOpen={showBackToMenuModal}
           onConfirm={handleBackToMenuConfirm}
           onCancel={handleBackToMenuCancel}
         />

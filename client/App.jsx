@@ -41,7 +41,7 @@ function App() {
             setShowAuthModal(true);
           }
         } catch (error) {
-          console.error('Auth verification failed:', error);
+          console.error("Auth verification failed:", error);
           setAppState("auth");
           setShowAuthModal(true);
         }
@@ -60,8 +60,8 @@ function App() {
       setShowAuthModal(true);
     };
 
-    window.addEventListener('auth-expired', handleAuthExpired);
-    return () => window.removeEventListener('auth-expired', handleAuthExpired);
+    window.addEventListener("auth-expired", handleAuthExpired);
+    return () => window.removeEventListener("auth-expired", handleAuthExpired);
   }, []);
 
   // Update page title based on app state
@@ -73,7 +73,7 @@ function App() {
     } else if (appState === "game-selection") {
       document.title = "Game Selection - The Gaming Nook";
     } else if (appState === "waiting") {
-      document.title = `Waiting for Player - ${selectedGame?.displayName || 'Game'}`;
+      document.title = `Waiting for Player - ${selectedGame?.displayName || "Game"}`;
     } else if (appState === "playing" && currentGameState && selectedGame) {
       const isMyTurn = currentDraftState?.pickOrder[currentDraftState.currentPickIndex] === gameInfo?.playerIndex;
       if (isMyTurn) {
@@ -140,15 +140,15 @@ function App() {
 
     // Handle page unload/refresh
     const handleBeforeUnload = () => {
-      console.log('Page unloading, disconnecting socket');
+      console.log("Page unloading, disconnecting socket");
       socketService.disconnect();
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      console.log('App component unmounting, disconnecting socket');
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      console.log("App component unmounting, disconnecting socket");
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       socketService.disconnect();
     };
   }, []);
@@ -207,21 +207,17 @@ function App() {
 
   const handleGameSelect = async (game) => {
     setSelectedGame(game);
-    
+
     if (user) {
       if (!socketService.isConnected()) {
         alert("Connection lost. Please refresh the page and try again.");
         return;
       }
-      
+
       try {
         setAppState("waiting");
         // Pass the selected game type and auth token to the server
-        const { gameId, playerIndex } = await socketService.joinGame(
-          user.username, 
-          game.id, 
-          authService.getToken()
-        );
+        const { gameId, playerIndex } = await socketService.joinGame(user.username, game.id, authService.getToken());
         console.log("Joined game successfully:", { gameId, playerIndex, gameType: game.id });
         setGameInfo({ gameId, playerIndex, gameType: game.id });
       } catch (error) {
@@ -276,7 +272,7 @@ function App() {
               <h1>The Gaming Nook</h1>
             </div>
             <p>Your destination for strategic 2-player games</p>
-            
+
             <div className="connection-status">
               <div className="status-content">
                 <span>Status: {connectionStatus === "connected" ? "🟢 Connected" : "🔴 Disconnected"}</span>
@@ -318,12 +314,15 @@ function App() {
               <h1>The Gaming Nook</h1>
             </div>
             <p>Your destination for strategic 2-player games</p>
-            
+
             <div className="user-welcome">
-              <p>Welcome back, <strong>{user?.username}</strong>!</p>
+              <p>
+                Welcome back, <strong>{user?.username}</strong>!
+              </p>
               {authService.isGuest() && (
                 <p className="guest-notice">
-                  Playing as guest - <button onClick={() => setShowAuthModal(true)}>Create account</button> to save progress
+                  Playing as guest - <button onClick={() => setShowAuthModal(true)}>Create account</button> to save
+                  progress
                 </p>
               )}
             </div>
@@ -349,13 +348,13 @@ function App() {
               >
                 Play Games
               </button>
-              
+
               <div className="menu-secondary-actions">
                 <button onClick={() => setShowProfile(true)} className="profile-button">
                   View Profile
                 </button>
                 <button onClick={handleLogout} className="logout-button">
-                  {authService.isGuest() ? 'Switch User' : 'Logout'}
+                  {authService.isGuest() ? "Switch User" : "Logout"}
                 </button>
               </div>
             </div>
@@ -387,20 +386,10 @@ function App() {
         </div>
 
         {/* Auth Modal */}
-        <AuthModal
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          onAuthSuccess={handleAuthSuccess}
-        />
+        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} onAuthSuccess={handleAuthSuccess} />
 
         {/* User Profile Modal */}
-        {showProfile && (
-          <UserProfile
-            user={user}
-            onClose={() => setShowProfile(false)}
-            onLogout={handleLogout}
-          />
-        )}
+        {showProfile && <UserProfile user={user} onClose={() => setShowProfile(false)} onLogout={handleLogout} />}
       </div>
     );
   }
@@ -410,11 +399,8 @@ function App() {
     return (
       <div className="app">
         <div className="game-selection-container">
-          <GameSelection 
-            onGameSelect={handleGameSelect} 
-            user={user}
-          />
-          <button 
+          <GameSelection onGameSelect={handleGameSelect} user={user} />
+          <button
             className="back-button"
             onClick={handleReturnToMenu}
             style={{
@@ -432,8 +418,8 @@ function App() {
           >
             ← Back to Menu
           </button>
-          
-          <button 
+
+          <button
             className="profile-button"
             onClick={() => setShowProfile(true)}
             style={{
@@ -454,13 +440,7 @@ function App() {
         </div>
 
         {/* User Profile Modal */}
-        {showProfile && (
-          <UserProfile
-            user={user}
-            onClose={() => setShowProfile(false)}
-            onLogout={handleLogout}
-          />
-        )}
+        {showProfile && <UserProfile user={user} onClose={() => setShowProfile(false)} onLogout={handleLogout} />}
       </div>
     );
   }

@@ -691,7 +691,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.keyboard-shortcut kbd {
+kbd {
   background: linear-gradient(145deg, #4a5568, #2d3748);
   color: var(--color-text-white);
   padding: var(--space-1) var(--space-3);
@@ -703,10 +703,11 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.1);
   min-width: 28px;
   text-align: center;
+  margin-right: var(--space-1);
 }
 
 .keyboard-shortcut span {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: var(--font-size-base);
   flex: 1;
 }
@@ -721,6 +722,78 @@
 .keyboard-help-footer p {
   margin: 0;
   color: #666;
+}
+
+/* ===== KEYBOARD HELP MODAL ===== */
+.keyboard-help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.keyboard-help-modal {
+  background: var(--color-bg-overlay);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.keyboard-help-modal h3 {
+  margin: 0 0 var(--space-6) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.shortcut-group h4 {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: var(--space-2);
+}
+
+.shortcut {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+
+
+.shortcut span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  flex: 1;
+}
+
+.keyboard-help-modal .btn {
+  display: block;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-6);
 }
 
 /* ===== KEYBOARD NAVIGATION STYLES ===== */

@@ -259,21 +259,145 @@ async function startServer() {
 
       // Legacy Vetrolisci events for backward compatibility
       socket.on("pick-card", async (data) => {
-        // Convert to generic move format
+        // Convert to generic move format and process internally
         const moveData = {
           type: 'pick-card',
           ...data
         };
-        socket.emit("game-move", moveData);
+        
+        const player = players.get(socket.id);
+        if (!player || !player.currentGame) {
+          socket.emit("error", { message: "Not in a game" });
+          return;
+        }
+
+        const room = gameRooms.get(player.currentGame);
+        if (!room || room.status !== 'playing') {
+          socket.emit("error", { message: "Game not active" });
+          return;
+        }
+
+        try {
+          const result = GameServerRegistry.processMove(
+            room.gameType, 
+            room.id, 
+            socket.id, 
+            moveData
+          );
+
+          // Broadcast result to all players in the room
+          if (result.broadcast) {
+            io.to(room.id).emit(result.event, result.data);
+          } else {
+            socket.emit(result.event, result.data);
+          }
+
+          // Check for game end conditions
+          if (result.gameEnded) {
+            room.status = 'finished';
+            
+            // Update statistics for authenticated users
+            if (result.winner !== undefined && result.winner !== null) {
+              const roomPlayers = room.players;
+              const player1 = players.get(roomPlayers[0].id);
+              const player2 = players.get(roomPlayers[1].id);
+              
+              // Update game stats for both players
+              if (player1 && player1.isAuthenticated) {
+                const won = (result.winner === 0);
+                try {
+                  await authService.updateGameStats(player1.userId, room.gameType, won);
+                } catch (error) {
+                  console.error(`Failed to update stats for ${player1.name}:`, error);
+                }
+              }
+              
+              if (player2 && player2.isAuthenticated) {
+                const won = (result.winner === 1);
+                try {
+                  await authService.updateGameStats(player2.userId, room.gameType, won);
+                } catch (error) {
+                  console.error(`Failed to update stats for ${player2.name}:`, error);
+                }
+              }
+              
+              // Record game history
+              try {
+                const winnerId = result.winner === 0 
+                  ? (player1?.isAuthenticated ? player1.userId : null)
+                  : (player2?.isAuthenticated ? player2.userId : null);
+                  
+                await authService.recordGame(
+                  room.id, 
+                  room.gameType, 
+                  player1?.isAuthenticated ? player1.userId : null,
+                  player2?.isAuthenticated ? player2.userId : null,
+                  winnerId,
+                  result.gameData || null
+                );
+              } catch (error) {
+                console.error('Failed to record game history:', error);
+              }
+            }
+            
+            setTimeout(() => {
+              gameRooms.delete(room.id);
+            }, 30000); // Clean up finished games after 30 seconds
+          }
+
+        } catch (error) {
+          console.error("Move processing error:", error);
+          socket.emit("error", { message: error.message });
+        }
       });
 
       socket.on("place-card", async (data) => {
-        // Convert to generic move format
+        // Convert to generic move format and process internally
         const moveData = {
           type: 'place-card',
           ...data
         };
-        socket.emit("game-move", moveData);
+        
+        const player = players.get(socket.id);
+        if (!player || !player.currentGame) {
+          socket.emit("error", { message: "Not in a game" });
+          return;
+        }
+
+        const room = gameRooms.get(player.currentGame);
+        if (!room || room.status !== 'playing') {
+          socket.emit("error", { message: "Game not active" });
+          return;
+        }
+
+        try {
+          const result = GameServerRegistry.processMove(
+            room.gameType, 
+            room.id, 
+            socket.id, 
+            moveData
+          );
+
+          // Broadcast result to all players in the room
+          if (result.broadcast) {
+            io.to(room.id).emit(result.event, result.data);
+          } else {
+            socket.emit(result.event, result.data);
+          }
+
+          // Check for game end conditions
+          if (result.gameEnded) {
+            room.status = 'finished';
+            
+            setTimeout(() => {
+              gameRooms.delete(room.id);
+            }, 30000); // Clean up finished games after 30 seconds
+          }
+
+        } catch (error) {
+          console.error("Move processing error:", error);
+          socket.emit("error", { message: error.message });
+        }
       });
 
       socket.on("disconnect", () => {
