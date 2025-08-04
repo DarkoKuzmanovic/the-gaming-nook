@@ -215,16 +215,37 @@
 
 .card-restriction-overlay {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 15;
+  border-radius: 8px;
+}
+
+.card-restriction-overlay::before {
+  content: '';
   background: url("/icons/restricted.png") no-repeat center center;
   background-size: contain;
-  width: 40px;
-  height: 40px;
-  pointer-events: none;
-  z-index: 10;
-  opacity: 0.9;
+  width: 50px;
+  height: 50px;
+  display: block;
+}
+
+.restricted-card {
+  filter: grayscale(0.8) brightness(0.6);
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.restricted-card:hover {
+  filter: grayscale(0.8) brightness(0.6);
+  transform: none !important;
 }
 
 /* ===== CARD DISPLAY ELEMENTS ===== */

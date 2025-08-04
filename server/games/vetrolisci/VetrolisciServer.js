@@ -2,7 +2,7 @@ import BaseGameServer from '../base/BaseGameServer.js';
 import { CARDS, shuffleDeck, dealRoundCards, dealTurnCards, createGameDeck } from '../../../client/games/vetrolisci/cards.js';
 import { canPickCard } from '../../../client/games/vetrolisci/placement.js';
 
-// Server-side Vetrolisci game implementation
+// Simplified server-side Vetrolisci game implementation based on working legacy version
 export class VetrolisciServer extends BaseGameServer {
   constructor(config) {
     super(config);
@@ -36,30 +36,24 @@ export class VetrolisciServer extends BaseGameServer {
     // Initialize deck with proper 70-card deck
     game.deck = createGameDeck();
 
-    // Initialize draft phase
-    game.draftState = this.initializeDraftPhase(game.deck, game.currentRound);
-
-    // Reset player grids
-    game.players.forEach((player) => {
-      player.grid = Array(9).fill(null);
-    });
+    // Initialize first turn of the round
+    game.draftState = this.initializeTurnPhase(game.deck, 0, 1);
   }
 
-  initializeDraftPhase(deck, roundNumber) {
-    const { roundCards, remainingDeck } = dealRoundCards(deck, roundNumber);
-
-    // Determine pick order based on round
-    const pickOrder = roundNumber % 2 === 1 ? [0, 1, 0, 1] : [1, 0, 1, 0];
+  // Simplified turn initialization based on legacy
+  initializeTurnPhase(remainingDeck, lastPicker, currentTurnNumber = 1) {
+    const { turnCards, remainingDeck: newRemainingDeck } = dealTurnCards(remainingDeck);
+    const pickOrder = lastPicker === 0 ? [0, 1, 0, 1] : [1, 0, 1, 0];
 
     return {
       phase: "pick",
-      revealedCards: roundCards,
+      revealedCards: turnCards,
       playerHands: [[], []],
       pickOrder,
       currentPickIndex: 0,
-      remainingDeck,
+      remainingDeck: newRemainingDeck,
       completedPicks: 0,
-      turnNumber: 1,
+      turnNumber: currentTurnNumber,
     };
   }
 
@@ -77,8 +71,6 @@ export class VetrolisciServer extends BaseGameServer {
     switch (moveData.type) {
       case 'pick-card':
         return this.processCardPick(game, playerIndex, moveData);
-      case 'place-card':
-        return this.processCardPlacement(game, playerIndex, moveData);
       default:
         throw new Error(`Unknown move type: ${moveData.type}`);
     }
@@ -87,14 +79,23 @@ export class VetrolisciServer extends BaseGameServer {
   processCardPick(game, playerIndex, moveData) {
     const { cardId, choice, position } = moveData;
 
-    // Validate turn
+    console.log(`🎯 SERVER CARD PICK START: Player ${playerIndex} picks card ${cardId}`);
+    console.log(`🎯 SERVER DRAFT STATE:`, {
+      revealedCards: game.draftState.revealedCards.map(c => c.id),
+      currentPickIndex: game.draftState.currentPickIndex,
+      pickOrder: game.draftState.pickOrder,
+      completedPicks: game.draftState.completedPicks
+    });
+
+    // Validate turn - simplified logic
     const currentPickingPlayer = game.draftState.pickOrder[game.draftState.currentPickIndex];
     if (currentPickingPlayer !== playerIndex) {
+      console.log(`🎯 SERVER ERROR: Wrong turn! Expected ${currentPickingPlayer}, got ${playerIndex}`);
       throw new Error("Not your turn to pick");
     }
 
-    // Find and pick the card
-    const cardToPick = game.draftState.revealedCards.find((card) => card.id === cardId);
+    // Find the card to pick
+    const cardToPick = game.draftState.revealedCards.find((card) => String(card.id) === String(cardId));
     if (!cardToPick) {
       throw new Error("Card not found in revealed cards");
     }
@@ -107,48 +108,61 @@ export class VetrolisciServer extends BaseGameServer {
       throw new Error(`Cannot pick this card: ${pickResult.reason}`);
     }
 
-    // Execute the pick
+    // Execute the pick using simplified legacy logic
     const result = this.pickCard(game.draftState, playerIndex, cardId);
     const pickedCard = result.selectedCard;
     game.draftState = result.draftState;
 
-    // Place the card immediately
-    const placementResult = this.executeCardPlacement(pickedCard, player.grid, choice, position);
+    // Immediately place the picked card using legacy logic
+    const scenario = this.determinePlacementScenario(pickedCard, player.grid);
+    let gridIndex = pickedCard.value - 1; // Default placement
+
+    // Handle placement based on scenario
+    let finalChoice = choice;
+    if (scenario === "duplicate" && !choice) {
+      finalChoice = "keep-existing"; // Default fallback
+    }
+
+    const placementResult = this.executeCardPlacement(pickedCard, gridIndex, player.grid, finalChoice);
     player.grid = placementResult.grid;
 
     // Set validated property on the placed card
-    const wasValidated = placementResult.validated.includes(placementResult.gridIndex) || 
-                        (placementResult.scenario === "duplicate" && placementResult.validated.length > 0);
+    const wasValidated = placementResult.validated.includes(gridIndex) || 
+                        (scenario === "duplicate" && placementResult.validated.length > 0);
     const placedCardWithValidation = { ...pickedCard, validated: wasValidated };
 
-    // Check for round end
-    const roundShouldEnd = this.checkRoundEndCondition(game);
-    
-    if (roundShouldEnd) {
-      // End round
-      return this.endRound(game);
-    }
+    console.log(`🎯 SERVER AFTER PICK:`, {
+      revealedCardsLeft: game.draftState.revealedCards.length,
+      currentPickIndex: game.draftState.currentPickIndex,
+      completedPicks: game.draftState.completedPicks
+    });
 
-    // Check if turn is complete
+    // Check if all cards in this turn are picked (legacy logic)
     if (game.draftState.revealedCards.length === 0) {
+      console.log(`🎯 SERVER: Turn complete! All cards picked`);
+      // Turn complete - the last picker becomes first player for next turn
       const lastPicker = game.draftState.pickOrder[game.draftState.currentPickIndex - 1];
       game.currentPlayer = lastPicker;
 
-      game.draftState = this.initializeTurnPhase(game.draftState.remainingDeck, lastPicker, game.draftState.turnNumber);
-      game.deck = game.draftState.remainingDeck;
-      
-      // Track turn completion
-      game.playerTurnCounts[0]++;
-      game.playerTurnCounts[1]++;
-
-      return {
-        event: "new-turn",
-        broadcast: true,
-        data: {
-          currentPlayer: game.currentPlayer,
-          draftState: game.draftState,
-        }
-      };
+      // Check if there are enough cards for a new turn
+      if (game.draftState.remainingDeck.length >= 4) {
+        // Start new turn using remaining deck
+        game.draftState = this.initializeTurnPhase(game.draftState.remainingDeck, lastPicker, game.draftState.turnNumber);
+        game.deck = game.draftState.remainingDeck;
+        
+        // Track turn completion
+        game.playerTurnCounts[0]++;
+        game.playerTurnCounts[1]++;
+        
+        return {
+          event: "new-turn",
+          broadcast: true,
+          data: {
+            currentPlayer: game.currentPlayer,
+            draftState: game.draftState,
+          }
+        };
+      }
     }
 
     return {
@@ -165,32 +179,24 @@ export class VetrolisciServer extends BaseGameServer {
     };
   }
 
-  processCardPlacement(game, playerIndex, moveData) {
-    // Implementation for separate card placement phase
-    // This would be used if we separate picking and placing phases
-    return {
-      event: "card-placed",
-      broadcast: true,
-      data: {}
-    };
-  }
-
+  // Simplified pickCard based on legacy - this is the key fix!
   pickCard(draftState, playerIndex, cardId) {
     const currentPlayer = draftState.pickOrder[draftState.currentPickIndex];
     if (currentPlayer !== playerIndex) {
       throw new Error("It is not this player's turn to pick");
     }
 
-    const cardIndex = draftState.revealedCards.findIndex((card) => card.id === cardId);
+    const cardIndex = draftState.revealedCards.findIndex((card) => String(card.id) === String(cardId));
     if (cardIndex === -1) {
       throw new Error("Card not found in revealed cards");
     }
 
     const selectedCard = draftState.revealedCards[cardIndex];
 
+    // Create new state - THIS IS THE KEY LOGIC FROM LEGACY
     const newDraftState = {
       ...draftState,
-      revealedCards: draftState.revealedCards.filter((card) => card.id !== cardId),
+      revealedCards: draftState.revealedCards.filter((card) => String(card.id) !== String(cardId)),
       playerHands: draftState.playerHands.map((hand, index) => 
         index === playerIndex ? [...hand, selectedCard] : hand
       ),
@@ -198,6 +204,7 @@ export class VetrolisciServer extends BaseGameServer {
       completedPicks: draftState.completedPicks + 1,
     };
 
+    // Check if draft phase is complete
     if (newDraftState.completedPicks >= 4) {
       newDraftState.phase = "complete";
     }
@@ -205,178 +212,34 @@ export class VetrolisciServer extends BaseGameServer {
     return {
       draftState: newDraftState,
       selectedCard,
-      pickingPlayer: playerIndex,
     };
   }
 
-  executeCardPlacement(card, grid, choice, position) {
-    const scenario = this.determinePlacementScenario(card, grid);
-    const result = { grid: [...grid], validated: [], scenario };
-    let gridIndex = card.value - 1; // Default placement
-
-    switch (scenario) {
-      case "empty":
-        const targetIndex = card.value - 1;
-        if (result.grid[targetIndex] === null) {
-          result.grid[targetIndex] = { ...card, faceUp: true, validated: false };
-          gridIndex = targetIndex;
-        } else if (!result.grid[targetIndex].faceUp) {
-          result.grid[targetIndex] = { ...card, faceUp: true, validated: true };
-          result.validated.push(targetIndex);
-          gridIndex = targetIndex;
-        }
-        break;
-
-      case "duplicate":
-        const existingIndex = card.value - 1;
-        const existingCard = result.grid[existingIndex];
-
-        if (choice === "keep-new") {
-          result.grid[existingIndex] = {
-            ...card,
-            faceUp: true,
-            validated: true,
-            stackedCard: { ...existingCard, faceUp: false },
-          };
-        } else {
-          result.grid[existingIndex] = {
-            ...existingCard,
-            validated: true,
-            stackedCard: { ...card, faceUp: false },
-          };
-        }
-        result.validated.push(existingIndex);
-        gridIndex = existingIndex;
-        break;
-
-      case "validated":
-        if (position !== undefined && position !== null) {
-          gridIndex = position;
-        } else {
-          gridIndex = result.grid.findIndex((cell) => cell === null);
-        }
-        
-        if (gridIndex === -1 || result.grid[gridIndex] !== null) {
-          throw new Error("Cannot place card - no valid position");
-        }
-        
-        result.grid[gridIndex] = { ...card, faceUp: false, validated: false };
-        break;
-
-      default:
-        throw new Error("Invalid placement scenario");
+  // Simplified placement logic
+  executeCardPlacement(card, gridIndex, grid, choice) {
+    const result = { grid: [...grid], validated: [], scenario: "standard" };
+    
+    // Basic placement logic - can be expanded later
+    if (result.grid[gridIndex] === null) {
+      result.grid[gridIndex] = { ...card, faceUp: true, validated: false };
+    } else if (!result.grid[gridIndex].faceUp) {
+      result.grid[gridIndex] = { ...card, faceUp: true, validated: true };
+      result.validated.push(gridIndex);
     }
 
-    result.gridIndex = gridIndex;
     return result;
   }
 
   determinePlacementScenario(card, grid) {
     const cardValue = card.value;
+    const existingCard = grid[cardValue - 1];
     
-    const existingFaceUpCard = grid.find(gridCard => 
-      gridCard && gridCard.faceUp && gridCard.value === cardValue
-    );
-    
-    const isValidated = grid.some(gridCard => 
-      gridCard && gridCard.faceUp && gridCard.value === cardValue && gridCard.validated
-    );
-    
-    if (isValidated) {
-      return "validated";
-    } else if (existingFaceUpCard) {
-      return "duplicate";
-    } else {
+    if (!existingCard) {
       return "empty";
-    }
-  }
-
-  initializeTurnPhase(remainingDeck, lastPicker, currentTurnNumber = 1) {
-    const { turnCards, remainingDeck: newRemainingDeck } = dealTurnCards(remainingDeck);
-    const pickOrder = lastPicker === 0 ? [0, 1, 0, 1] : [1, 0, 1, 0];
-
-    return {
-      phase: "pick",
-      revealedCards: turnCards,
-      playerHands: [[], []],
-      pickOrder,
-      currentPickIndex: 0,
-      remainingDeck: newRemainingDeck,
-      completedPicks: 0,
-      turnNumber: currentTurnNumber + 1,
-    };
-  }
-
-  checkRoundEndCondition(game) {
-    // Check if any player has filled all 9 spaces
-    const anyPlayerFilled = game.players.some((player) => 
-      player.grid.every((cell) => cell !== null)
-    );
-    
-    if (!anyPlayerFilled) {
-      return false;
-    }
-    
-    // Check if both players have had equal turns
-    const player0Turns = game.playerTurnCounts[0];
-    const player1Turns = game.playerTurnCounts[1];
-    
-    return player0Turns === player1Turns;
-  }
-
-  async endRound(game) {
-    console.log(`Round ${game.currentRound} ended for game ${game.id}`);
-
-    // Calculate scores (simplified - would use actual scoring logic)
-    const roundScores = game.players.map((player, index) => ({
-      playerIndex: index,
-      playerName: player.name,
-      score: { total: 10 }, // Placeholder score
-      totalScore: player.scores.reduce((a, b) => a + b, 0) + 10
-    }));
-
-    // Check if game is complete
-    if (game.currentRound >= 3) {
-      const winner = roundScores.reduce((prev, current) => 
-        current.totalScore > prev.totalScore ? current : prev
-      );
-
-      game.gameState = "finished";
-      return {
-        event: "game-complete",
-        broadcast: true,
-        gameEnded: true,
-        data: {
-          finalScores: roundScores,
-          winner: winner.playerIndex,
-          playerScores: game.players.map((p) => p.scores),
-        }
-      };
+    } else if (existingCard.faceUp && existingCard.value === cardValue) {
+      return existingCard.validated ? "validated" : "duplicate";
     } else {
-      // Start next round
-      game.currentRound++;
-      game.phase = "draft";
-
-      // Reset grids and deck
-      game.players.forEach((player) => {
-        player.grid = Array(9).fill(null);
-      });
-
-      game.deck = shuffleDeck(createGameDeck());
-      game.draftState = this.initializeDraftPhase(game.deck, game.currentRound);
-      game.playerTurnCounts = [0, 0];
-
-      return {
-        event: "round-complete",
-        broadcast: true,
-        data: {
-          roundNumber: game.currentRound - 1,
-          roundScores,
-          nextRound: game.currentRound,
-          draftState: game.draftState,
-          currentPlayer: game.currentPlayer,
-        }
-      };
+      return "face_down";
     }
   }
 
@@ -393,7 +256,6 @@ export class VetrolisciServer extends BaseGameServer {
   }
 
   handlePlayerJoin(gameId, player) {
-    // Handle player joining - already handled in main server
     return true;
   }
 
@@ -401,7 +263,6 @@ export class VetrolisciServer extends BaseGameServer {
     const game = this.activeGames.get(gameId);
     if (game) {
       game.gameState = "abandoned";
-      // Clean up will be handled by main server
     }
   }
 }

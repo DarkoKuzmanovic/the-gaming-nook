@@ -5,7 +5,6 @@ const Confetti = ({ cardId, onComplete }) => {
   const [pieces, setPieces] = useState([]);
 
   useEffect(() => {
-    console.log("🎉 Confetti component mounted for cardId:", cardId);
     // Generate confetti pieces
     const newPieces = Array.from({ length: 8 }, (_, i) => ({
       id: i,
@@ -15,16 +14,13 @@ const Confetti = ({ cardId, onComplete }) => {
     }));
 
     setPieces(newPieces);
-    console.log("🎉 Generated confetti pieces:", newPieces.length);
 
     // Clean up after animation
     const timer = setTimeout(() => {
-      console.log("🎉 Confetti animation complete for cardId:", cardId);
       if (onComplete) onComplete(cardId);
     }, 1500);
 
     return () => {
-      console.log("🎉 Confetti component unmounting for cardId:", cardId);
       clearTimeout(timer);
     };
   }, [cardId, onComplete]);

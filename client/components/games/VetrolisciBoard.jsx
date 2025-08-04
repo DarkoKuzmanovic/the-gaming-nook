@@ -39,7 +39,7 @@ const VetrolisciBoard = ({
       { name: "Opponent", grid: Array(9).fill(null), scores: [0, 0, 0] },
     ],
     currentCards: [],
-    selectedCard: null,
+    // Note: selectedCard removed - cards placed automatically during draft
     deck: [],
   });
 
@@ -338,9 +338,8 @@ const VetrolisciBoard = ({
         case "9":
           // Quick grid placement using number keys
           const gridIndex = parseInt(event.key) - 1;
-          if (gameState.selectedCard && gameState.phase === "place" && gameState.currentPlayer === playerIndex) {
-            handleCardPlace(gridIndex);
-          } else if (showPlacementChoice && placementChoiceData) {
+          // Note: Manual grid placement removed - cards placed automatically during draft
+          if (showPlacementChoice && placementChoiceData) {
             // Use number keys for placement choice modal
             const availablePositions = placementChoiceData.availablePositions;
             if (availablePositions.includes(gridIndex)) {
@@ -397,6 +396,8 @@ const VetrolisciBoard = ({
   useEffect(() => {
     if (!socketService || !gameInfo) return;
 
+    console.log("🔌 SETUP: Registering socket event listeners for game", gameInfo?.gameId);
+
     // Handle server draft events
     socketService.onDraftStarted((serverDraftState) => {
       console.log("Draft started:", serverDraftState);
@@ -410,12 +411,28 @@ const VetrolisciBoard = ({
 
     socketService.onCardPickedAndPlaced(
       ({ playerIndex: pickingPlayer, cardId, placedCard, newGrid, draftState: newDraftState, placementResult }) => {
-        console.log(`Player ${pickingPlayer} picked and placed card ${cardId}`);
-        console.log("🔍 GRID UPDATE DEBUG:", {
+        const timestamp = Date.now();
+        console.log(`🎯 SYNC DEBUG [${timestamp}] Player ${pickingPlayer} picked and placed card ${cardId}`);
+        console.log("🎯 SYNC GRID UPDATE:", {
+          timestamp,
           cardId,
-          placedCard,
-          placedCardId: placedCard?.id,
-          newGrid: newGrid.map((card) => (card ? { id: card.id, value: card.value, validated: card.validated } : null)),
+          pickingPlayer,
+          isMyCard: pickingPlayer === playerIndex,
+          placedCard: placedCard ? {
+            id: placedCard.id,
+            value: placedCard.value,
+            validated: placedCard.validated,
+            faceUp: placedCard.faceUp
+          } : null,
+          gridBefore: gameState.players[pickingPlayer]?.grid?.map((card, idx) => ({
+            pos: idx,
+            card: card ? { id: card.id, value: card.value, validated: card.validated } : null
+          })),
+          gridAfter: newGrid.map((card, idx) => ({
+            pos: idx,
+            card: card ? { id: card.id, value: card.value, validated: card.validated } : null
+          })),
+          draftCardsRemaining: newDraftState.revealedCards.length
         });
 
         // Clear pending request
@@ -448,115 +465,116 @@ const VetrolisciBoard = ({
               (gridCard) => gridCard && gridCard.validated && gridCard.value === placedCard.value
             );
 
-            console.log("🎉 CONFETTI DEBUG - onCardPickedAndPlaced:", {
-              cardId,
-              placedCardId: placedCard.id,
-              validatedCardInGrid: validatedCardInGrid?.id,
-              validated: placedCard.validated,
-              eventType: "onCardPickedAndPlaced",
-            });
 
             if (validatedCardInGrid) {
               setConfettiCards((prev) => {
                 // Prevent duplicate additions - use the grid card ID
                 if (prev.has(validatedCardInGrid.id)) {
-                  console.log("🎉 Confetti already exists for card:", validatedCardInGrid.id);
                   return prev;
                 }
-                const newSet = new Set([...prev, validatedCardInGrid.id]);
-                console.log("🎉 Setting confetti cards:", Array.from(newSet));
-                return newSet;
+                return new Set([...prev, validatedCardInGrid.id]);
               });
-              const confettiTimeoutId = setTimeout(() => {
+              setTimeout(() => {
                 setConfettiCards((prev) => {
                   const newSet = new Set(prev);
                   newSet.delete(validatedCardInGrid.id);
                   return newSet;
                 });
-                // Remove timeout from tracking
-                setTimeoutRefs((prev) => {
-                  const newSet = new Set(prev);
-                  newSet.delete(confettiTimeoutId);
-                  return newSet;
-                });
               }, 1500);
-              
-              // Track timeout for cleanup
-              setTimeoutRefs((prev) => new Set([...prev, confettiTimeoutId]));
             }
           }
 
           // Clear placement animation after duration
-          const placingTimeoutId = setTimeout(() => {
+          setTimeout(() => {
             setPlacingCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(placedCard.id);
               return newSet;
             });
-            // Remove timeout from tracking
-            setTimeoutRefs((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(placingTimeoutId);
-              return newSet;
-            });
           }, 600);
-          
-          // Track timeout for cleanup
-          setTimeoutRefs((prev) => new Set([...prev, placingTimeoutId]));
 
           // Clear fade-in animation after duration
-          const fadeTimeoutId = setTimeout(() => {
+          setTimeout(() => {
             setNewlyPlacedCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(placedCard.id);
               return newSet;
             });
-            // Remove timeout from tracking
-            setTimeoutRefs((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(fadeTimeoutId);
-              return newSet;
-            });
           }, 500);
-          
-          // Track timeout for cleanup
-          setTimeoutRefs((prev) => new Set([...prev, fadeTimeoutId]));
 
           // Clear glow effect after 5 seconds
-          const glowTimeoutId = setTimeout(() => {
+          setTimeout(() => {
             setGlowingCards((prev) => {
               const newSet = new Set(prev);
               newSet.delete(placedCard.id);
               return newSet;
             });
-            // Remove timeout from tracking
-            setTimeoutRefs((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(glowTimeoutId);
-              return newSet;
-            });
           }, 5000);
-          
-          // Track timeout for cleanup
-          setTimeoutRefs((prev) => new Set([...prev, glowTimeoutId]));
         }
 
         setDraftState(newDraftState);
         setGameState((prev) => {
           const newPlayers = [...prev.players];
-          // Trust server's authoritative grid state completely
+          // Ensure deep copy of grid to force React re-render
           newPlayers[pickingPlayer] = {
             ...newPlayers[pickingPlayer],
-            grid: [...newGrid], // Create a new array to ensure React detects the change
+            grid: newGrid.map(card => card ? { ...card } : null), // Deep copy each card object
           };
 
-          return {
+          const newState = {
             ...prev,
             players: newPlayers,
           };
+
+          console.log(`🎯 SYNC STATE UPDATE [${timestamp}]:`, {
+            timestamp,
+            cardId,
+            pickingPlayer,
+            isMyCard: pickingPlayer === playerIndex,
+            stateChangeDetected: JSON.stringify(prev.players[pickingPlayer]?.grid) !== JSON.stringify(newGrid),
+            gridUpdatedSuccessfully: newState.players[pickingPlayer].grid.length === newGrid.length,
+            newGridCards: newState.players[pickingPlayer].grid.map((card, idx) => ({
+              pos: idx,
+              cardId: card?.id,
+              value: card?.value,
+              faceUp: card?.faceUp
+            }))
+          });
+
+          return newState;
         });
       }
     );
+
+    // Handle card picked pending choice events
+    socketService.onCardPickedPendingChoice(({ playerIndex: pickingPlayer, cardId, pickedCard, draftState: newDraftState }) => {
+      console.log(`🎯 PENDING CHOICE: Player ${pickingPlayer} picked card ${cardId}, waiting for choice`);
+      
+      // If it's the current player, show the choice modal
+      if (pickingPlayer === gameInfo.playerIndex) {
+        setCardChoiceData({
+          cardId,
+          newCard: pickedCard
+        });
+        setShowCardChoice(true);
+      }
+      
+      setDraftState(newDraftState);
+    });
+
+    // Handle card choice processed events
+    socketService.onCardChoiceProcessed(({ playerIndex: choosingPlayer, cardId, choice, draftState: newDraftState }) => {
+      console.log(`🎯 CHOICE PROCESSED: Player ${choosingPlayer} made choice ${choice} for card ${cardId}`);
+      
+      // Clear pending request
+      setPendingRequests((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(cardId);
+        return newSet;
+      });
+      
+      setDraftState(newDraftState);
+    });
 
     socketService.onCardPickedAndDiscarded(
       ({ playerIndex: pickingPlayer, cardId, discardedCard, draftState: newDraftState, reason }) => {
@@ -593,151 +611,14 @@ const VetrolisciBoard = ({
       }));
     });
 
-    socketService.onDraftComplete(({ draftState: finalDraftState, playerHands, currentPlayer }) => {
-      console.log("Draft complete:", finalDraftState);
+    socketService.onDraftComplete(({ draftState: finalDraftState, currentPlayer }) => {
+      console.log("🎯 DRAFT COMPLETE - All cards have been picked and placed:", finalDraftState);
       setDraftState(finalDraftState);
-
-      // Transition to placement phase with player's cards
-      const phaseTimeoutId = setTimeout(() => {
-        const playerCards = playerHands[playerIndex];
-        setGameState((prev) => ({
-          ...prev,
-          phase: "place",
-          currentCards: playerCards,
-          currentPlayer: currentPlayer,
-        }));
-        // Remove timeout from tracking
-        setTimeoutRefs((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(phaseTimeoutId);
-          return newSet;
-        });
-      }, 2000);
-      
-      // Track timeout for cleanup
-      setTimeoutRefs((prev) => new Set([...prev, phaseTimeoutId]));
+      // Note: No placement phase needed - all cards already placed during draft
     });
 
-    // Handle card placement events
-    socketService.onCardPlaced(
-      ({
-        playerIndex: placingPlayer,
-        cardId,
-        gridIndex,
-        choice,
-        placedCard,
-        newGrid,
-        currentPlayer,
-        placementResult,
-      }) => {
-        console.log(`Player ${placingPlayer} placed card ${cardId}`);
-
-        // Add fade-in animation for the placed card
-        setNewlyPlacedCards((prev) => new Set([...prev, cardId]));
-        setGlowingCards((prev) => new Set([...prev, cardId]));
-
-        // Check if card was validated for confetti
-        if (placedCard && placedCard.validated) {
-          // Play validation sound effect
-          if (soundEnabled) {
-            AudioService.playSound("validate");
-          }
-
-          console.log("🎉 CONFETTI DEBUG - onCardPlaced:", {
-            cardId,
-            placedCardId: placedCard.id,
-            validated: placedCard.validated,
-            eventType: "onCardPlaced",
-            idsMatch: cardId === placedCard.id,
-          });
-          setConfettiCards((prev) => {
-            // Prevent duplicate additions
-            if (prev.has(cardId)) {
-              console.log("🎉 Confetti already exists for card:", cardId);
-              return prev;
-            }
-            const newSet = new Set([...prev, cardId]);
-            console.log("🎉 Setting confetti cards (onCardPlaced):", Array.from(newSet));
-            return newSet;
-          });
-          const confettiTimeoutId2 = setTimeout(() => {
-            setConfettiCards((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(cardId);
-              return newSet;
-            });
-            // Remove timeout from tracking
-            setTimeoutRefs((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(confettiTimeoutId2);
-              return newSet;
-            });
-          }, 1500);
-          
-          // Track timeout for cleanup
-          setTimeoutRefs((prev) => new Set([...prev, confettiTimeoutId2]));
-        }
-
-        // Clear fade-in animation after duration
-        const fadeTimeoutId2 = setTimeout(() => {
-          setNewlyPlacedCards((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(cardId);
-            return newSet;
-          });
-          // Remove timeout from tracking
-          setTimeoutRefs((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(fadeTimeoutId2);
-            return newSet;
-          });
-        }, 500);
-        
-        // Track timeout for cleanup
-        setTimeoutRefs((prev) => new Set([...prev, fadeTimeoutId2]));
-
-        // Clear glow effect after 5 seconds
-        const glowTimeoutId2 = setTimeout(() => {
-          setGlowingCards((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(cardId);
-            return newSet;
-          });
-          // Remove timeout from tracking
-          setTimeoutRefs((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(glowTimeoutId2);
-            return newSet;
-          });
-        }, 5000);
-        
-        // Track timeout for cleanup
-        setTimeoutRefs((prev) => new Set([...prev, glowTimeoutId2]));
-
-        setGameState((prev) => {
-          const newPlayers = [...prev.players];
-          // Trust server's authoritative grid state completely
-          newPlayers[placingPlayer] = {
-            ...newPlayers[placingPlayer],
-            grid: [...newGrid], // Create a new array to ensure React detects the change
-          };
-
-          // Remove card from current player's hand if it's our turn
-          let newCurrentCards = prev.currentCards;
-          if (placingPlayer === playerIndex) {
-            newCurrentCards = prev.currentCards.filter((c) => c.id !== cardId);
-          }
-
-          return {
-            ...prev,
-            players: newPlayers,
-            currentCards: newCurrentCards,
-            currentPlayer,
-            selectedCard: placingPlayer === playerIndex ? null : prev.selectedCard,
-          };
-        });
-      }
-    );
+    // Note: onCardPlaced removed - card placement handled by card-picked-and-placed events
+    // No separate placement phase exists in real Vetrolisci game
 
     // Handle round completion
     socketService.onRoundComplete(
@@ -771,7 +652,7 @@ const VetrolisciBoard = ({
             phase: "draft",
             currentPlayer: newCurrentPlayer,
             currentCards: [],
-            selectedCard: null,
+            // Note: selectedCard removed - no manual selection needed
           };
         });
 
@@ -815,7 +696,15 @@ const VetrolisciBoard = ({
     if (gameInfo.draftState) {
       setDraftState(gameInfo.draftState);
     }
-  }, [socketService, gameInfo, playerIndex, soundEnabled]);
+
+    // Cleanup function to prevent duplicate event listeners
+    return () => {
+      console.log("🧹 CLEANUP: Removing socket event listeners");
+      if (socketService) {
+        socketService.removeAllListeners();
+      }
+    };
+  }, [socketService, gameInfo?.gameId]); // Only re-run when game changes, not playerIndex
 
   const handleDraftCardPick = (cardId) => {
     if (!cardId || !draftState) return;
@@ -897,9 +786,15 @@ const VetrolisciBoard = ({
         });
         setShowPlacementChoice(true);
       } else {
-        // Send pick-and-place to server immediately
+        // Send pick-and-place to server immediately with target position
+        const targetIndex = pickedCard.value - 1; // Cards 1-9 map to indices 0-8
+        const position = {
+          row: Math.floor(targetIndex / 3),
+          col: targetIndex % 3
+        };
+        
         try {
-          socketService.pickCard(cardId);
+          socketService.pickCard(cardId, 'place', position);
         } catch (error) {
           console.error("Failed to send pick card:", error);
           // Clear pending request on error
@@ -935,44 +830,37 @@ const VetrolisciBoard = ({
     setTimeoutRefs((prev) => new Set([...prev, timeoutId]));
   };
 
-  const handleCardSelect = (card) => {
-    if (gameState.phase === "place" && gameState.currentPlayer === playerIndex) {
-      setGameState((prev) => ({
-        ...prev,
-        selectedCard: card,
-      }));
-    }
-  };
+  // Note: Card selection removed - not needed in real Vetrolisci game
+  // Cards are picked from draft and immediately placed
 
-  const handleCardPlace = (gridIndex) => {
-    if (gameState.phase === "place" && gameState.selectedCard && gameState.currentPlayer === playerIndex) {
-      const card = gameState.selectedCard;
-      const currentPlayer = gameState.players[playerIndex];
-      const scenario = determinePlacementScenario(card, currentPlayer.grid);
-
-      if (scenario === PlacementScenario.DUPLICATE_NUMBER) {
-        // Show choice modal for duplicate number scenario
-        const existingCard = currentPlayer.grid[card.value - 1];
-        setCardChoiceData({
-          existingCard,
-          newCard: card,
-          targetIndex: gridIndex,
-        });
-        setShowCardChoice(true);
-      } else {
-        // Send placement to server
-        socketService.placeCard(card.id, gridIndex);
-      }
-    }
-  };
+  // Note: handleCardPlace removed - cards are placed immediately during draft phase
+  // Players don't manually place cards on grid - this happens automatically via pick-card
 
   const handleCardChoice = (choice) => {
     if (cardChoiceData) {
-      const { cardId } = cardChoiceData;
+      const { cardId, newCard } = cardChoiceData;
 
       try {
-        // Send pick with choice to server (server will handle placement)
-        socketService.pickCard(cardId, choice);
+        // Map modal choice to server choice (server expects 'place' or 'discard')
+        let serverChoice;
+        if (choice === 'keep-new') {
+          serverChoice = 'place'; // Place the new card
+        } else if (choice === 'keep-existing') {
+          serverChoice = 'discard'; // Discard the new card (keep existing)
+        } else {
+          // Fallback for any other choice
+          serverChoice = choice === 'place' ? 'place' : 'discard';
+        }
+
+        console.log("🎯 CARD CHOICE:", {
+          choice,
+          serverChoice,
+          cardId,
+          newCard
+        });
+
+        // Send choice to server using pickCard (same as legacy implementation)
+        socketService.pickCard(cardId, serverChoice);
       } catch (error) {
         console.error("Failed to send card choice:", error);
         // Clear pending request on error
@@ -1003,14 +891,25 @@ const VetrolisciBoard = ({
   };
 
   const handlePlacementChoice = (position) => {
+    console.log("🎯 PLACEMENT CHOICE:", {
+      position,
+      placementChoiceData,
+      cardToPlace: placementChoiceData?.card
+    });
+
     if (placementChoiceData) {
       const { cardId } = placementChoiceData;
 
       try {
+        console.log("🎯 SENDING FACE-DOWN PLACEMENT:", {
+          cardId,
+          position,
+          method: "pickCard with position"
+        });
         // Send pick with placement position to server
-        socketService.pickCard(cardId, null, position);
+        socketService.pickCard(cardId, 'place', position);
       } catch (error) {
-        console.error("Failed to send placement choice:", error);
+        console.error("🎯 PLACEMENT CHOICE FAILED:", error);
         // Clear pending request on error
         setPendingRequests((prev) => {
           const newSet = new Set(prev);
@@ -1199,7 +1098,7 @@ const VetrolisciBoard = ({
                 const canPlayerPick = isMyTurn && cardData.pickable.canPick;
                 const isAnimating = animatingCards.has(cardData.id);
                 const isFlying = flyingCards.has(cardData.id);
-                const isRevealed = revealedCardIds.has(cardData.id) || !revealingCards;
+                const isRevealed = true; // Cards are immediately available for picking
                 const canPick = canPlayerPick && !isAnimating && isRevealed;
                 const isKeyboardSelected = isMyTurn && index === selectedCardIndex && keyboardNavigationStarted;
                 const hasInvalidAction = invalidActionCards.has(cardData.id);
@@ -1211,7 +1110,7 @@ const VetrolisciBoard = ({
                   isAnimating ? "card-picking" : ""
                 } ${isFadingOut ? "card-fade-out" : ""} ${isKeyboardSelected ? "keyboard-selected" : ""} ${
                   hasInvalidAction ? "invalid-action" : ""
-                }`;
+                } ${!cardData.pickable.canPick ? "restricted-card" : ""}`;
                 const tooltipText = !cardData.pickable.canPick
                   ? cardData.pickable.reason === "all_cards_validated"
                     ? "All cards would violate validation rule - can place face-down"
@@ -1242,9 +1141,10 @@ const VetrolisciBoard = ({
                       isInvalid={invalidActionCards.has(cardData.id)}
                       showConfetti={confettiCards.has(cardData.id)}
                     />
-                    {!cardData.pickable.canPick && (
-                      <div className="card-restriction-overlay" />
-                    )}
+
+                     {!cardData.pickable.canPick && (
+                       <div className="card-restriction-overlay" />
+                     )}
                   </div>
                 );
               });
@@ -1276,30 +1176,15 @@ const VetrolisciBoard = ({
             </div>
             <GameGrid
               grid={currentPlayer.grid}
-              onCellClick={handleCardPlace}
-              selectedCard={gameState.selectedCard}
-              className="current-player-grid"
+              onCardPlace={() => {}} // Player cannot manually place cards - happens automatically
+              selectedCard={null} // No manual card selection
+              canPlace={false}
               newlyPlacedCards={newlyPlacedCards}
               glowingCards={glowingCards}
               confettiCards={confettiCards}
               placingCards={placingCards}
+              key={`current-grid-${JSON.stringify(currentPlayer.grid)}`}
             />
-            {gameState.phase === "place" && gameState.currentCards.length > 0 && (
-              <div className="current-cards">
-                <h4>Your Cards:</h4>
-                <div className="card-hand">
-                  {gameState.currentCards.map((card) => (
-                    <div
-                      key={card.id}
-                      className={`hand-card ${gameState.selectedCard?.id === card.id ? "selected" : ""}`}
-                      onClick={() => handleCardSelect(card)}
-                    >
-                      <Card card={card} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
         {/* Opponent */}
@@ -1314,12 +1199,15 @@ const VetrolisciBoard = ({
           </div>
           <GameGrid
             grid={opponent.grid}
-            className="opponent-grid"
-            readOnly={true}
+            onCardPlace={() => {}}
+            selectedCard={null}
+            canPlace={false}
+            isOpponent={true}
             newlyPlacedCards={newlyPlacedCards}
             glowingCards={glowingCards}
             confettiCards={confettiCards}
             placingCards={placingCards}
+            key={`opponent-grid-${JSON.stringify(opponent.grid)}`}
           />
         </div>
       </div>
@@ -1380,9 +1268,10 @@ const VetrolisciBoard = ({
       {/* Modals */}
       {showCardChoice && cardChoiceData && (
         <CardChoiceModal
+          isOpen={showCardChoice}
           existingCard={cardChoiceData.existingCard}
           newCard={cardChoiceData.newCard}
-          onChoice={handleCardChoice}
+          onChoose={handleCardChoice}
           onCancel={handleCardChoiceCancel}
         />
       )}

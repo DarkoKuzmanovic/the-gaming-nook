@@ -33,6 +33,7 @@ const GameBoard = ({
       default:
         return (
           <VetrolisciBoard
+            key={gameInfo?.gameId || 'vetrolisci-board'}
             user={user}
             gameInfo={gameInfo}
             socketService={socketService}

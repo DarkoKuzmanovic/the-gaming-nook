@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import rateLimit from 'express-rate-limit';
 import GameServerRegistry from './games/base/GameServerRegistry.js';
 import database from './database/jsonDatabase.js';
 import authRoutes from './auth/authRoutes.js';
@@ -19,7 +20,7 @@ const __dirname = path.dirname(__filename);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: true, // Allow all origins for network access
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -33,24 +34,102 @@ async function startServer() {
     // Initialize database
     await database.initialize();
 
+    // Rate limiting
+    const limiter = rateLimit({
+      windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+      max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+      message: 'Too many requests from this IP'
+    });
+
     // Middleware
-    app.use(cors());
+    app.use(cors({
+      origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+      credentials: true
+    }));
     app.use(express.json());
+    app.use('/api/', limiter);
     app.use(express.static(path.join(__dirname, "../client/dist")));
 
     // Authentication routes
     app.use('/api/auth', authRoutes);
 
+    // Error handling middleware
+    app.use((err, req, res, next) => {
+      console.error('Error:', err);
+      
+      if (process.env.NODE_ENV === 'production') {
+        res.status(500).json({ message: 'Internal server error' });
+      } else {
+        res.status(500).json({ message: err.message, stack: err.stack });
+      }
+    });
+
     // Game state storage - now supports multiple game types and authenticated users
     const gameRooms = new Map(); // gameId -> { gameType, gameInstance, players, status }
     const players = new Map();   // socketId -> { name, socket, currentGame, userId, isAuthenticated }
+
+    // Socket.io rate limiting
+    const socketRateLimit = new Map();
 
     // Socket.io connection handling
     io.on("connection", (socket) => {
       console.log("User connected:", socket.id);
 
+      // Rate limiting middleware for socket events
+      socket.use((packet, next) => {
+        const clientId = socket.id;
+        const now = Date.now();
+        const windowMs = 1000; // 1 second
+        const maxRequests = 10;
+        
+        if (!socketRateLimit.has(clientId)) {
+          socketRateLimit.set(clientId, { count: 1, resetTime: now + windowMs });
+          return next();
+        }
+        
+        const clientData = socketRateLimit.get(clientId);
+        
+        if (now > clientData.resetTime) {
+          clientData.count = 1;
+          clientData.resetTime = now + windowMs;
+          return next();
+        }
+        
+        if (clientData.count >= maxRequests) {
+          return next(new Error('Rate limit exceeded'));
+        }
+        
+        clientData.count++;
+        next();
+      });
+
+      // Socket error handling
+      socket.on('error', (error) => {
+        console.error('Socket error:', error);
+        socket.emit('error', { message: 'An error occurred' });
+      });
+
       // Updated join-game to accept game type and optional authentication token
-      socket.on("join-game", async (playerName, gameType = 'vetrolisci', authToken = null) => {
+      socket.on("join-game", async (data) => {
+        // Input validation
+        if (!data || typeof data !== 'object') {
+          return socket.emit('error', { message: 'Invalid request format' });
+        }
+        
+        let { playerName, gameType = 'vetrolisci', authToken = null } = data;
+        
+        if (!gameType || !['vetrolisci', 'connect4'].includes(gameType)) {
+          return socket.emit('error', { message: 'Invalid game type' });
+        }
+        
+        if (!playerName || typeof playerName !== 'string' || playerName.length > 50 || playerName.trim().length === 0) {
+          return socket.emit('error', { message: 'Invalid player name' });
+        }
+        
+        if (authToken && typeof authToken !== 'string') {
+          return socket.emit('error', { message: 'Invalid auth token format' });
+        }
+
         if (!GameServerRegistry.hasGameServer(gameType)) {
           socket.emit("error", { message: `Game type not supported: ${gameType}` });
           return;
@@ -171,6 +250,11 @@ async function startServer() {
 
       // Generic move handler that delegates to appropriate game server
       socket.on("game-move", async (moveData) => {
+        // Input validation
+        if (!moveData || typeof moveData !== 'object') {
+          return socket.emit('error', { message: 'Invalid move data format' });
+        }
+
         const player = players.get(socket.id);
         if (!player || !player.currentGame) {
           socket.emit("error", { message: "Not in a game" });
@@ -259,6 +343,7 @@ async function startServer() {
 
       // Legacy Vetrolisci events for backward compatibility
       socket.on("pick-card", async (data) => {
+        console.log(`🎯 MAIN SERVER: Received pick-card event:`, data);
         // Convert to generic move format and process internally
         const moveData = {
           type: 'pick-card',
@@ -351,54 +436,11 @@ async function startServer() {
         }
       });
 
-      socket.on("place-card", async (data) => {
-        // Convert to generic move format and process internally
-        const moveData = {
-          type: 'place-card',
-          ...data
-        };
-        
-        const player = players.get(socket.id);
-        if (!player || !player.currentGame) {
-          socket.emit("error", { message: "Not in a game" });
-          return;
-        }
+      // Card choice handler for Vetrolisci duplicate card scenarios
+      // Card choices are now handled through the pick-card event (same as legacy)
 
-        const room = gameRooms.get(player.currentGame);
-        if (!room || room.status !== 'playing') {
-          socket.emit("error", { message: "Game not active" });
-          return;
-        }
-
-        try {
-          const result = GameServerRegistry.processMove(
-            room.gameType, 
-            room.id, 
-            socket.id, 
-            moveData
-          );
-
-          // Broadcast result to all players in the room
-          if (result.broadcast) {
-            io.to(room.id).emit(result.event, result.data);
-          } else {
-            socket.emit(result.event, result.data);
-          }
-
-          // Check for game end conditions
-          if (result.gameEnded) {
-            room.status = 'finished';
-            
-            setTimeout(() => {
-              gameRooms.delete(room.id);
-            }, 30000); // Clean up finished games after 30 seconds
-          }
-
-        } catch (error) {
-          console.error("Move processing error:", error);
-          socket.emit("error", { message: error.message });
-        }
-      });
+      // Note: place-card handler removed - cards placed immediately via pick-card
+      // No separate placement phase exists in real Vetrolisci game
 
       socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);

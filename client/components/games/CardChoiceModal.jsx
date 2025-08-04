@@ -31,7 +31,7 @@ const CardChoiceModal = ({
     <div className="modal-overlay">
       <div className="modal-content">
         <h3>Choose which card to keep face-up</h3>
-        <p>You already have a face-up card with number {newCard.number}. Choose which one to keep face-up:</p>
+        <p>You already have a face-up card with number {newCard.value}. Choose which one to keep face-up:</p>
         
         <div className="card-choices">
           <div 

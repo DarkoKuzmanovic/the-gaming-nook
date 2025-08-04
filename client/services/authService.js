@@ -36,10 +36,20 @@ class AuthService {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
+      
+      // Check if response has content before parsing JSON
+      const contentType = response.headers.get('content-type');
+      let data = null;
+      
+      if (contentType && contentType.includes('application/json')) {
+        const text = await response.text();
+        if (text) {
+          data = JSON.parse(text);
+        }
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        throw new Error(data?.error || `HTTP error! status: ${response.status}`);
       }
 
       return data;

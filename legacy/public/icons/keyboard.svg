@@ -1,0 +1,35 @@
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Keyboard icon in style of back-to-menu.svg -->
+  <!-- Main keyboard body -->
+  <rect x="3" y="8" width="24" height="16" rx="2" stroke="white" stroke-width="2" fill="none"/>
+  
+  <!-- Top row keys -->
+  <rect x="5" y="10" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="8" y="10" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="11" y="10" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="14" y="10" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="17" y="10" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="20" y="10" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="23" y="10" width="2" height="2" rx="0.5" fill="white"/>
+  
+  <!-- Middle row keys -->
+  <rect x="5" y="13" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="8" y="13" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="11" y="13" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="14" y="13" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="17" y="13" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="20" y="13" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="23" y="13" width="2" height="2" rx="0.5" fill="white"/>
+  
+  <!-- Bottom row keys -->
+  <rect x="5" y="16" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="8" y="16" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="11" y="16" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="14" y="16" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="17" y="16" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="20" y="16" width="2" height="2" rx="0.5" fill="white"/>
+  <rect x="23" y="16" width="2" height="2" rx="0.5" fill="white"/>
+  
+  <!-- Space bar -->
+  <rect x="9" y="19" width="12" height="2" rx="1" fill="white"/>
+</svg>

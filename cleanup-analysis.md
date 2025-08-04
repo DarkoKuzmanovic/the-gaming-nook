@@ -15,7 +15,7 @@ Comprehensive analysis of unused files, dead code, and cleanup opportunities to 
 ```
 _exit.svg               # Unused duplicate of exit.svg
 back-to-menu.svg        # Not referenced anywhere in codebase
-star.svg                # Not referenced anywhere in codebase
+star.svg                # Keep - Used as data URI in Card.css for validation animations
 validation-check.png    # Not referenced anywhere in codebase
 ```
 
@@ -109,7 +109,7 @@ VetrolisciGame.js            # Client-side game logic class
 ## 🎯 Recommended Action Plan
 
 ### Phase 1: Safe Deletions
-1. Remove unused icons (`_exit.svg`, `back-to-menu.svg`, `star.svg`, `validation-check.png`)
+1. Remove unused icons (`_exit.svg`, `back-to-menu.svg`, `validation-check.png`)
 2. Remove unused DraftPhase component and CSS
 3. Remove development documentation files
 4. Remove backup server file and old database

@@ -54,20 +54,22 @@ class SocketService {
     }
 
     return new Promise((resolve, reject) => {
+      const data = { playerName, gameType, authToken };
       console.log("Emitting join-game with:", { playerName, gameType, hasToken: !!authToken });
-      this.socket.emit("join-game", playerName, gameType, authToken);
+      this.socket.emit("join-game", data);
+
+      const timeoutId = setTimeout(() => {
+        console.error("Join game timeout");
+        reject(new Error("Join game timeout"));
+      }, 10000);
 
       this.socket.once("game-joined", ({ gameId, playerIndex }) => {
+        clearTimeout(timeoutId); // Clear timeout on success
         this.gameId = gameId;
         this.playerIndex = playerIndex;
         console.log(`Successfully joined game ${gameId} as player ${playerIndex}`);
         resolve({ gameId, playerIndex });
       });
-
-      setTimeout(() => {
-        console.error("Join game timeout");
-        reject(new Error("Join game timeout"));
-      }, 10000);
     });
   }
 
@@ -79,31 +81,57 @@ class SocketService {
 
   onDraftStarted(callback) {
     if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("draft-started");
     this.socket.on("draft-started", callback);
   }
 
   onCardPicked(callback) {
     if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("card-picked");
     this.socket.on("card-picked", callback);
   }
 
   onCardPickedAndPlaced(callback) {
     if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("card-picked-and-placed");
     this.socket.on("card-picked-and-placed", callback);
+  }
+
+  onCardPickedPendingChoice(callback) {
+    if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("card-picked-pending-choice");
+    this.socket.on("card-picked-pending-choice", callback);
+  }
+
+  onCardChoiceProcessed(callback) {
+    if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("card-choice-processed");
+    this.socket.on("card-choice-processed", callback);
   }
 
   onCardPickedAndDiscarded(callback) {
     if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("card-picked-and-discarded");
     this.socket.on("card-picked-and-discarded", callback);
   }
 
   onNewTurn(callback) {
     if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("new-turn");
     this.socket.on("new-turn", callback);
   }
 
   onDraftComplete(callback) {
     if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("draft-complete");
     this.socket.on("draft-complete", callback);
   }
 
@@ -120,31 +148,50 @@ class SocketService {
     });
   }
 
-  placeCard(cardId, gridIndex, choice) {
+  sendCardChoice(cardId, choice, position) {
     if (!this.socket) return;
-    this.socket.emit("place-card", {
-      gameId: this.gameId,
-      playerIndex: this.playerIndex,
+    
+    this.socket.emit("card-choice", {
       cardId,
-      gridIndex,
       choice,
+      position
     });
   }
 
-  // Card placement events
-  onCardPlaced(callback) {
+  // Note: placeCard removed - cards placed immediately via pickCard
+  // No separate placement phase exists in real Vetrolisci game
+
+  // Note: onCardPlaced removed - cards placed immediately via pick-card events
+  // No separate card-placed events exist in real Vetrolisci game
+
+  // Event cleanup methods
+  removeAllListeners() {
     if (!this.socket) return;
-    this.socket.on("card-placed", callback);
+    console.log("🧹 SOCKET: Removing all event listeners");
+    this.socket.removeAllListeners("draft-started");
+    this.socket.removeAllListeners("card-picked");
+    this.socket.removeAllListeners("card-picked-and-placed");
+    this.socket.removeAllListeners("card-picked-pending-choice");
+    this.socket.removeAllListeners("card-choice-processed");
+    this.socket.removeAllListeners("card-picked-and-discarded");
+    this.socket.removeAllListeners("new-turn");
+    this.socket.removeAllListeners("draft-complete");
+    this.socket.removeAllListeners("round-complete");
+    this.socket.removeAllListeners("game-complete");
   }
 
   // Round management events
   onRoundComplete(callback) {
     if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("round-complete");
     this.socket.on("round-complete", callback);
   }
 
   onGameComplete(callback) {
     if (!this.socket) return;
+    // Remove any existing listeners first to prevent duplicates
+    this.socket.off("game-complete");
     this.socket.on("game-complete", callback);
   }
 

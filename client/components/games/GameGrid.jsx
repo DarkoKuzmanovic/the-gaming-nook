@@ -57,19 +57,9 @@ const GameGrid = ({
                   newlyPlacedCards.has(card.id) ? "card-fade-in" : ""
                 } ${glowingCards.has(card.id) ? "card-glow" : ""}`}
               />
-              {(() => {
-                if (confettiCards.size > 0) {
-                  console.log("🎉 CONFETTI RENDER CHECK:", {
-                    gridCardId: card.id,
-                    confettiCards: Array.from(confettiCards),
-                    hasConfetti: confettiCards.has(card.id),
-                    cardPosition: index,
-                  });
-                }
-                return confettiCards.has(card.id) ? (
-                  <Confetti cardId={card.id} onComplete={onConfettiComplete} />
-                ) : null;
-              })()}
+              {confettiCards.has(card.id) ? (
+                <Confetti cardId={card.id} onComplete={onConfettiComplete} />
+              ) : null}
             </>
           )}
           {getPlacementHint(index) && <div className="placement-hint">{getPlacementHint(index).description}</div>}
