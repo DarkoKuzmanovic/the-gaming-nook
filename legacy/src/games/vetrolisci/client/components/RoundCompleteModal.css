@@ -1,0 +1,59 @@
+.round-complete-modal {
+  text-align: center;
+}
+
+.round-complete-modal h3 {
+  color: #28a745;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.round-scores {
+  margin-bottom: 20px;
+}
+
+.player-round-score {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-left: 4px solid #007bff;
+}
+
+.player-round-score h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.score-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #28a745;
+  margin-bottom: 8px;
+}
+
+.score-breakdown {
+  display: flex;
+  justify-content: space-around;
+  font-size: 12px;
+  color: #666;
+}
+
+.score-breakdown span {
+  background-color: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.next-round-info {
+  background-color: #e3f2fd;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  color: #1565c0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+}

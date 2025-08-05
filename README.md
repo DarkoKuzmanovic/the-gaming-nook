@@ -1,10 +1,10 @@
-# Vetrolisci - Digital Pixies Card Game
+# The Gaming Nook - Digital Pixies Card Game
 
 A real-time multiplayer implementation of the strategic card game Pixies for 2 players. Built with React, Node.js, and Socket.IO.
 
 ## 🎮 Game Overview
 
-Vetrolisci brings the Pixies card game to life with an intuitive digital interface. Players strategically place cards in a 3×3 grid across 3 rounds, scoring points through validated card numbers, symbols, and color zones.
+The Gaming Nook brings the Pixies card game to life with an intuitive digital interface. Players strategically place cards in a 3×3 grid across 3 rounds, scoring points through validated card numbers, symbols, and color zones.
 
 ### Key Features
 
@@ -27,7 +27,7 @@ Vetrolisci brings the Pixies card game to life with an intuitive digital interfa
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd vetrolisci
+cd the-gaming-nook
 ```
 
 2. Install dependencies:
@@ -91,7 +91,7 @@ npm run typecheck
 - **Symbols**: +1 per spiral (🌀), -1 per cross (✖️), special card bonuses
 - **Color Zones**: Largest connected color group × round multiplier (2x/3x/4x)
 
-For complete rules, see [vetrolisci-ruleset.md](./vetrolisci-ruleset.md).
+For complete rules, see [pixies-ruleset.md](./pixies-ruleset.md).
 
 ## 🏗️ Architecture
 
@@ -118,25 +118,30 @@ For complete rules, see [vetrolisci-ruleset.md](./vetrolisci-ruleset.md).
 ## 📁 Project Structure
 
 ```
-src/
-├── components/          # React UI components
-│   ├── GameBoard.jsx   # Main game container
-│   ├── GameGrid.jsx    # 3×3 card grid display
-│   ├── DraftPhase.jsx  # Card picking interface
-│   ├── Card.jsx        # Individual card component
-│   ├── ScoreBoard.jsx  # Score tracking display
-│   └── ...             # Modal and utility components
-├── game/               # Game logic modules
-│   ├── draft.js        # Draft phase mechanics
-│   ├── placement.js    # Card placement logic
-│   ├── scoring.js      # Scoring calculations
-│   └── validation.js   # Card validation rules
-├── data/
-│   └── cards.js        # 70-card game deck definition
-└── services/
-    ├── socket.js       # Socket.IO client wrapper
-    ├── gameStateCache.js # Game state persistence
-    └── imagePreloader.js # Asset optimization
+client/                 # Frontend React application
+├── components/         # React UI components
+│   ├── games/         # Game-specific components
+│   ├── lobby/         # Lobby components
+│   └── shared/        # Shared components
+├── games/             # Game implementations
+│   ├── base/          # Base game framework
+│   └── vetrolisci/    # Vetrolisci game implementation
+├── services/          # Service modules
+│   ├── socket.js      # Socket.IO client wrapper
+│   ├── gameStateCache.js # Game state persistence
+│   └── imagePreloader.js # Asset optimization
+└── App.jsx           # Main application component
+
+server/               # Backend Node.js application
+├── games/           # Server-side game logic
+│   ├── base/        # Base server framework
+│   └── vetrolisci/  # Vetrolisci server implementation
+└── main.js          # Server entry point
+
+public/              # Static assets
+├── cards/          # Card images
+├── icons/          # UI icons
+└── audio/          # Audio files
 ```
 
 ## 🎨 Features

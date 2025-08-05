@@ -1,0 +1,451 @@
+/* ===== BASE CARD STYLES ===== */
+.card {
+  width: 84px;
+  height: 120px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+/* ===== CARD STATES ===== */
+.card.selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light), var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card.placed {
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  background: rgba(72, 187, 120, 0.05);
+}
+
+.card.validated {
+  border-color: rgba(255, 215, 0, 0.6);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 215, 0, 0.15), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(255, 223, 0, 0.1), transparent 50%),
+    linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 235, 59, 0.08));
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4), 0 0 24px rgba(255, 215, 0, 0.2), 0 0 36px rgba(255, 215, 0, 0.1),
+    var(--shadow-md);
+  animation: validatedGlow 2s ease-in-out infinite alternate;
+}
+
+/* ===== COLOR-SPECIFIC VALIDATED CARD GLOWS ===== */
+.card.validated.card-blue {
+  border-color: rgba(59, 130, 246, 0.6);
+  background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.15), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.1), transparent 50%),
+    linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.08));
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4), 0 0 24px rgba(59, 130, 246, 0.2), 0 0 36px rgba(59, 130, 246, 0.1),
+    var(--shadow-md);
+  animation: validatedBlueGlow 2s ease-in-out infinite alternate;
+}
+
+.card.validated.card-green {
+  border-color: rgba(149, 204, 31, 0.6);
+  background: radial-gradient(circle at 30% 30%, rgba(149, 204, 31, 0.15), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(149, 204, 31, 0.1), transparent 50%),
+    linear-gradient(135deg, rgba(149, 204, 31, 0.05), rgba(149, 204, 31, 0.08));
+  box-shadow: 0 0 12px rgba(149, 204, 31, 0.4), 0 0 24px rgba(149, 204, 31, 0.2), 0 0 36px rgba(149, 204, 31, 0.1),
+    var(--shadow-md);
+  animation: validatedGreenGlow 2s ease-in-out infinite alternate;
+}
+
+.card.validated.card-red {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: radial-gradient(circle at 30% 30%, rgba(239, 68, 68, 0.15), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(239, 68, 68, 0.1), transparent 50%),
+    linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.08));
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4), 0 0 24px rgba(239, 68, 68, 0.2), 0 0 36px rgba(239, 68, 68, 0.1),
+    var(--shadow-md);
+  animation: validatedRedGlow 2s ease-in-out infinite alternate;
+}
+
+.card.validated.card-yellow {
+  border-color: rgba(251, 191, 36, 0.6);
+  background: radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.15), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(251, 191, 36, 0.1), transparent 50%),
+    linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(251, 191, 36, 0.08));
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.4), 0 0 24px rgba(251, 191, 36, 0.2), 0 0 36px rgba(251, 191, 36, 0.1),
+    var(--shadow-md);
+  animation: validatedYellowGlow 2s ease-in-out infinite alternate;
+}
+
+.card.validated.card-multi {
+  border-color: rgba(147, 51, 234, 0.6);
+  background: radial-gradient(circle at 30% 30%, rgba(147, 51, 234, 0.15), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(147, 51, 234, 0.1), transparent 50%),
+    linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.08));
+  box-shadow: 0 0 12px rgba(147, 51, 234, 0.4), 0 0 24px rgba(147, 51, 234, 0.2), 0 0 36px rgba(147, 51, 234, 0.1),
+    var(--shadow-md);
+  animation: validatedMultiGlow 2s ease-in-out infinite alternate;
+}
+
+/* ===== CARD IMAGES ===== */
+.card-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  z-index: 1;
+}
+
+/* ===== CARD CONTENT STRUCTURE ===== */
+.card-fallback {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.card-back-fallback {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ===== CARD TEXT ELEMENTS ===== */
+.card-number {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-1);
+  color: var(--color-text-primary);
+}
+
+.card-number-small {
+  font-size: 1rem;
+  font-weight: bold;
+  transform: rotate(180deg);
+}
+
+.card-number-peek {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 0.6rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  padding: 0.1rem 0.2rem;
+  border-radius: 2px;
+}
+
+.card-symbols {
+  display: flex;
+  gap: 2px;
+  font-size: var(--font-size-xs);
+}
+
+.spiral,
+.cross {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ===== CARD VISUAL ELEMENTS ===== */
+.card-color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  margin-bottom: var(--space-1);
+  box-shadow: var(--shadow-sm);
+}
+
+.special-indicator {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: #ffd700;
+}
+
+/* ===== CARD BADGES AND INDICATORS ===== */
+.validation-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  z-index: 10;
+  animation: starPulseRotate 2s ease-in-out infinite alternate;
+}
+
+/* ===== COLOR-SPECIFIC VALIDATION STARS ===== */
+.card-blue .validation-badge {
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%233b82f6'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6)) drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+}
+
+.card-green .validation-badge {
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%2395cc1f'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 4px rgba(149, 204, 31, 0.6)) drop-shadow(0 0 8px rgba(149, 204, 31, 0.3));
+}
+
+.card-red .validation-badge {
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%23ef4444'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6)) drop-shadow(0 0 8px rgba(239, 68, 68, 0.3));
+}
+
+.card-yellow .validation-badge {
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%23fbbf24'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 8px rgba(251, 191, 36, 0.3));
+}
+
+.card-multi .validation-badge {
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%239333ea'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 4px rgba(147, 51, 234, 0.6)) drop-shadow(0 0 8px rgba(147, 51, 234, 0.3));
+}
+
+.stacked-indicator {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 20px;
+  height: 20px;
+  background: #ff9800;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}
+
+/* ===== CARD BACK STYLES ===== */
+.card-back {
+  background: url("/background.jpg") repeat;
+  background-size: 50px 50px;
+  position: relative;
+  color: white;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-back::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(44, 62, 80, 0.8);
+  border-radius: 6px;
+  z-index: 1;
+}
+
+.card-back > * {
+  position: relative;
+  z-index: 2;
+}
+
+.card-back-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(255, 255, 255, 0.1) 5px,
+    rgba(255, 255, 255, 0.1) 10px
+  );
+  border-radius: 6px;
+}
+
+/* ===== COLOR THEMES ===== */
+.card-blue {
+  background: url("/background.jpg") repeat, rgba(227, 242, 253, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
+}
+
+.card-green {
+  background: url("/background.jpg") repeat, rgba(232, 245, 232, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
+}
+
+.card-yellow {
+  background: url("/background.jpg") repeat, rgba(255, 248, 225, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
+}
+
+.card-orange {
+  background: url("/background.jpg") repeat, rgba(255, 243, 224, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
+}
+
+.card-red {
+  background: url("/background.jpg") repeat, rgba(255, 235, 238, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
+}
+
+.card-purple {
+  background: url("/background.jpg") repeat, rgba(243, 229, 245, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
+}
+
+.card-brown {
+  background: url("/background.jpg") repeat, rgba(239, 235, 233, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
+}
+
+.card-multi {
+  background: url("/background.jpg") repeat, rgba(240, 248, 240, 0.8);
+  background-size: 50px 50px, cover;
+  background-blend-mode: overlay;
+}
+
+/* ===== ANIMATIONS ===== */
+.card-revealing {
+  animation: cardReveal 0.5s ease-out forwards;
+  opacity: 0;
+  transform: scale(0.8) rotateX(-90deg);
+}
+
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotateX(-90deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.05) rotateX(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateX(0deg);
+  }
+}
+
+@keyframes validatedGlow {
+  0% {
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4), 0 0 24px rgba(255, 215, 0, 0.2), 0 0 36px rgba(255, 215, 0, 0.1),
+      var(--shadow-md);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.6), 0 0 32px rgba(255, 215, 0, 0.3), 0 0 48px rgba(255, 215, 0, 0.15),
+      var(--shadow-md);
+  }
+}
+
+@keyframes validatedBlueGlow {
+  0% {
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4), 0 0 24px rgba(59, 130, 246, 0.2), 0 0 36px rgba(59, 130, 246, 0.1),
+      var(--shadow-md);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.6), 0 0 32px rgba(59, 130, 246, 0.3), 0 0 48px rgba(59, 130, 246, 0.15),
+      var(--shadow-md);
+  }
+}
+
+@keyframes validatedGreenGlow {
+  0% {
+    box-shadow: 0 0 12px rgba(149, 204, 31, 0.4), 0 0 24px rgba(149, 204, 31, 0.2), 0 0 36px rgba(149, 204, 31, 0.1),
+      var(--shadow-md);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(149, 204, 31, 0.6), 0 0 32px rgba(149, 204, 31, 0.3), 0 0 48px rgba(149, 204, 31, 0.15),
+      var(--shadow-md);
+  }
+}
+
+@keyframes validatedRedGlow {
+  0% {
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4), 0 0 24px rgba(239, 68, 68, 0.2), 0 0 36px rgba(239, 68, 68, 0.1),
+      var(--shadow-md);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.6), 0 0 32px rgba(239, 68, 68, 0.3), 0 0 48px rgba(239, 68, 68, 0.15),
+      var(--shadow-md);
+  }
+}
+
+@keyframes validatedYellowGlow {
+  0% {
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.4), 0 0 24px rgba(251, 191, 36, 0.2), 0 0 36px rgba(251, 191, 36, 0.1),
+      var(--shadow-md);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.6), 0 0 32px rgba(251, 191, 36, 0.3), 0 0 48px rgba(251, 191, 36, 0.15),
+      var(--shadow-md);
+  }
+}
+
+@keyframes validatedMultiGlow {
+  0% {
+    box-shadow: 0 0 12px rgba(147, 51, 234, 0.4), 0 0 24px rgba(147, 51, 234, 0.2), 0 0 36px rgba(147, 51, 234, 0.1),
+      var(--shadow-md);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(147, 51, 234, 0.6), 0 0 32px rgba(147, 51, 234, 0.3), 0 0 48px rgba(147, 51, 234, 0.15),
+      var(--shadow-md);
+  }
+}
+
+@keyframes starPulseRotate {
+  0% {
+    transform: scale(1) rotate(-5deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.05) rotate(5deg);
+    opacity: 0.95;
+  }
+}

@@ -13,80 +13,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Major Revamp (Current Implementation)
 - **Started fresh** with clean isolated architecture after legacy multiplayer issues
 - **Preserved working game logic** from `/legacy/` folder containing proven Vetrolisci implementation
-- **Isolated game system**: Each game in `/src/games/` is self-contained with client/server/shared folders
+- **Isolated game system**: Each game in `/client/games/` and `/server/games/` is self-contained
 - **Simple tech stack**: React + Vite (frontend) + Express + Socket.IO (backend) - no complex frameworks or databases
 
-### Key Issues Resolved
-1. **Card Validation Bug**: Fixed auto-validation logic that was incorrectly validating cards just for being in correct position
-2. **Draft State Advancement**: Fixed critical bug where server advanced draft state before placement choices were made
-3. **Modal System**: Fixed CardChoiceModal (duplicate cards) and PlacementChoiceModal (validated placement) scenarios  
-4. **Player Indexing**: Fixed multiplayer synchronization issues with proper player index management
-5. **React Hooks**: Fixed hooks ordering violations in GameBoard component
-6. **Restricted Cards**: Implemented validation overlay system with visual restrictions for validated cards
+### Frontend (React + Vite + ES Modules)
+- **Entry Point**: `client/main.jsx` → `client/App.jsx`
+- **State Management**: React state with localStorage persistence via `gameStateCache`
+- **Components**: Comprehensive React component library in `client/components/`
+- **Game Logic**: Client-side game logic in `client/games/`
+- **Services**: Modular services for audio, caching, image preloading, and socket communication
+- **Real-time Communication**: Socket.IO client wrapper in `client/services/socket.js`
 
-### Current Status
-- ✅ **Core multiplayer Vetrolisci working** with proper card validation rules
-- ✅ **Room-based multiplayer** with host/guest system
-- ✅ **All placement scenarios** working: empty/face-down, duplicate number, already validated
-- ✅ **Modal system** for card choices and placement decisions
-- ✅ **Restricted card overlays** showing which cards can't be picked and why
-- ✅ **Real-time synchronization** between players
-- ✅ **Complete game flow** from room creation to game completion
+### Backend (Node.js + Express + ES Modules)
+- **Entry Point**: `server/main.js` - handles both HTTP and WebSocket connections
+- **Module System**: Full ES module support with `"type": "module"` in package.json
+- **Game State**: In-memory storage using Maps for games and players
+- **Real-time Features**: Socket.IO for live multiplayer functionality
+- **Card System**: 70-card deck with image mapping in `client/games/vetrolisci/cards.js`
 
-## Current Architecture (Post-Revamp)
+### Key Game Systems
+- **Draft Phase**: `client/games/vetrolisci/draft.js` - card picking mechanics with turn-based logic
+- **Placement Logic**: `client/games/vetrolisci/placement.js` - sophisticated card placement validation
+- **Scoring Engine**: `client/games/vetrolisci/scoring.js` - complex scoring with validated cards, symbols, and color zones
+- **Validation**: `client/games/vetrolisci/validation.js` - card validation rules and adjacency checks
 
-### Isolated Game System
-```
-src/
-├── shared/
-│   ├── client/               # Shared client components (Modal, Button, etc.)
-│   └── server/               # Main server with room management
-│       └── main.js          # Express + Socket.IO server (port 8001)
-└── games/
-    └── vetrolisci/          # Self-contained Vetrolisci game
-        ├── client/          # React components for Vetrolisci
-        │   └── components/  # GameBoard, Card, modals, etc.
-        ├── server/          # Vetrolisci server logic
-        │   └── vetrolisci-server.js
-        └── shared/          # Game logic shared between client/server
-            ├── cards.js     # 70-card deck with image mapping
-            ├── draft.js     # 4-card draft system
-            ├── placement.js # Card placement scenarios + validation
-            ├── scoring.js   # Complex scoring with color zones
-            └── validation.js # Card validation rules
-```
-
-### Frontend (React + Vite)
-- **Entry Point**: `src/index.html` → `src/main.jsx` → `src/App.jsx`
-- **Room System**: Create/join rooms with room codes, host/guest roles
-- **Game Integration**: Dynamic loading of game components based on room type
-- **Real-time Communication**: Socket.IO client wrapper in `shared/client/utils/socket-client.js`
-
-### Backend (Node.js + Express + Socket.IO)
-- **Entry Point**: `src/shared/server/main.js` - handles room management and routing
-- **Game Servers**: Individual game logic in `src/games/{game}/server/`
-- **In-memory State**: Maps for rooms, players, game states
-- **Real-time Features**: Socket.IO for live multiplayer with room isolation
-
-### Vetrolisci Game Systems (Current Implementation)
-- **Draft Phase**: 4-card alternating draft system with turn-based picking
-- **Placement Scenarios**: 
-  1. **Empty/Face-down**: Auto-place on target position (card.value - 1)
-  2. **Duplicate Number**: Show CardChoiceModal to choose which card stays face-up  
-  3. **Already Validated**: Show PlacementChoiceModal to place face-down on empty space
-- **Card Validation**: Cards validate when placed correctly with face-down cards underneath
-- **Restriction System**: Visual overlays prevent picking validated card numbers (unless all cards are validated)
-- **Scoring Engine**: Complex scoring with validated numbers, symbols, and color zones
-
-### Socket.IO Events (Current Implementation)
-
-#### Room Management
-- **Client → Server**: `create-room`, `join-room`, `check-room`
-- **Server → Client**: `player-joined`, `game-started`
-
-#### Vetrolisci Game Events  
-- **Client → Server**: `vetrolisci-pick-card`, `vetrolisci-placement-choice`, `vetrolisci-get-state`
-- **Server → Client**: `vetrolisci-card-placed`, `vetrolisci-round-complete`, `vetrolisci-game-complete`
+### Enhanced Services
+- **Audio Service**: `client/services/audio.js` - background music and sound effects management
+- **Game State Cache**: `client/services/gameStateCache.js` - localStorage persistence for game recovery
+- **Image Preloader**: `client/services/imagePreloader.js` - preloads all card images for smooth gameplay
+- **Socket Service**: `client/services/socket.js` - WebSocket communication wrapper with error handling
 
 ## Development Commands
 
@@ -187,44 +142,53 @@ npm run typecheck
 ## Current Project Structure (Post-Revamp)
 
 ```
-src/
-├── index.html                    # Entry point
-├── main.jsx                      # React entry
-├── App.jsx                       # Main app with room system
-├── shared/
-│   ├── client/
-│   │   ├── components/          # Reusable UI components
-│   │   │   ├── Modal.jsx        # Modal wrapper
-│   │   │   ├── Button.jsx       # Styled buttons  
-│   │   │   └── LoadingSpinner.jsx
-│   │   └── utils/
-│   │       └── socket-client.js # Socket.IO wrapper
-│   └── server/
-│       └── main.js              # Express + Socket.IO server
-├── games/
-│   └── vetrolisci/              # Self-contained Vetrolisci game
-│       ├── client/
-│       │   └── components/      # Vetrolisci UI components
-│       │       ├── GameBoard.jsx       # Main game interface
-│       │       ├── GameGrid.jsx        # 3x3 card grid
-│       │       ├── Card.jsx            # Individual cards
-│       │       ├── CardChoiceModal.jsx # Duplicate card choices
-│       │       ├── PlacementChoiceModal.jsx # Position selection
-│       │       ├── RoundCompleteModal.jsx   # Round summaries
-│       │       └── ScoreBoard.jsx      # Score tracking
-│       ├── server/
-│       │   └── vetrolisci-server.js    # Game server logic
-│       └── shared/              # Shared game logic
-│           ├── cards.js         # 70-card deck + images
-│           ├── draft.js         # 4-card draft system
-│           ├── placement.js     # Placement scenarios + validation
-│           ├── scoring.js       # Complex scoring system
-│           └── validation.js    # Card validation rules
-├── public/
-│   ├── vetrolisci/cards/       # Card images (moved from legacy)
-│   └── shared/icons/           # UI icons including restricted.png
-└── legacy/                     # Preserved working implementation
-    └── src/                    # Reference for advanced features
+client/                     # Frontend React application
+├── components/             # React UI components
+│   ├── games/             # Game-specific components
+│   │   ├── GameBoard.jsx  # Main game container with state management
+│   │   ├── GameGrid.jsx   # 3x3 card grid with placement logic
+│   │   ├── Card.jsx       # Individual card with lazy loading
+│   │   ├── LazyImage.jsx  # Optimized image loading
+│   │   ├── Confetti.jsx   # Victory animations
+│   │   ├── DraftPhase.jsx # Draft phase UI
+│   │   └── PlacementChoiceModal.jsx # Grid position selection
+│   ├── lobby/             # Lobby components
+│   │   └── GameSelection.jsx # Game selection interface
+│   └── shared/            # Shared components
+│       └── GameCard.jsx   # Reusable game card component
+├── games/                 # Game implementations
+│   ├── base/              # Base game framework
+│   │   ├── BaseGame.js    # Base game class
+│   │   └── GameRegistry.js # Game registration system
+│   └── vetrolisci/        # Vetrolisci game implementation
+│       ├── VetrolisciGame.js # Main game logic
+│       ├── cards.js       # Card definitions and mapping
+│       ├── draft.js       # Draft phase mechanics
+│       ├── placement.js   # Card placement validation
+│       └── validation.js  # Card validation rules
+├── services/              # Service modules
+│   ├── socket.js         # Socket.IO client wrapper
+│   ├── gameStateCache.js # localStorage game persistence
+│   └── imagePreloader.js # Card image preloading
+└── App.jsx               # Main application component
+
+server/                    # Backend Node.js application
+├── games/                # Server-side game logic
+│   ├── base/             # Base server framework
+│   │   ├── BaseGameServer.js # Base server game class
+│   │   └── GameServerRegistry.js # Server game registration
+│   └── vetrolisci/       # Vetrolisci server implementation
+│       ├── VetrolisciServer.js # Server game logic
+│       └── index.js      # Game server exports
+└── main.js               # Server entry point
+
+client/public/            # Static assets
+├── cards/               # Card images
+├── icons/               # UI icons
+└── audio/               # Audio files
+
+legacy/                   # Preserved working implementation
+└── src/                 # Reference for advanced features
 ```
 
 ## Important Notes for Future Development
