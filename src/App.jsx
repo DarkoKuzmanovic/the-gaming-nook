@@ -1,384 +1,344 @@
-import React, { useState, useEffect, useMemo } from "react";
-import GameBoard from "./components/GameBoard";
-import ScoreBoard from "./components/ScoreBoard";
-import socketService from "./services/socket";
-import imagePreloader from "./services/imagePreloader";
-import gameStateCache from "./services/gameStateCache";
-import "./App.css";
+import React, { useState, useEffect } from 'react'
+import socketClient from './shared/client/utils/socket-client.js'
+import Modal from './shared/client/components/Modal.jsx'
+import Button from './shared/client/components/Button.jsx'
+import LoadingSpinner from './shared/client/components/LoadingSpinner.jsx'
+import GameBoard from './games/vetrolisci/client/components/GameBoard.jsx'
+import './App.css'
 
 function App() {
-  const [gameState, setGameState] = useState("menu"); // 'menu', 'waiting', 'playing', 'finished'
-  const [playerName, setPlayerName] = useState(() => {
-    // Load saved player name from localStorage
-    return localStorage.getItem("vetrolisci-player-name") || "";
-  });
-  const [gameInfo, setGameInfo] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState("disconnected");
-  const [currentGameState, setCurrentGameState] = useState(null);
-  const [currentDraftState, setCurrentDraftState] = useState(null);
-  const [imagesPreloaded, setImagesPreloaded] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentView, setCurrentView] = useState('menu') // 'menu', 'create', 'join', 'waiting', 'game'
+  const [roomCode, setRoomCode] = useState('')
+  const [connected, setConnected] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [currentRoom, setCurrentRoom] = useState(null)
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [gameData, setGameData] = useState(null)
 
-  // Update page title based on game state
+  // Connect to server on app load
   useEffect(() => {
-    if (gameState === "menu") {
-      document.title = "Vetrolisci - Digital Pixies Card Game";
-    } else if (gameState === "waiting") {
-      document.title = "Waiting for Player - Vetrolisci";
-    } else if (gameState === "playing" && currentGameState) {
-      const isMyTurn = currentDraftState?.pickOrder[currentDraftState.currentPickIndex] === gameInfo?.playerIndex;
-      if (isMyTurn) {
-        document.title = `Your Turn - Round ${currentGameState.currentRound} - Vetrolisci`;
-      } else {
-        document.title = `Round ${currentGameState.currentRound} - Vetrolisci`;
-      }
-    }
-  }, [gameState, currentGameState, currentDraftState, gameInfo?.playerIndex]);
-
-  // Save player name to localStorage whenever it changes
-  useEffect(() => {
-    if (playerName.trim()) {
-      localStorage.setItem("vetrolisci-player-name", playerName.trim());
-    }
-  }, [playerName]);
-
-  useEffect(() => {
-    // Check for cached game state on app start
-    const cachedState = gameStateCache.loadGameState();
-    if (cachedState) {
-      console.log("Restoring game from cache:", cachedState);
-      setGameState("playing");
-      setGameInfo(cachedState.gameInfo);
-      setCurrentGameState(cachedState.gameState);
-      setCurrentDraftState(cachedState.draftState);
-      // Note: We'll need to reconnect to the socket with the cached game ID
-    }
-
-    // Preload card images on app start
-    imagePreloader
-      .preloadAllCardImages()
-      .then((result) => {
-        console.log("Card images preloaded:", result);
-        setImagesPreloaded(true);
-      })
-      .catch((error) => {
-        console.error("Failed to preload images:", error);
-        setImagesPreloaded(true); // Continue anyway
-      });
-
-    // Connect to server on app start
-    const socket = socketService.connect();
-
-    socket.on("connect", () => {
-      console.log("Socket connected");
-      setConnectionStatus("connected");
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected");
-      setConnectionStatus("disconnected");
-    });
-
-    // Handle game started event
-    socketService.onGameStarted((game) => {
-      console.log("Game started event received:", game);
-      setGameState("playing");
-      setGameInfo((prevInfo) => ({ ...prevInfo, ...game }));
-    });
-
-    // Handle player disconnection
-    socketService.onPlayerDisconnected((playerIndex) => {
-      console.log("Player disconnected:", playerIndex);
-      gameStateCache.clearGameState(); // Clear cache when game ends
-      alert("The other player has disconnected. Returning to menu.");
-      setGameState("menu");
-      setGameInfo(null);
-    });
-
-    return () => {
-      socketService.disconnect();
-    };
-  }, []);
-
-  // Cache game state when playing and state changes
-  useEffect(() => {
-    if (gameState === "playing" && gameInfo && currentGameState) {
-      gameStateCache.saveGameState(currentGameState, gameInfo, currentDraftState);
-    } else if (gameState === "menu" || gameState === "finished") {
-      gameStateCache.clearGameState();
-    }
-  }, [gameState, gameInfo, currentGameState, currentDraftState]);
-
-  const handleReturnToMenu = () => {
-    console.log("Returning to main menu");
-    gameStateCache.clearGameState();
-    setGameState("menu");
-    setGameInfo(null);
-    setCurrentGameState(null);
-    setCurrentDraftState(null);
-  };
-
-  const startGame = async () => {
-    if (playerName.trim() && socketService.isConnected()) {
+    const connect = async () => {
       try {
-        setGameState("waiting");
-        const { gameId, playerIndex } = await socketService.joinGame(playerName.trim());
-        console.log("Joined game successfully:", { gameId, playerIndex });
-        setGameInfo({ gameId, playerIndex });
+        setLoading(true)
+        await socketClient.connect()
+        setConnected(true)
+        
+        // Set up connection status listener
+        socketClient.onConnectionStatus(({ connected, reconnected }) => {
+          setConnected(connected)
+          if (reconnected) {
+            console.log('🔌 Reconnected to server')
+          }
+        })
 
-        // If this is the second player, the game will start automatically
-        // If this is the first player, we wait for another player
-      } catch (error) {
-        console.error("Failed to join game:", error);
-        alert("Failed to join game. Please try again.");
-        setGameState("menu");
+        // Set up error handling
+        socketClient.onError((error) => {
+          setError(error.message || 'An error occurred')
+          setShowErrorModal(true)
+        })
+
+        // Listen for when players join
+        socketClient.onPlayerJoined((data) => {
+          console.log('👤 Player joined:', data)
+        })
+
+        // Listen for game started
+        socketClient.on('game-started', (data) => {
+          console.log('🚀 Game started for room:', data.room.code)
+          
+          // Find player index by socket ID
+          let playerIndex = 0
+          if (data.room && data.room.players) {
+            const myPlayer = data.room.players.find(p => p.id === socketClient.getSocketId())
+            if (myPlayer) {
+              playerIndex = data.room.players.indexOf(myPlayer)
+            }
+          }
+          
+          console.log(`🎯 Joined as Player ${playerIndex} (${data.room.players[playerIndex]?.name})`)
+          
+          setGameData({
+            roomCode: data.room.code,
+            gameType: data.room.gameType,
+            playerIndex: playerIndex,
+            gameState: data.gameState
+          })
+          setCurrentView('game')
+        })
+
+      } catch (err) {
+        console.error('Failed to connect to server:', err)
+        setError('Failed to connect to server. Please check your connection.')
+        setShowErrorModal(true)
+      } finally {
+        setLoading(false)
       }
     }
-  };
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement
-        .requestFullscreen()
-        .then(() => {
-          setIsFullscreen(true);
-        })
-        .catch((err) => {
-          console.log("Error attempting to enable fullscreen:", err);
-        });
-    } else {
-      document
-        .exitFullscreen()
-        .then(() => {
-          setIsFullscreen(false);
-        })
-        .catch((err) => {
-          console.log("Error attempting to exit fullscreen:", err);
-        });
-    }
-  };
+    connect()
 
-  // Listen for fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    // Cleanup on unmount
     return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
+      socketClient.disconnect()
+    }
+  }, [])
 
-  if (gameState === "menu") {
-    return (
-      <div className="app">
-        <div className="menu">
-          <div className="menu-content">
-            <h1>Vetrolisci</h1>
-            <p>A strategic card placement game for 2 players</p>
-            <div className="connection-status">
-              <div className="status-content">
-                <span>Status: {connectionStatus === "connected" ? "🟢 Connected" : "🔴 Disconnected"}</span>
-                {connectionStatus !== "connected" && (
-                  <button className="refresh-button" onClick={() => window.location.reload()} title="Refresh page">
-                    <img src="/icons/refresh.svg" alt="Refresh" width="16" height="16" />
-                  </button>
-                )}
-              </div>
-              {!imagesPreloaded && <div>🖼️ Loading images...</div>}
-            </div>
-            <div className="menu-form">
-              <input
-                type="text"
-                placeholder="Enter your name"
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && startGame()}
-              />
-              <button
-                onClick={startGame}
-                disabled={!playerName.trim() || connectionStatus !== "connected"}
-                title={
-                  connectionStatus !== "connected" ? "Waiting for connection..." : "Start searching for another player"
-                }
-              >
-                Find Game
-              </button>
-            </div>
-            <p className="instructions">Enter your name and click "Find Game" to be matched with another player</p>
-            <div className="version-footer">
-              <small>
-                Copyright &copy; 2025 &mdash; Darko Kuzmanović <span class="connection-status">v1.0.0</span>
-              </small>
-              <button
-                onClick={toggleFullscreen}
-                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-                style={{
-                  position: "absolute",
-                  top: "20px",
-                  right: "20px",
-                  background: "rgba(255, 255, 255, 0.15)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "8px",
-                  padding: "10px",
-                  cursor: "pointer",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
-                }}
-              >
-                <img src="/icons/fullscreen.png" alt="Fullscreen" style={{ width: "20px", height: "20px" }} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  const handleCreateGame = () => {
+    setCurrentView('create')
   }
 
-  if (gameState === "waiting") {
+  const handleJoinGame = () => {
+    setCurrentView('join')
+  }
+
+  const handleBack = () => {
+    setCurrentView('menu')
+    setRoomCode('')
+    setError('')
+    setCurrentRoom(null)
+    setGameData(null)
+  }
+
+  const handleCreateVetrolisciRoom = async () => {
+    if (!connected) {
+      setError('Not connected to server')
+      setShowErrorModal(true)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await socketClient.emit('create-room', { 
+        gameType: 'vetrolisci', 
+        playerName: 'Host' 
+      })
+      
+      if (response.success) {
+        setCurrentRoom(response)
+        setRoomCode(response.roomCode)
+        setCurrentView('waiting')
+        console.log('🎮 Room created:', response.roomCode)
+      } else {
+        setError(response.error || 'Failed to create room')
+        setShowErrorModal(true)
+      }
+    } catch (err) {
+      setError('Failed to create room. Please try again.')
+      setShowErrorModal(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleJoinRoom = async () => {
+    console.log('🎯 JOIN ATTEMPT: Starting join process for room:', roomCode)
+    
+    if (!connected) {
+      console.log('🎯 JOIN ATTEMPT: Not connected to server')
+      setError('Not connected to server')
+      setShowErrorModal(true)
+      return
+    }
+
+    if (roomCode.length !== 6) {
+      console.log('🎯 JOIN ATTEMPT: Invalid room code length:', roomCode.length)
+      setError('Please enter a valid 6-character room code')
+      setShowErrorModal(true)
+      return
+    }
+
+    try {
+      setLoading(true)
+      console.log('🎯 JOIN ATTEMPT: Checking if room exists:', roomCode)
+      
+      // First check if room exists
+      const checkResponse = await socketClient.checkRoom(roomCode)
+      console.log('🎯 JOIN ATTEMPT: Check room response:', checkResponse)
+      
+      if (!checkResponse.success) {
+        console.log('🎯 JOIN ATTEMPT: Room check failed:', checkResponse.error)
+        setError(checkResponse.error || 'Room not found')
+        setShowErrorModal(true)
+        setLoading(false)
+        return
+      }
+
+      console.log('🎯 JOIN ATTEMPT: Room exists, attempting to join...')
+      // Join the room
+      const joinResponse = await socketClient.joinRoom(roomCode, 'Guest')
+      console.log('🎯 JOIN ATTEMPT: Join response:', joinResponse)
+      
+      if (joinResponse.success) {
+        setCurrentRoom(joinResponse)
+        setCurrentView('waiting')
+        console.log('👤 Successfully joined room:', roomCode)
+      } else {
+        console.log('🎯 JOIN ATTEMPT: Join failed:', joinResponse.error)
+        setError(joinResponse.error || 'Failed to join room')
+        setShowErrorModal(true)
+      }
+    } catch (err) {
+      console.log('🎯 JOIN ATTEMPT: Exception:', err)
+      setError('Failed to join room. Please try again.')
+      setShowErrorModal(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const copyRoomCode = () => {
+    navigator.clipboard.writeText(roomCode)
+    // Could add a toast notification here
+    console.log('📋 Room code copied to clipboard')
+  }
+
+  if (loading && currentView === 'menu') {
     return (
       <div className="app">
-        <div className="waiting">
-          <div className="waiting-content">
-            <h1>Vetrolisci</h1>
-            <div className="spinner">⟳</div>
-            <h2>
-              Waiting for another player
-              <span className="loading-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </h2>
-            <p>Game ID: {gameInfo?.gameId}</p>
-            <p>You are Player {(gameInfo?.playerIndex || 0) + 1}</p>
-            <button
-              onClick={() => {
-                socketService.disconnect();
-                setGameState("menu");
-                setGameInfo(null);
-              }}
-              title="Return to main menu"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        <LoadingSpinner size="large" text="Connecting to server..." />
       </div>
-    );
+    )
   }
 
   return (
     <div className="app">
       <header className="app-header">
-        <div className="app-header-left">
-          <h1 style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <img
-              src="/icons/favicon-96x96.png"
-              alt="Vetrolisci logo"
-              width={24}
-              height={24}
-              style={{ marginTop: "-5px" }}
-            />
-            Vetrolisci
-          </h1>
-          <p>
-            Player: {playerName} | Game: {gameInfo?.gameId}
-          </p>
-        </div>
-        <div className="app-header-right">
-          <GameInfo gameState={currentGameState} draftState={currentDraftState} />
-        </div>
-
-        {/* Floating turn indicator in center bottom */}
-        {currentDraftState && (
-          <HeaderTurnIndicator
-            isMyTurn={currentDraftState.pickOrder[currentDraftState.currentPickIndex] === gameInfo?.playerIndex}
-            opponentName={
-              currentGameState?.players[currentDraftState.pickOrder[currentDraftState.currentPickIndex]]?.name
-            }
-          />
+        <h1>🎮 The Gaming Nook</h1>
+        <p>Simple multiplayer games for friends</p>
+        {!connected && (
+          <div className="connection-status offline">
+            ⚠️ Disconnected from server
+          </div>
         )}
       </header>
 
-      <GameBoard
-        playerName={playerName}
-        gameInfo={gameInfo}
-        socketService={socketService}
-        onGameStateChange={setCurrentGameState}
-        onDraftStateChange={setCurrentDraftState}
-        onReturnToMenu={handleReturnToMenu}
-        hideScoreBoard={true}
-        hideTurnIndicator={true}
-      />
+      <main className="app-main">
+        {currentView === 'menu' && (
+          <div className="menu">
+            <Button 
+              variant="success"
+              size="large"
+              onClick={handleCreateGame}
+              disabled={!connected}
+            >
+              Create Game
+            </Button>
+            
+            <Button 
+              variant="primary"
+              size="large"
+              onClick={handleJoinGame}
+              disabled={!connected}
+            >
+              Join Game
+            </Button>
+          </div>
+        )}
+
+        {currentView === 'create' && (
+          <div className="create-game">
+            <h2>Select Game Type</h2>
+            <div className="game-selection">
+              <Button
+                className="game-card-button"
+                variant="danger"
+                size="large"
+                onClick={handleCreateVetrolisciRoom}
+                loading={loading}
+                disabled={!connected}
+              >
+                <div className="game-card-content">
+                  <h3>Vetrolisci</h3>
+                  <p>Card Strategy Game</p>
+                </div>
+              </Button>
+            </div>
+            <Button variant="outline" onClick={handleBack}>
+              ← Back
+            </Button>
+          </div>
+        )}
+
+        {currentView === 'join' && (
+          <div className="join-game">
+            <h2>Join Game</h2>
+            <div className="join-form">
+              <input
+                type="text"
+                placeholder="Enter room code..."
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                maxLength={6}
+                className="room-code-input"
+                disabled={loading}
+              />
+              <Button 
+                variant="primary"
+                size="large"
+                onClick={handleJoinRoom}
+                disabled={roomCode.length !== 6 || !connected}
+                loading={loading}
+              >
+                Join Game
+              </Button>
+            </div>
+            <Button variant="outline" onClick={handleBack}>
+              ← Back
+            </Button>
+          </div>
+        )}
+
+        {currentView === 'waiting' && (
+          <div className="waiting-room">
+            <h2>Room: {roomCode}</h2>
+            <div className="room-info">
+              <p><strong>Game:</strong> {currentRoom?.room?.gameType || currentRoom?.gameType}</p>
+              <p><strong>Players:</strong> {currentRoom?.room?.players?.length || 1}/2</p>
+            </div>
+            
+            <div className="room-code-share">
+              <h3>Share this code with your friend:</h3>
+              <div className="room-code-display">
+                <span className="room-code-text">{roomCode}</span>
+                <Button variant="outline" size="small" onClick={copyRoomCode}>
+                  Copy
+                </Button>
+              </div>
+            </div>
+
+            <LoadingSpinner text="Waiting for another player to join..." />
+            
+            <Button variant="outline" onClick={handleBack}>
+              Leave Room
+            </Button>
+          </div>
+        )}
+
+        {currentView === 'game' && gameData && (
+          <GameBoard 
+            roomCode={gameData.roomCode}
+            playerIndex={gameData.playerIndex}
+            onBackToMenu={handleBack}
+          />
+        )}
+      </main>
+
+      {/* Error Modal */}
+      <Modal
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        title="Error"
+      >
+        <p className="error-message">{error}</p>
+        <div className="modal-actions">
+          <Button onClick={() => setShowErrorModal(false)}>
+            OK
+          </Button>
+        </div>
+      </Modal>
     </div>
-  );
+  )
 }
 
-// HeaderTurnIndicator and waiting synonyms
-const WAITING_SYNONYMS = [
-  "Summoning",
-  "Consulting the oracle for",
-  "Staring intensely at",
-  "Manifesting a move from",
-  "Politely nudging",
-];
-
-const YOUR_TURN_SYNONYMS = [
-  "Your moment of glory!",
-  "It's showtime!",
-  "The spotlight's on you!",
-  "Unleash your strategy!",
-  "Your move, maestro!",
-];
-
-function HeaderTurnIndicator({ isMyTurn, opponentName }) {
-  const waitingPhrase = React.useMemo(() => {
-    if (!opponentName) return "Waiting for";
-    const idx = Math.floor(Math.random() * WAITING_SYNONYMS.length);
-    return WAITING_SYNONYMS[idx];
-  }, [opponentName]);
-
-  const yourTurnPhrase = React.useMemo(() => {
-    const idx = Math.floor(Math.random() * YOUR_TURN_SYNONYMS.length);
-    return YOUR_TURN_SYNONYMS[idx];
-  }, [isMyTurn]);
-
-  return (
-    <div className="header-turn-indicator">
-      {isMyTurn ? (
-        <>{yourTurnPhrase}</>
-      ) : (
-        <>
-          {`${waitingPhrase} ${opponentName}`}
-          <span className="loading-dots">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </>
-      )}
-    </div>
-  );
-}
-
-// Game info component to be used in header
-const GameInfo = ({ gameState, draftState }) => {
-  if (!gameState) {
-    return (
-      <div className="game-info-inline">
-        <h2>Loading...</h2>
-      </div>
-    );
-  }
-
-  return (
-    <div className="game-info-inline">
-      <h2>Round {gameState.currentRound}/3</h2>
-      <p>Turn: {gameState.players[gameState.currentPlayer]?.name}</p>
-    </div>
-  );
-};
-
-export default App;
+export default App
