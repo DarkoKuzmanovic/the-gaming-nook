@@ -1,12 +1,11 @@
 /* ===== DRAFT PHASE CONTAINER ===== */
 .draft-phase {
-  background: url("/vetrolisci/background.jpg") repeat, rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-radius: 12px;
-  padding: 15px 20px;
+  padding: 20px 24px;
   margin: 20px 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border: 2px solid #e9ecef;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   max-width: 800px;
   margin: 20px auto;
 }
@@ -15,34 +14,39 @@
 .draft-header {
   text-align: center;
   margin-bottom: 20px;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 16px;
 }
 
 .draft-header h3 {
-  color: #333;
-  margin: 0 0 10px 0;
-  font-size: 1.3em;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 /* ===== TURN INDICATOR ===== */
 .turn-indicator {
-  margin: 15px 0;
+  margin: 16px 0;
   padding: 12px 20px;
   border-radius: 8px;
-  font-weight: bold;
-  transition: all 0.3s ease;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
 
 .turn-indicator.my-turn {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: #d97706;
   color: white;
+  border-color: #d97706;
   animation: pulse-glow 2s infinite;
 }
 
 .turn-indicator.waiting {
-  background: linear-gradient(135deg, #6c757d, #adb5bd);
-  color: white;
+  background: #f3f4f6;
+  color: #6b7280;
+  border-color: #e5e7eb;
 }
 
 .my-turn-text {
