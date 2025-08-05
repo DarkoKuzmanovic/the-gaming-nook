@@ -1,30 +1,22 @@
 {
   "name": "the-gaming-nook",
   "version": "2.0.0",
-  "description": "Multi-game platform featuring strategic 2-player games",
+  "description": "Simple multiplayer gaming platform with isolated game architecture",
   "type": "module",
-  "main": "server/main.js",
+  "main": "src/shared/server/main.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon server/main.js",
+    "server": "node src/shared/server/main.js",
     "client": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "test": "jest",
-    "lint": "eslint client --ext .js,.jsx,.ts,.tsx",
-    "typecheck": "tsc --noEmit"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "express-rate-limit": "^8.0.1",
-    "jsonwebtoken": "^9.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "socket.io": "^4.7.2",
-    "socket.io-client": "^4.8.1",
-    "uuid": "^11.1.0"
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
@@ -33,17 +25,6 @@
     "concurrently": "^8.2.0",
     "vite": "^4.4.5"
   },
-  "keywords": [
-    "card-game",
-    "pixies",
-    "multiplayer",
-    "react",
-    "node"
-  ],
-  "author": {
-    "name": "Darko Kuzmanovic",
-    "email": "darko@quz.ma",
-    "url": "https://quz.ma"
-  },
+  "author": "The Gaming Nook Team",
   "license": "MIT"
 }

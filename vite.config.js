@@ -3,26 +3,13 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  root: './client', // Point to new client directory
-  server: {
-    host: '0.0.0.0', // Allow external network access
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8001',
-        changeOrigin: true,
-        secure: false,
-      },
-      '/socket.io': {
-        target: 'http://localhost:8001',
-        changeOrigin: true,
-        secure: false,
-        ws: true,
-      },
-    },
-  },
+  root: 'src',
   build: {
-    outDir: '../client/dist', // Build output directory
-    emptyOutDir: true,
+    outDir: '../dist'
   },
+  server: {
+    port: 5173,
+    host: '0.0.0.0' // Allow network access for testing
+  },
+  publicDir: '../src/public'
 })
