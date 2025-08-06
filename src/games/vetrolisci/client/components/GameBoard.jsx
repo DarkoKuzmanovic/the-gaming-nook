@@ -5,13 +5,15 @@ import CardChoiceModal from './CardChoiceModal.jsx'
 import PlacementChoiceModal from './PlacementChoiceModal.jsx'
 import RoundCompleteModal from './RoundCompleteModal.jsx'
 import ScoreBoard from './ScoreBoard.jsx'
+import TurnScoreModal from './TurnScoreModal.jsx'
+import ScoreboardModal from './ScoreboardModal.jsx'
 import DraftPhase from './DraftPhase.jsx'
 import { PlacementScenario, getPickableCards } from '../../shared/placement.js'
 import socketClient from '../../../../shared/client/utils/socket-client.js'
 import audioService from '../services/audio.js'
 import './GameBoard.css'
 
-const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
+const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) => {
   const [gameState, setGameState] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -23,6 +25,8 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
   const [placementChoiceData, setPlacementChoiceData] = useState(null)
   const [showRoundComplete, setShowRoundComplete] = useState(false)
   const [roundCompleteData, setRoundCompleteData] = useState(null)
+  const [showTurnScore, setShowTurnScore] = useState(false)
+  const [showScoreboard, setShowScoreboard] = useState(false)
   
   // Animation states
   const [animatingCards, setAnimatingCards] = useState(new Set())
@@ -46,6 +50,13 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
   }
   
   // Confetti handler
+  // Handle turn score continue
+  const handleTurnScoreContinue = () => {
+    setShowTurnScore(false)
+    // Emit to server to continue to next turn
+    socketClient.emit('continue-from-scoring', { roomCode })
+  }
+
   const handleConfettiComplete = (cardId) => {
     setConfettiCards(prev => {
       const newSet = new Set(prev)
@@ -83,6 +94,13 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
       document.title = 'The Gaming Nook'
     }
   }, [gameState?.phase, gameState?.currentRound, gameState?.currentPickingPlayer?.index, playerIndex])
+
+  // Handle scoring phase
+  useEffect(() => {
+    if (gameState?.phase === 'scoring' && !showTurnScore) {
+      setShowTurnScore(true)
+    }
+  }, [gameState?.phase, showTurnScore])
 
   // Log turn changes only
   useEffect(() => {
@@ -396,60 +414,30 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
 
   return (
     <div className="game-board">
-      {/* Game Header */}
-      <div className="game-header">
-        <div className="header-left">
-          <h2>Vetrolisci - Round {gameState.currentRound}/3</h2>
-        </div>
-        
-        <div className="header-right">
-          {/* Audio Controls */}
-          <div className="audio-controls">
-            <button 
-              className={`audio-button ${soundEnabled ? 'enabled' : 'disabled'}`}
-              onClick={toggleSound}
-              title={soundEnabled ? 'Disable sound effects' : 'Enable sound effects'}
-            >
-              🔊
-            </button>
-            <button 
-              className={`audio-button ${musicEnabled ? 'enabled' : 'disabled'}`}
-              onClick={toggleMusic}
-              title={musicEnabled ? 'Disable music' : 'Enable music'}
-            >
-              🎵
-            </button>
+      {/* Game Header - only show if showHeader is true */}
+      {showHeader && (
+        <div className="game-header">
+          <div className="header-left">
+            <h2>Vetrolisci - Round {gameState.currentRound}/3</h2>
+          </div>
+          
+          {/* Game Progress */}
+          <div className="game-progress">
+            <div className="round-indicators">
+              {[1, 2, 3].map(round => (
+                <div 
+                  key={round} 
+                  className={`round-indicator ${round === gameState.currentRound ? 'current' : ''} ${round < gameState.currentRound ? 'completed' : ''}`}
+                >
+                  {round}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+      )}
         
-        {/* Game Progress */}
-        <div className="game-progress">
-          <div className="round-indicators">
-            {[1, 2, 3].map(round => (
-              <div 
-                key={round} 
-                className={`round-indicator ${round === gameState.currentRound ? 'current' : ''} ${round < gameState.currentRound ? 'completed' : ''}`}
-              >
-                {round}
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="turn-indicator">
-          {isMyTurn ? (
-            <span className="my-turn">Your turn to pick!</span>
-          ) : (
-            <span className="waiting">
-              Waiting for {currentPickingPlayerName}
-              <span className="loading-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </span>
-          )}
-        </div>
+
         
         {/* Error Display */}
         {error && (
@@ -457,8 +445,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
             ⚠️ {error}
           </div>
         )}
-      </div>
-
+      
       {/* Game Content Container */}
       <div className="game-content">
         {/* Enhanced Draft Phase */}
@@ -497,21 +484,46 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
           />
         </div>
       </div>
+
+      {/* Bottom Right Controls */}
+      <div className="bottom-right-controls">
+        {/* Audio Controls */}
+        <button 
+          className={`control-button audio-button ${soundEnabled ? 'enabled' : 'disabled'}`}
+          onClick={toggleSound}
+          title={soundEnabled ? 'Disable sound effects' : 'Enable sound effects'}
+          style={{ bottom: '180px', right: '20px' }}
+        >
+          <img src="/shared/icons/sound.png" alt="Sound Effects" style={{ width: '20px', height: '20px' }} />
+        </button>
+        <button 
+          className={`control-button audio-button ${musicEnabled ? 'enabled' : 'disabled'}`}
+          onClick={toggleMusic}
+          title={musicEnabled ? 'Disable music' : 'Enable music'}
+          style={{ bottom: '120px', right: '20px' }}
+        >
+          <img src="/shared/icons/music.png" alt="Music" style={{ width: '20px', height: '20px' }} />
+        </button>
+        
+        {/* Scoreboard Button */}
+        <button 
+          className="control-button scoreboard-button"
+          onClick={() => setShowScoreboard(true)}
+          title="View detailed scoreboard"
+          style={{ bottom: '60px', right: '20px' }}
+        >
+          <img src="/shared/icons/score.png" alt="Scoreboard" style={{ width: '20px', height: '20px' }} />
+        </button>
+        
+        {/* Back to Menu */}
+        <button 
+          className="control-button back-to-menu-button"
+          onClick={onBackToMenu}
+          style={{ bottom: '60px', left: '20px' }}
+        >
+          <img src="/shared/icons/back-to-menu.svg" alt="Back to Menu" style={{ width: '20px', height: '20px' }} />
+        </button>
       </div>
-
-      {/* Scoreboard */}
-      <ScoreBoard 
-        players={gameState.players} 
-        currentRound={gameState.currentRound} 
-      />
-
-      {/* Back to Menu */}
-      <button 
-        className="back-to-menu-button"
-        onClick={onBackToMenu}
-      >
-        Back to Menu
-      </button>
 
       {/* Modals */}
       <CardChoiceModal
@@ -537,6 +549,21 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
         nextRound={roundCompleteData?.nextRound}
         onContinue={handleRoundContinue}
       />
+
+      <TurnScoreModal
+        isOpen={showTurnScore}
+        gameState={gameState}
+        playerIndex={playerIndex}
+        onContinue={handleTurnScoreContinue}
+      />
+
+      <ScoreboardModal
+        isOpen={showScoreboard}
+        gameState={gameState}
+        playerIndex={playerIndex}
+        onClose={() => setShowScoreboard(false)}
+      />
+      </div>
     </div>
   )
 }

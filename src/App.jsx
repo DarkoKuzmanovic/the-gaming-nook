@@ -66,6 +66,16 @@ function App() {
           })
           setCurrentView('game')
         })
+        
+        // Listen for game state updates to keep header in sync
+        socketClient.on('vetrolisci-game-state', (data) => {
+          if (gameData) {
+            setGameData(prev => ({
+              ...prev,
+              gameState: data
+            }))
+          }
+        })
 
       } catch (err) {
         console.error('Failed to connect to server:', err)
@@ -204,8 +214,17 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>🎮 The Gaming Nook</h1>
-        <p>Simple multiplayer games for friends</p>
+        {currentView === 'game' && gameData ? (
+          <>
+            <h1>🎮 Vetrolisci - Round {gameData.gameState?.currentRound || 1}/3</h1>
+            <p>Room: {gameData.roomCode}</p>
+          </>
+        ) : (
+          <>
+            <h1>🎮 The Gaming Nook</h1>
+            <p>Simple multiplayer games for friends</p>
+          </>
+        )}
         {!connected && (
           <div className="connection-status offline">
             ⚠️ Disconnected from server
@@ -320,6 +339,7 @@ function App() {
             roomCode={gameData.roomCode}
             playerIndex={gameData.playerIndex}
             onBackToMenu={handleBack}
+            showHeader={false}
           />
         )}
       </main>

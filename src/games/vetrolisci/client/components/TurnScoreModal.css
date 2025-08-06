@@ -1,0 +1,147 @@
+/* ===== TURN SCORE MODAL ===== */
+.turn-score-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.turn-score-modal .modal-header {
+  text-align: center;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 16px;
+}
+
+.turn-score-modal .modal-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* ===== SCORES CONTAINER ===== */
+.scores-container {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .scores-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.player-score-section {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.player-score-section h3 {
+  margin: 0 0 12px 0;
+  color: #374151;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.score-display {
+  text-align: center;
+}
+
+.round-score {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #dbeafe;
+  border-radius: 6px;
+  border: 1px solid #93c5fd;
+}
+
+.round-score strong {
+  color: #1e40af;
+  font-size: 18px;
+}
+
+/* ===== SCORE BREAKDOWN ===== */
+.score-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.breakdown-item:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== MODAL ACTIONS ===== */
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.continue-button {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px;
+}
+
+.continue-button:hover {
+  background: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.continue-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 480px) {
+  .turn-score-modal {
+    padding: 16px;
+    width: 95%;
+  }
+  
+  .turn-score-modal .modal-header h2 {
+    font-size: 20px;
+  }
+  
+  .continue-button {
+    width: 100%;
+    min-width: unset;
+  }
+}

@@ -341,6 +341,38 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('continue-from-scoring', (data) => {
+    try {
+      const { roomCode } = data;
+      console.log(`🎯 Continue from scoring for room ${roomCode}`);
+      
+      const game = vetrolisciServer.getGame(roomCode);
+      if (!game) {
+        console.error(`❌ Game not found: ${roomCode}`);
+        return;
+      }
+      
+      // Transition from scoring phase to next turn/round
+      if (game.phase === 'scoring') {
+        if (game.currentRound >= 3) {
+          // Game should be finished
+          game.phase = 'finished';
+        } else {
+          // Continue to next turn of current round or start new round
+          game.phase = 'draft';
+        }
+        
+        // Emit updated game state to all players in the room
+        const gameState = vetrolisciServer.getGameState(roomCode);
+        io.to(roomCode).emit('vetrolisci-game-updated', gameState);
+        
+        console.log(`🎯 Transitioned from scoring to ${game.phase} phase`);
+       }
+     } catch (error) {
+       console.error(`❌ Continue from scoring error: ${error.message}`);
+     }
+   });
+
   // Handle disconnection
   socket.on('disconnect', () => {
     console.log(`🔌 Client disconnected: ${socket.id}`);

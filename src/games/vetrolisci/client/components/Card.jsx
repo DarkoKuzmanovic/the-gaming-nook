@@ -104,6 +104,8 @@ const Card = memo(({ card, isSelected, onClick, isPlaced = false, showBack = fal
           </div>
         </div>
       )}
+      
+      {card.validated && <div className="validation-badge"></div>}
     </div>
   )
 })
