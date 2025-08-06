@@ -110,8 +110,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Card restriction overlay styles */
@@ -259,11 +263,17 @@
   margin: 0 1px;
 }
 
-.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
 
 @keyframes loading-dots {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
   }
   40% {
@@ -271,24 +281,32 @@
   }
 }
 
-/* Removed old revealed-cards styles - now using DraftPhase component */
+/* Main game layout container */
+.game-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 8px;
+}
 
+/* Game grids container - more compact layout */
 .game-grids {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  margin: 20px 0 30px 0;
+  gap: 24px;
+  margin: 16px 0 30px 0;
   justify-items: center;
   width: 100%;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 780px; /* Increased to accommodate wider game grids */
 }
 
 @media (min-width: 1024px) {
   .game-grids {
-    max-width: 1100px;
-    gap: 60px;
+    max-width: 900px; /* Increased to accommodate wider game grids */
+    gap: 32px;
   }
 }
 
@@ -299,10 +317,16 @@
 
 .player-grid-section h3,
 .opponent-grid-section h3 {
-  margin-bottom: 10px;
-  color: #333;
-  font-size: 1.1em;
+  margin-bottom: 12px;
+  color: #1a1a1a;
+  font-size: 1.1rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .back-to-menu-button {
@@ -349,12 +373,36 @@
 }
 
 @media (max-width: 768px) {
+  .game-board {
+    padding: 12px;
+  }
+
+  .game-header {
+    margin-bottom: 15px;
+  }
+
+  .header-left h2 {
+    font-size: 1.2rem;
+  }
+
   .game-grids {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
+    margin: 12px 0 20px 0;
+    max-width: 430px; /* Match the max-width of a single game grid */
   }
-  
-  .game-board {
-    padding: 10px;
+
+  .game-content {
+    max-width: 430px; /* Match the max-width of a single game grid */
+  }
+
+  .audio-controls {
+    margin-left: 8px;
+  }
+
+  .audio-button {
+    min-width: 36px;
+    height: 36px;
+    font-size: 14px;
   }
 }

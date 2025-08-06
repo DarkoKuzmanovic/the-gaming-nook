@@ -28,6 +28,8 @@ export class VetrolisciServer {
       deck,
       draftState: null,
       turn: 0,
+      playerTurnCounts: [0, 0], // Track turns per player
+      lastPicker: null, // Track who picked the last card for dynamic pick order
       status: 'playing',
       createdAt: Date.now()
     }
@@ -47,17 +49,30 @@ export class VetrolisciServer {
     try {
       // Deal 4 cards for this turn
       const { turnCards, remainingDeck } = dealTurnCards(game.deck)
+      
+      // Update deck
       game.deck = remainingDeck
       
-      // Initialize draft phase with these 4 cards
-      game.draftState = initializeDraftPhase([...turnCards], game.currentRound)
+      // Calculate pick order based on legacy system:
+      // - First turn of round: use round-based order
+      // - Subsequent turns: last picker becomes first picker
+      let pickOrder
+      if (game.lastPicker === null) {
+        // First turn of round - use round-based order
+        pickOrder = game.currentRound % 2 === 1 ? [0, 1, 0, 1] : [1, 0, 1, 0]
+      } else {
+        // Subsequent turns - last picker becomes first picker (legacy behavior)
+        pickOrder = game.lastPicker === 0 ? [0, 1, 0, 1] : [1, 0, 1, 0]
+      }
+      
+      // Initialize draft phase with the 4 cards and dynamic pick order
+      game.draftState = initializeDraftPhase(turnCards, pickOrder)
       game.phase = 'draft'
       
-      console.log(`🎯 Turn started: ${turnCards.length} cards revealed for draft`)
-      console.log(`🎯 Pick order: ${game.draftState.pickOrder.join(' → ')}`)
+      console.log(`🎯 Turn ${game.turn + 1}: Revealed ${turnCards.length} cards, pick order: ${game.draftState.pickOrder} (lastPicker: ${game.lastPicker})`)
       
     } catch (error) {
-      console.error(`❌ Error starting turn: ${error.message}`)
+      console.error(`❌ Error starting new turn: ${error.message}`)
       throw error
     }
   }
@@ -161,6 +176,10 @@ export class VetrolisciServer {
             needsChoice = true
             console.log(`🎯 Player needs to choose empty position for face-down card`)
           } else {
+            // Validate that the chosen position is still empty
+            if (game.players[playerIndex].grid[placementChoice.position] !== null) {
+              throw new Error(`Position ${placementChoice.position + 1} is no longer available`)
+            }
             placementResult = executeCardPlacement(
               selectedCard, 
               placementChoice.position, 
@@ -184,6 +203,16 @@ export class VetrolisciServer {
       // Check if draft phase is complete
       if (game.draftState.phase === DraftPhase.COMPLETE) {
         console.log(`🎯 Turn complete - all 4 cards picked`)
+        
+        // Store the last picker for next turn's pick order
+        game.lastPicker = playerIndex
+        console.log(`🎯 Last picker for this turn: Player ${game.lastPicker}`)
+        
+        // Increment turn counts for both players (they both participated in this turn)
+        game.playerTurnCounts[0]++
+        game.playerTurnCounts[1]++
+        console.log(`🎯 Updated turn counts: Player 0: ${game.playerTurnCounts[0]}, Player 1: ${game.playerTurnCounts[1]}`)
+        
         this.checkTurnEnd(game)
       }
 
@@ -227,13 +256,51 @@ export class VetrolisciServer {
     // Increment turn counter
     game.turn++
     
-    // Check if round should end (after multiple turns)
-    // For now, let's do 3 turns per round
-    if (game.turn >= 3) {
+    // Check if round should end based on legacy rules:
+    // 1. At least one player has filled all 9 grid spaces
+    // 2. Both players have had equal number of turns
+    if (this.checkRoundEndCondition(game)) {
       this.endRound(game)
     } else {
       // Start next turn
       this.startNewTurn(game)
+    }
+  }
+
+  checkRoundEndCondition(game) {
+    // Check if any player has filled all 9 spaces
+    const anyPlayerFilled = game.players.some((player) => 
+      player.grid.every((cell) => cell !== null)
+    )
+    
+    if (!anyPlayerFilled) {
+      console.log(`🎯 Round continues - no player has filled their grid yet`)
+      return false // Round continues if no one has filled their grid
+    }
+    
+    // Initialize turn counts if not present
+    if (!game.playerTurnCounts) {
+      game.playerTurnCounts = [0, 0]
+      console.log(`🎯 Initialized turn counts for backward compatibility`)
+      return true // Allow round to end if no turn tracking yet
+    }
+    
+    // Round ends only if both players have had equal number of turns
+    const player0Turns = game.playerTurnCounts[0]
+    const player1Turns = game.playerTurnCounts[1]
+    
+    console.log(`🎯 ROUND END CHECK: Player 0 turns: ${player0Turns}, Player 1 turns: ${player1Turns}`)
+    console.log(`🎯 At least one player filled grid: ${anyPlayerFilled}`)
+    
+    // Both players must have completed the same number of turns
+    const equalTurns = player0Turns === player1Turns
+    
+    if (anyPlayerFilled && equalTurns) {
+      console.log(`🎯 Round ending - grid filled and equal turns completed`)
+      return true
+    } else {
+      console.log(`🎯 Round continues - waiting for equal turns (${player0Turns} vs ${player1Turns})`)
+      return false
     }
   }
 
@@ -269,12 +336,19 @@ export class VetrolisciServer {
       game.turn = 0
       game.phase = 'draft'
       
+      // Reset turn counts for new round
+      game.playerTurnCounts = [0, 0]
+      
+      // Reset lastPicker for new round to use round-based pick order
+      game.lastPicker = null
+      
       // Clear grids for new round
       game.players.forEach(player => {
         player.grid = Array(9).fill(null)
       })
       
       console.log(`🎯 Round ${game.currentRound - 1} complete. Starting round ${game.currentRound}`)
+      console.log(`🎯 Reset turn counts for new round`)
       
       // Start first turn of new round
       this.startNewTurn(game)

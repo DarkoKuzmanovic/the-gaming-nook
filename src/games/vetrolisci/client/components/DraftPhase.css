@@ -3,11 +3,18 @@
   background: #ffffff;
   border-radius: 12px;
   padding: 20px 24px;
-  margin: 20px 0;
+  margin: 16px 0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  max-width: 800px;
-  margin: 20px auto;
+  width: 100%;
+  max-width: 780px; /* Matched with game-grids container */
+  margin: 16px auto;
+}
+
+@media (min-width: 1024px) {
+  .draft-phase {
+    max-width: 900px; /* Matched with game-grids container */
+  }
 }
 
 /* ===== DRAFT HEADER ===== */
@@ -65,7 +72,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
   }
   50% {
@@ -87,12 +95,20 @@
   animation: loading-bounce 1.4s infinite ease-in-out;
 }
 
-.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-.loading-dots span:nth-child(3) { animation-delay: 0s; }
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+.loading-dots span:nth-child(3) {
+  animation-delay: 0s;
+}
 
 @keyframes loading-bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }
@@ -164,13 +180,32 @@
   backdrop-filter: blur(10px);
   border-radius: 8px;
   border: 2px dashed #dee2e6;
-  max-width: 600px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .card-container {
   position: relative;
   transition: all 0.3s ease;
+  width: 100px;
+  height: 140px;
+}
+
+@media (min-width: 768px) {
+  .card-container {
+    width: 110px;
+    height: 154px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-container {
+    width: 120px;
+    height: 168px;
+  }
 }
 
 .card-container.pickable {
@@ -238,34 +273,35 @@
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   .draft-phase {
-    margin: 10px;
-    padding: 15px;
+    margin: 8px auto;
+    padding: 16px;
+    border-radius: 8px;
+    max-width: 430px; /* Match the max-width of game-content on mobile */
   }
-  
+
   .pick-progress {
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
-  
+
   .available-cards {
-    gap: 10px;
-    padding: 15px;
+    gap: 8px;
+    padding: 12px;
+    width: 100%;
   }
-  
-  /* Player hands removed - cards go directly to grid */
 }
 
 @media (max-width: 480px) {
   .draft-header h3 {
     font-size: 1.2em;
   }
-  
+
   .turn-indicator {
     padding: 10px 15px;
     font-size: 0.9em;
   }
-  
+
   .available-cards {
     gap: 8px;
     padding: 10px;

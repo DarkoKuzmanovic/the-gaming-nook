@@ -459,19 +459,21 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
         )}
       </div>
 
-      {/* Enhanced Draft Phase */}
-      {gameState.draftState && gameState.draftState.revealedCards && (
-        <DraftPhase
-          gameState={gameState}
-          playerIndex={playerIndex}
-          onCardPick={handleCardPick}
-          error={error}
-          animatingCards={animatingCards}
-        />
-      )}
+      {/* Game Content Container */}
+      <div className="game-content">
+        {/* Enhanced Draft Phase */}
+        {gameState.draftState && gameState.draftState.revealedCards && (
+          <DraftPhase
+            gameState={gameState}
+            playerIndex={playerIndex}
+            onCardPick={handleCardPick}
+            error={error}
+            animatingCards={animatingCards}
+          />
+        )}
 
-      {/* Game Grids */}
-      <div className="game-grids">
+        {/* Game Grids */}
+        <div className="game-grids">
         <div className="player-grid-section">
           <h3>Your Grid ({currentPlayer.name})</h3>
           <GameGrid
@@ -494,6 +496,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu }) => {
             onConfettiComplete={handleConfettiComplete}
           />
         </div>
+      </div>
       </div>
 
       {/* Scoreboard */}

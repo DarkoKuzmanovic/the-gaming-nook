@@ -1,5 +1,5 @@
 // Draft phase mechanics for Vetrolisci
-import { dealRoundCards } from "./cards.js";
+// Card dealing is now handled externally before calling initializeDraftPhase
 
 export const DraftPhase = {
   REVEAL: "reveal",
@@ -7,21 +7,14 @@ export const DraftPhase = {
   COMPLETE: "complete",
 };
 
-export function initializeDraftPhase(deck, roundNumber) {
+export function initializeDraftPhase(turnCards, pickOrder) {
   try {
-    const { roundCards, remainingDeck } = dealRoundCards(deck, roundNumber);
-
-    // Determine pick order based on round: P1, P2, P1, P2 for round 1
-    // For subsequent rounds, whoever finished last round starts next
-    // Round 1: P1>P2>P1>P2, Round 2: P2>P1>P2>P1, Round 3: P1>P2>P1>P2
-    const pickOrder = roundNumber % 2 === 1 ? [0, 1, 0, 1] : [1, 0, 1, 0];
-
     return {
       phase: DraftPhase.PICK, // Start directly in pick phase for automatic card revealing
-      revealedCards: roundCards,
-      pickOrder, // Alternating pick order based on round
+      revealedCards: turnCards,
+      pickOrder, // Dynamic pick order passed from server
       currentPickIndex: 0,
-      remainingDeck,
+      remainingDeck: [], // Not used in turn-based dealing
       completedPicks: 0,
     };
   } catch (error) {
