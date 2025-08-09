@@ -3,7 +3,8 @@ import socketClient from "./shared/client/utils/socket-client.js";
 import Modal from "./shared/client/components/Modal.jsx";
 import Button from "./shared/client/components/Button.jsx";
 import LoadingSpinner from "./shared/client/components/LoadingSpinner.jsx";
-import GameBoard from "./games/vetrolisci/client/components/GameBoard.jsx";
+import VetrolisciGameBoard from "./games/vetrolisci/client/components/GameBoard.jsx";
+import Connect4GameBoard from "./games/connect4/client/components/GameBoard.jsx";
 import "./App.css";
 
 function App() {
@@ -140,6 +141,37 @@ function App() {
     }
   };
 
+  const handleCreateConnect4Room = async () => {
+    if (!connected) {
+      setError("Not connected to server");
+      setShowErrorModal(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await socketClient.emit("create-room", {
+        gameType: "connect4",
+        playerName: "Host",
+      });
+
+      if (response.success) {
+        setCurrentRoom(response);
+        setRoomCode(response.roomCode);
+        setCurrentView("waiting");
+        console.log("🔴 Connect 4 room created:", response.roomCode);
+      } else {
+        setError(response.error || "Failed to create room");
+        setShowErrorModal(true);
+      }
+    } catch (err) {
+      setError("Failed to create room. Please try again.");
+      setShowErrorModal(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleJoinRoom = async () => {
     console.log("🎯 JOIN ATTEMPT: Starting join process for room:", roomCode);
 
@@ -256,7 +288,7 @@ function App() {
         </div>
 
         <div className="header-right">
-          {currentView === "game" && gameData?.gameState && (
+          {currentView === "game" && gameData?.gameState && gameData.gameType === "vetrolisci" && (
             <div className="game-progress">
               <div className="round-indicators">
                 {[1, 2, 3].map((round) => (
@@ -269,6 +301,15 @@ function App() {
                     {round}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {currentView === "game" && gameData?.gameState && gameData.gameType === "connect4" && (
+            <div className="game-progress">
+              <div className="round-info">
+                {gameData.gameState.gameState === "playing" ? "In Progress" : 
+                 gameData.gameState.gameState === "finished" ? "Game Over" : "Ready"}
               </div>
             </div>
           )}
@@ -305,6 +346,19 @@ function App() {
                 <div className="game-card-content">
                   <h3>Vetrolisci</h3>
                   <p>Card Strategy Game</p>
+                </div>
+              </Button>
+              <Button
+                className="game-card-button"
+                variant="primary"
+                size="large"
+                onClick={handleCreateConnect4Room}
+                loading={loading}
+                disabled={!connected}
+              >
+                <div className="game-card-content">
+                  <h3>Connect 4</h3>
+                  <p>Classic Strategy Game</p>
                 </div>
               </Button>
             </div>
@@ -374,15 +428,29 @@ function App() {
         )}
 
         {currentView === "game" && gameData && (
-          <GameBoard
-            roomCode={gameData.roomCode}
-            playerIndex={gameData.playerIndex}
-            onBackToMenu={handleBack}
-            showHeader={false}
-            onGameStateUpdate={(gameState) => {
-              setGameData((prev) => ({ ...prev, gameState }));
-            }}
-          />
+          <>
+            {gameData.gameType === "vetrolisci" && (
+              <VetrolisciGameBoard
+                roomCode={gameData.roomCode}
+                playerIndex={gameData.playerIndex}
+                onBackToMenu={handleBack}
+                showHeader={false}
+                onGameStateUpdate={(gameState) => {
+                  setGameData((prev) => ({ ...prev, gameState }));
+                }}
+              />
+            )}
+            {gameData.gameType === "connect4" && (
+              <Connect4GameBoard
+                roomCode={gameData.roomCode}
+                playerIndex={gameData.playerIndex}
+                onBackToMenu={handleBack}
+                onGameStateUpdate={(gameState) => {
+                  setGameData((prev) => ({ ...prev, gameState }));
+                }}
+              />
+            )}
+          </>
         )}
       </main>
 

@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import vetrolisciServer from '../../games/vetrolisci/server/vetrolisci-server.js';
+import connect4Server, { setupConnect4Events } from '../../games/connect4/server/connect4-server.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -217,6 +218,13 @@ io.on('connection', (socket) => {
           } catch (error) {
             console.error(`❌ Error creating Vetrolisci game: ${error.message}`);
           }
+        } else if (room.gameType === 'connect4') {
+          try {
+            gameState = connect4Server.initializeGame(room.code, room.players);
+            console.log(`🎮 Connect 4 game created for room ${room.code}`);
+          } catch (error) {
+            console.error(`❌ Error creating Connect 4 game: ${error.message}`);
+          }
         }
         
         io.to(room.code).emit('game-started', {
@@ -372,6 +380,9 @@ io.on('connection', (socket) => {
        console.error(`❌ Continue from scoring error: ${error.message}`);
      }
    });
+
+  // Connect 4 game event handlers
+  setupConnect4Events(io, socket, { rooms, players });
 
   // Handle disconnection
   socket.on('disconnect', () => {

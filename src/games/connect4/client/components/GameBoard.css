@@ -1,0 +1,357 @@
+/* ==================== CONNECT 4 GAME BOARD ==================== */
+
+.connect4-game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-2xl);
+  min-height: 100vh;
+  background: url("/background.jpg") repeat;
+  background-size: 50px 50px;
+  position: relative;
+}
+
+.connect4-game-board::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.85);
+  z-index: 0;
+}
+
+.connect4-game-board > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==================== GAME CONTENT ==================== */
+
+.connect4-game-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2xl);
+  width: 100%;
+  max-width: 800px;
+}
+
+/* ==================== GAME STATUS ==================== */
+
+.connect4-game-status {
+  text-align: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.connect4-current-player {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  margin-bottom: var(--spacing-sm);
+}
+
+.connect4-player-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  font-weight: var(--font-weight-semibold);
+  transition: var(--transition-all);
+}
+
+.connect4-player-indicator.red {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.connect4-player-indicator.yellow {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fde047;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.connect4-player-indicator.active {
+  animation: pulse-glow 2s infinite;
+  box-shadow: 0 0 20px currentColor;
+}
+
+/* ==================== GAME GRID ==================== */
+
+.connect4-grid-container {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-2xl);
+}
+
+.connect4-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: var(--spacing-sm);
+  background: rgba(30, 41, 59, 0.8);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  border: 2px solid rgba(148, 163, 184, 0.2);
+}
+
+/* ==================== GAME CELLS ==================== */
+
+.connect4-cell {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: default;
+  transition: var(--transition-all);
+  border: 2px solid rgba(148, 163, 184, 0.3);
+  background: rgba(241, 245, 249, 0.1);
+}
+
+.connect4-cell.occupied {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ==================== GAME DISCS ==================== */
+
+.connect4-disc {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  transition: var(--transition-all);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.connect4-disc.red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.connect4-disc.yellow {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  color: #92400e;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.connect4-disc.last-move {
+  animation: disc-placed 0.6s ease-out;
+  box-shadow: 0 0 20px currentColor, 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ==================== PLAYABLE CELLS ==================== */
+
+.connect4-cell.playable {
+  cursor: pointer;
+}
+
+.connect4-cell.playable:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+.connect4-cell:not(.playable) {
+  cursor: default;
+}
+
+.connect4-cell:not(.playable):hover {
+  background: rgba(241, 245, 249, 0.1);
+  border-color: rgba(148, 163, 184, 0.3);
+  transform: none;
+}
+
+/* ==================== GAME RESULT ==================== */
+
+.connect4-game-result {
+  text-align: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-2xl);
+  max-width: 400px;
+}
+
+.connect4-winner-announcement {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-white);
+}
+
+.connect4-winner-announcement.red {
+  color: #fca5a5;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.connect4-winner-announcement.yellow {
+  color: #fde047;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.connect4-winner-announcement.draw {
+  color: var(--color-gray-300);
+  text-shadow: 0 0 10px rgba(156, 163, 175, 0.5);
+}
+
+/* ==================== CONTROL BUTTONS ==================== */
+
+.connect4-controls {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+}
+
+.connect4-button {
+  padding: var(--button-padding-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  border: none;
+  border-radius: var(--button-border-radius);
+  cursor: pointer;
+  transition: var(--transition-all);
+  font-family: inherit;
+  min-width: 120px;
+}
+
+.connect4-button.primary {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: 1px solid var(--color-primary);
+}
+
+.connect4-button.primary:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-focus) var(--color-primary-focus);
+}
+
+.connect4-button.secondary {
+  background: var(--color-white);
+  color: var(--color-secondary);
+  border: 1px solid var(--color-gray-300);
+}
+
+.connect4-button.secondary:hover {
+  background: var(--color-gray-50);
+  border-color: var(--color-secondary-lighter);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+/* ==================== LOADING & ERROR STATES ==================== */
+
+.connect4-loading, .connect4-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.connect4-loading h2, .connect4-error h2 {
+  color: var(--color-white);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-2xl);
+}
+
+.connect4-error p {
+  color: var(--color-error-light);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-base);
+}
+
+/* ==================== ANIMATIONS ==================== */
+
+@keyframes disc-placed {
+  0% {
+    transform: translateY(-100px) scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(10px) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+/* ==================== MOBILE RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  .connect4-game-board {
+    padding: var(--spacing-lg);
+  }
+  
+  .connect4-grid {
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md);
+  }
+  
+  .connect4-cell, .connect4-column-header {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .connect4-disc {
+    width: 38px;
+    height: 38px;
+    font-size: var(--font-size-sm);
+  }
+  
+  .connect4-column-header {
+    height: 35px;
+    font-size: var(--font-size-sm);
+  }
+  
+  .connect4-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .connect4-button {
+    width: 100%;
+  }
+}
