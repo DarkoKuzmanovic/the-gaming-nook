@@ -1,0 +1,245 @@
+/**
+ * Design System - CSS Variables (Theme)
+ *
+ * This file defines the design tokens for The Gaming Nook platform.
+ * All components should use these variables instead of hardcoded values.
+ */
+
+:root {
+  /* ===== COLOR PALETTE ===== */
+
+  /* Primary Colors */
+  --color-primary: #d97706;
+  --color-primary-hover: #b45309;
+  --color-primary-light: rgba(217, 119, 6, 0.1);
+  --color-primary-focus: rgba(217, 119, 6, 0.25);
+
+  /* Secondary Colors */
+  --color-secondary: #374151;
+  --color-secondary-light: #6b7280;
+  --color-secondary-lighter: #9ca3af;
+
+  /* Neutral Colors */
+  --color-white: #ffffff;
+  --color-black: #1a1a1a;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #374151;
+  --color-gray-800: #1a1a1a;
+
+  /* State Colors */
+  --color-success: #059669;
+  --color-success-light: rgba(5, 150, 105, 0.1);
+  --color-success-alt: #28a745;
+  --color-error: #dc2626;
+  --color-error-light: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-warning: #f59e0b;
+  --color-info: #007bff;
+  --color-info-hover: #0056b3;
+
+  /* Card Type Colors */
+  --color-card-blue: #3b82f6;
+  --color-card-blue-shadow: rgba(59, 130, 246, 0.6);
+  --color-card-green: #95cc1f;
+  --color-card-green-shadow: rgba(149, 204, 31, 0.6);
+  --color-card-red: #ef4444;
+  --color-card-red-shadow: rgba(239, 68, 68, 0.6);
+  --color-card-yellow: #fbbf24;
+  --color-card-yellow-shadow: rgba(251, 191, 36, 0.6);
+  --color-card-multi: #9333ea;
+  --color-card-multi-shadow: rgba(147, 51, 234, 0.6);
+
+  /* Game State Colors */
+  --color-validated: #059669;
+  --color-validated-light: rgba(5, 150, 105, 0.1);
+  --color-validated-medium: rgba(5, 150, 105, 0.2);
+  --color-selected: #d97706;
+  --color-selected-light: rgba(217, 119, 6, 0.1);
+
+  /* ===== SPACING & SIZING ===== */
+
+  /* Spacing Scale */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 30px;
+  --spacing-4xl: 40px;
+
+  /* Component Sizes */
+  --size-button-sm: 45px;
+  --size-button-md: 50px;
+  --size-control-button-width: 50px;
+  --size-control-button-height: 50px;
+  --size-round-indicator: 30px;
+  --size-round-indicator-sm: 24px;
+  --size-validation-badge: 24px;
+  --size-restriction-icon: 40px;
+
+  /* Layout Sizes */
+  --width-game-board-max: 1400px;
+  --width-game-content-max: 1200px;
+  --width-game-grids-max: 780px;
+  --width-game-grids-max-lg: 900px;
+  --width-game-grid-mobile: 430px;
+
+  /* ===== VISUAL EFFECTS ===== */
+
+  /* Border Radius */
+  --border-radius-sm: 6px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 15px;
+  --border-radius-2xl: 16px;
+  --border-radius-round: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
+  --shadow-focus: 0 0 0 3px;
+  --shadow-button-hover: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  /* Glassmorphism Effects */
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-bg-light: rgba(255, 255, 255, 0.12);
+  --glass-bg-medium: rgba(255, 255, 255, 0.18);
+  --glass-bg-strong: rgba(255, 255, 255, 0.25);
+  --glass-bg-mobile: rgba(255, 255, 255, 0.85);
+  --glass-bg-mobile-hover: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.25);
+  --glass-border-light: rgba(255, 255, 255, 0.2);
+  --glass-border-strong: rgba(255, 255, 255, 0.3);
+  --glass-blur: blur(14px);
+  --glass-blur-sm: blur(10px);
+  --glass-blur-lg: blur(16px);
+  --glass-blur-xl: blur(20px);
+  --glass-saturate: saturate(140%);
+  --glass-saturate-strong: saturate(150%);
+  --glass-inset-light: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --glass-inset-medium: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+
+  /* Text Shadows */
+  --text-shadow-light: 0 1px 2px rgba(255, 255, 255, 0.8);
+  --text-shadow-dark: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --text-shadow-strong: 1px 1px 2px rgba(0, 0, 0, 0.7);
+
+  /* ===== TRANSITIONS & ANIMATIONS ===== */
+
+  /* Transition Durations */
+  --transition-fast: 0.2s;
+  --transition-medium: 0.3s;
+  --transition-slow: 0.5s;
+
+  /* Transition Easings */
+  --ease-out: ease;
+  --ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Common Transitions */
+  --transition-all: all var(--transition-fast) var(--ease-out);
+  --transition-transform: transform var(--transition-fast) var(--ease-out);
+  --transition-colors: background-color var(--transition-fast) var(--ease-out),
+    border-color var(--transition-fast) var(--ease-out), color var(--transition-fast) var(--ease-out);
+  --transition-opacity: opacity var(--transition-medium) var(--ease-out);
+
+  /* ===== TYPOGRAPHY ===== */
+
+  /* Font Families */
+  --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Courier New", monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.1rem; /* ~18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.8rem; /* ~29px */
+  --font-size-4xl: 2rem; /* 32px */
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 2px;
+  --letter-spacing-widest: 3px;
+
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ===== Z-INDEX SCALE ===== */
+
+  --z-base: 1;
+  --z-elevated: 5;
+  --z-sticky: 10;
+  --z-overlay: 100;
+  --z-modal: 1000;
+  --z-tooltip: 2000;
+
+  /* ===== COMPONENT-SPECIFIC VARIABLES ===== */
+
+  /* Card Styles */
+  --card-bg: var(--color-white);
+  --card-border: 1px solid rgba(0, 0, 0, 0.06);
+  --card-shadow-default: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-transform-hover: translateY(-1px) scale(1.02);
+
+  /* Button Styles */
+  --button-padding-sm: 8px 12px;
+  --button-padding-md: 12px 24px;
+  --button-padding-lg: 16px 24px;
+  --button-border-radius: var(--border-radius-md);
+
+  /* Modal Styles */
+  --modal-backdrop: rgba(0, 0, 0, 0.4);
+  --modal-content-bg: var(--color-white);
+  --modal-border-radius: var(--border-radius-lg);
+
+  /* Form Styles */
+  --input-padding: 12px 16px;
+  --input-border: 1px solid var(--color-gray-300);
+  --input-border-focus: var(--color-primary);
+  --input-border-radius: var(--border-radius-md);
+
+  /* Game Specific */
+  --restriction-overlay: rgba(255, 0, 0, 0.3);
+  --card-overlay-light: rgba(0, 0, 0, 0.1);
+  --card-overlay-dark: rgba(0, 0, 0, 0.5);
+}
+
+/* ===== MOBILE PERFORMANCE OVERRIDES ===== */
+/* Disable expensive effects on smaller screens for better performance */
+
+@media (max-width: 768px) {
+  :root {
+    --glass-bg: var(--glass-bg-mobile);
+    --glass-bg-light: var(--glass-bg-mobile);
+    --glass-bg-medium: var(--glass-bg-mobile);
+    --glass-bg-strong: var(--glass-bg-mobile-hover);
+    --glass-blur: none;
+    --glass-blur-sm: none;
+    --glass-blur-lg: none;
+    --glass-blur-xl: none;
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 6px 24px rgba(0, 0, 0, 0.12);
+  }
+}

@@ -1,11 +1,8 @@
 /* ===== DRAFT PHASE CONTAINER ===== */
 .draft-phase {
-  background: #ffffff;
   border-radius: 12px;
   padding: 20px 24px;
   margin: 16px 0;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
   width: 100%;
   max-width: 780px; /* Matched with game-grids container */
   margin: 16px auto;
@@ -20,9 +17,9 @@
 /* ===== DRAFT HEADER ===== */
 .draft-header {
   text-align: center;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 16px;
+  margin-bottom: 12px; /* reduced since title removed */
+  border-bottom: none; /* no divider needed without title */
+  padding-bottom: 0;
 }
 
 .draft-header h3 {
@@ -33,90 +30,7 @@
   letter-spacing: -0.02em;
 }
 
-/* ===== TURN INDICATOR ===== */
-.turn-indicator {
-  margin: 16px 0;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-}
-
-.turn-indicator.my-turn {
-  background: #d97706;
-  color: white;
-  border-color: #d97706;
-  animation: pulse-glow 2s infinite;
-}
-
-.turn-indicator.waiting {
-  background: #f3f4f6;
-  color: #6b7280;
-  border-color: #e5e7eb;
-}
-
-.my-turn-text {
-  font-size: 1.1em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.waiting-text {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(40, 167, 69, 0.8);
-  }
-}
-
-/* ===== LOADING DOTS ===== */
-.loading-dots {
-  display: inline-flex;
-  gap: 3px;
-}
-
-.loading-dots span {
-  width: 4px;
-  height: 4px;
-  background: currentColor;
-  border-radius: 50%;
-  animation: loading-bounce 1.4s infinite ease-in-out;
-}
-
-.loading-dots span:nth-child(1) {
-  animation-delay: -0.32s;
-}
-.loading-dots span:nth-child(2) {
-  animation-delay: -0.16s;
-}
-.loading-dots span:nth-child(3) {
-  animation-delay: 0s;
-}
-
-@keyframes loading-bounce {
-  0%,
-  80%,
-  100% {
-    transform: scale(0.8);
-    opacity: 0.5;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
+/* Turn indicator and loading dots styles moved to GameBoard.css */
 
 /* ===== PICK PROGRESS ===== */
 .pick-progress {
@@ -163,11 +77,35 @@
 }
 
 /* ===== AVAILABLE CARDS ===== */
+/* Section header with error display */
+.section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-sm);
+}
+
 .available-cards-section h4 {
-  color: #333;
-  margin: 0 0 15px 0;
+  color: var(--color-gray-800);
+  margin: 0;
   text-align: center;
-  font-size: 1.2em;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
+}
+
+/* Error banner in section header */
+.section-header .error-banner {
+  background: var(--color-error-light);
+  color: var(--color-error-dark);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-error);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .available-cards {
@@ -176,7 +114,6 @@
   gap: 15px;
   flex-wrap: nowrap;
   padding: 20px;
-  background: url("/vetrolisci/background.jpg") repeat, rgba(248, 249, 250, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 8px;
   border: 2px dashed #dee2e6;
@@ -297,13 +234,15 @@
     font-size: 1.2em;
   }
 
-  .turn-indicator {
-    padding: 10px 15px;
-    font-size: 0.9em;
-  }
+  /* Turn indicator styles removed - now in GameBoard.css */
 
   .available-cards {
     gap: 8px;
     padding: 10px;
   }
+}
+
+/* Remove pick-progress styling since UI elements removed */
+.pick-progress {
+  display: none;
 }

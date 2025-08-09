@@ -1,9 +1,23 @@
 import React, { memo } from 'react'
+import { motion } from 'framer-motion'
 import LazyImage from './LazyImage.jsx'
+import ValidationStar from './ValidationStar.jsx'
 import { getCardImagePath, getCardBackImagePath } from '../../shared/cards.js'
 import './Card.css'
 
-const Card = memo(({ card, isSelected, onClick, isPlaced = false, showBack = false, className = "" }) => {
+const Card = memo(({ 
+  card, 
+  isSelected, 
+  onClick, 
+  isPlaced = false, 
+  showBack = false, 
+  className = "",
+  layoutId = null,
+  initial = null,
+  animate = null,
+  exit = null,
+  transition = null
+}) => {
   const getColorClass = (color) => {
     const colorMap = {
       blue: "card-blue",
@@ -38,29 +52,66 @@ const Card = memo(({ card, isSelected, onClick, isPlaced = false, showBack = fal
 
   if (showBack) {
     const backImagePath = getCardBackImagePath()
+    const MotionDiv = layoutId ? motion.div : 'div'
+    const motionProps = layoutId ? { 
+      layoutId, 
+      initial, 
+      animate, 
+      exit, 
+      transition: transition || { duration: 0.3, ease: "easeInOut" }
+    } : {}
+    
     return (
-      <div className={`card card-back ${isPlaced ? "placed" : ""} ${className}`}>
+      <MotionDiv 
+        className={`card card-back ${isPlaced ? "placed" : ""} ${className}`}
+        {...motionProps}
+      >
         <LazyImage
           src={`/vetrolisci/cards/backs/${backImagePath}`}
           alt="Card back"
           className="card-image"
         />
-      </div>
+      </MotionDiv>
     )
   }
 
   if (!card) {
-    return <div className={`card card-empty ${className}`}></div>
+    const MotionDiv = layoutId ? motion.div : 'div'
+    const motionProps = layoutId ? { 
+      layoutId, 
+      initial, 
+      animate, 
+      exit, 
+      transition: transition || { duration: 0.3, ease: "easeInOut" }
+    } : {}
+    
+    return (
+      <MotionDiv 
+        className={`card card-empty ${className}`}
+        {...motionProps}
+      >
+      </MotionDiv>
+    )
   }
 
   const frontImagePath = getCardImagePath(card)
 
+  const MotionDiv = layoutId ? motion.div : 'div'
+  const motionProps = layoutId ? { 
+    layoutId, 
+    initial, 
+    animate, 
+    exit, 
+    transition: transition || { duration: 0.3, ease: "easeInOut" }
+  } : {}
+  
   return (
-    <div
+    <MotionDiv
       className={`card ${getColorClass(card.color)} ${isSelected ? "selected" : ""} ${isPlaced ? "placed" : ""} ${
         card.validated ? "validated" : ""
       } ${className}`}
       onClick={onClick}
+      {...motionProps}
     >
       {frontImagePath ? (
         <LazyImage
@@ -105,8 +156,8 @@ const Card = memo(({ card, isSelected, onClick, isPlaced = false, showBack = fal
         </div>
       )}
       
-      {card.validated && <div className="validation-badge"></div>}
-    </div>
+      {card.validated && <ValidationStar color={card.color} />}
+    </MotionDiv>
   )
 })
 

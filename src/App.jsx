@@ -1,261 +1,296 @@
-import React, { useState, useEffect } from 'react'
-import socketClient from './shared/client/utils/socket-client.js'
-import Modal from './shared/client/components/Modal.jsx'
-import Button from './shared/client/components/Button.jsx'
-import LoadingSpinner from './shared/client/components/LoadingSpinner.jsx'
-import GameBoard from './games/vetrolisci/client/components/GameBoard.jsx'
-import './App.css'
+import React, { useState, useEffect } from "react";
+import socketClient from "./shared/client/utils/socket-client.js";
+import Modal from "./shared/client/components/Modal.jsx";
+import Button from "./shared/client/components/Button.jsx";
+import LoadingSpinner from "./shared/client/components/LoadingSpinner.jsx";
+import GameBoard from "./games/vetrolisci/client/components/GameBoard.jsx";
+import "./App.css";
 
 function App() {
-  const [currentView, setCurrentView] = useState('menu') // 'menu', 'create', 'join', 'waiting', 'game'
-  const [roomCode, setRoomCode] = useState('')
-  const [connected, setConnected] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [currentRoom, setCurrentRoom] = useState(null)
-  const [showErrorModal, setShowErrorModal] = useState(false)
-  const [gameData, setGameData] = useState(null)
+  const [currentView, setCurrentView] = useState("menu"); // 'menu', 'create', 'join', 'waiting', 'game'
+  const [roomCode, setRoomCode] = useState("");
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [currentRoom, setCurrentRoom] = useState(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [gameData, setGameData] = useState(null);
 
   // Connect to server on app load
   useEffect(() => {
     const connect = async () => {
       try {
-        setLoading(true)
-        await socketClient.connect()
-        setConnected(true)
-        
+        setLoading(true);
+        await socketClient.connect();
+        setConnected(true);
+
         // Set up connection status listener
         socketClient.onConnectionStatus(({ connected, reconnected }) => {
-          setConnected(connected)
+          setConnected(connected);
           if (reconnected) {
-            console.log('🔌 Reconnected to server')
+            console.log("🔌 Reconnected to server");
           }
-        })
+        });
 
         // Set up error handling
         socketClient.onError((error) => {
-          setError(error.message || 'An error occurred')
-          setShowErrorModal(true)
-        })
+          setError(error.message || "An error occurred");
+          setShowErrorModal(true);
+        });
 
         // Listen for when players join
         socketClient.onPlayerJoined((data) => {
-          console.log('👤 Player joined:', data)
-        })
+          console.log("👤 Player joined:", data);
+        });
 
         // Listen for game started
-        socketClient.on('game-started', (data) => {
-          console.log('🚀 Game started for room:', data.room.code)
-          
+        socketClient.on("game-started", (data) => {
+          console.log("🚀 Game started for room:", data.room.code);
+
           // Find player index by socket ID
-          let playerIndex = 0
+          let playerIndex = 0;
           if (data.room && data.room.players) {
-            const myPlayer = data.room.players.find(p => p.id === socketClient.getSocketId())
+            const myPlayer = data.room.players.find((p) => p.id === socketClient.getSocketId());
             if (myPlayer) {
-              playerIndex = data.room.players.indexOf(myPlayer)
+              playerIndex = data.room.players.indexOf(myPlayer);
             }
           }
-          
-          console.log(`🎯 Joined as Player ${playerIndex} (${data.room.players[playerIndex]?.name})`)
-          
+
+          console.log(`🎯 Joined as Player ${playerIndex} (${data.room.players[playerIndex]?.name})`);
+
           setGameData({
             roomCode: data.room.code,
             gameType: data.room.gameType,
             playerIndex: playerIndex,
-            gameState: data.gameState
-          })
-          setCurrentView('game')
-        })
-        
+            gameState: data.gameState,
+          });
+          setCurrentView("game");
+        });
+
         // Listen for game state updates to keep header in sync
-        socketClient.on('vetrolisci-game-state', (data) => {
+        socketClient.on("vetrolisci-game-state", (data) => {
           if (gameData) {
-            setGameData(prev => ({
+            setGameData((prev) => ({
               ...prev,
-              gameState: data
-            }))
+              gameState: data,
+            }));
           }
-        })
-
+        });
       } catch (err) {
-        console.error('Failed to connect to server:', err)
-        setError('Failed to connect to server. Please check your connection.')
-        setShowErrorModal(true)
+        console.error("Failed to connect to server:", err);
+        setError("Failed to connect to server. Please check your connection.");
+        setShowErrorModal(true);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    connect()
+    connect();
 
     // Cleanup on unmount
     return () => {
-      socketClient.disconnect()
-    }
-  }, [])
+      socketClient.disconnect();
+    };
+  }, []);
 
   const handleCreateGame = () => {
-    setCurrentView('create')
-  }
+    setCurrentView("create");
+  };
 
   const handleJoinGame = () => {
-    setCurrentView('join')
-  }
+    setCurrentView("join");
+  };
 
   const handleBack = () => {
-    setCurrentView('menu')
-    setRoomCode('')
-    setError('')
-    setCurrentRoom(null)
-    setGameData(null)
-  }
+    setCurrentView("menu");
+    setRoomCode("");
+    setError("");
+    setCurrentRoom(null);
+    setGameData(null);
+  };
 
   const handleCreateVetrolisciRoom = async () => {
     if (!connected) {
-      setError('Not connected to server')
-      setShowErrorModal(true)
-      return
+      setError("Not connected to server");
+      setShowErrorModal(true);
+      return;
     }
 
     try {
-      setLoading(true)
-      const response = await socketClient.emit('create-room', { 
-        gameType: 'vetrolisci', 
-        playerName: 'Host' 
-      })
-      
+      setLoading(true);
+      const response = await socketClient.emit("create-room", {
+        gameType: "vetrolisci",
+        playerName: "Host",
+      });
+
       if (response.success) {
-        setCurrentRoom(response)
-        setRoomCode(response.roomCode)
-        setCurrentView('waiting')
-        console.log('🎮 Room created:', response.roomCode)
+        setCurrentRoom(response);
+        setRoomCode(response.roomCode);
+        setCurrentView("waiting");
+        console.log("🎮 Room created:", response.roomCode);
       } else {
-        setError(response.error || 'Failed to create room')
-        setShowErrorModal(true)
+        setError(response.error || "Failed to create room");
+        setShowErrorModal(true);
       }
     } catch (err) {
-      setError('Failed to create room. Please try again.')
-      setShowErrorModal(true)
+      setError("Failed to create room. Please try again.");
+      setShowErrorModal(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleJoinRoom = async () => {
-    console.log('🎯 JOIN ATTEMPT: Starting join process for room:', roomCode)
-    
+    console.log("🎯 JOIN ATTEMPT: Starting join process for room:", roomCode);
+
     if (!connected) {
-      console.log('🎯 JOIN ATTEMPT: Not connected to server')
-      setError('Not connected to server')
-      setShowErrorModal(true)
-      return
+      console.log("🎯 JOIN ATTEMPT: Not connected to server");
+      setError("Not connected to server");
+      setShowErrorModal(true);
+      return;
     }
 
     if (roomCode.length !== 6) {
-      console.log('🎯 JOIN ATTEMPT: Invalid room code length:', roomCode.length)
-      setError('Please enter a valid 6-character room code')
-      setShowErrorModal(true)
-      return
+      console.log("🎯 JOIN ATTEMPT: Invalid room code length:", roomCode.length);
+      setError("Please enter a valid 6-character room code");
+      setShowErrorModal(true);
+      return;
     }
 
     try {
-      setLoading(true)
-      console.log('🎯 JOIN ATTEMPT: Checking if room exists:', roomCode)
-      
+      setLoading(true);
+      console.log("🎯 JOIN ATTEMPT: Checking if room exists:", roomCode);
+
       // First check if room exists
-      const checkResponse = await socketClient.checkRoom(roomCode)
-      console.log('🎯 JOIN ATTEMPT: Check room response:', checkResponse)
-      
+      const checkResponse = await socketClient.checkRoom(roomCode);
+      console.log("🎯 JOIN ATTEMPT: Check room response:", checkResponse);
+
       if (!checkResponse.success) {
-        console.log('🎯 JOIN ATTEMPT: Room check failed:', checkResponse.error)
-        setError(checkResponse.error || 'Room not found')
-        setShowErrorModal(true)
-        setLoading(false)
-        return
+        console.log("🎯 JOIN ATTEMPT: Room check failed:", checkResponse.error);
+        setError(checkResponse.error || "Room not found");
+        setShowErrorModal(true);
+        setLoading(false);
+        return;
       }
 
-      console.log('🎯 JOIN ATTEMPT: Room exists, attempting to join...')
+      console.log("🎯 JOIN ATTEMPT: Room exists, attempting to join...");
       // Join the room
-      const joinResponse = await socketClient.joinRoom(roomCode, 'Guest')
-      console.log('🎯 JOIN ATTEMPT: Join response:', joinResponse)
-      
+      const joinResponse = await socketClient.joinRoom(roomCode, "Guest");
+      console.log("🎯 JOIN ATTEMPT: Join response:", joinResponse);
+
       if (joinResponse.success) {
-        setCurrentRoom(joinResponse)
-        setCurrentView('waiting')
-        console.log('👤 Successfully joined room:', roomCode)
+        setCurrentRoom(joinResponse);
+        setCurrentView("waiting");
+        console.log("👤 Successfully joined room:", roomCode);
       } else {
-        console.log('🎯 JOIN ATTEMPT: Join failed:', joinResponse.error)
-        setError(joinResponse.error || 'Failed to join room')
-        setShowErrorModal(true)
+        console.log("🎯 JOIN ATTEMPT: Join failed:", joinResponse.error);
+        setError(joinResponse.error || "Failed to join room");
+        setShowErrorModal(true);
       }
     } catch (err) {
-      console.log('🎯 JOIN ATTEMPT: Exception:', err)
-      setError('Failed to join room. Please try again.')
-      setShowErrorModal(true)
+      console.log("🎯 JOIN ATTEMPT: Exception:", err);
+      setError("Failed to join room. Please try again.");
+      setShowErrorModal(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const copyRoomCode = () => {
-    navigator.clipboard.writeText(roomCode)
+    navigator.clipboard.writeText(roomCode);
     // Could add a toast notification here
-    console.log('📋 Room code copied to clipboard')
-  }
+    console.log("📋 Room code copied to clipboard");
+  };
 
-  if (loading && currentView === 'menu') {
+  if (loading && currentView === "menu") {
     return (
       <div className="app">
         <LoadingSpinner size="large" text="Connecting to server..." />
       </div>
-    )
+    );
   }
 
   return (
     <div className="app">
       <header className="app-header">
-        {currentView === 'game' && gameData ? (
-          <>
-            <h1>🎮 Vetrolisci - Round {gameData.gameState?.currentRound || 1}/3</h1>
-            <p>Room: {gameData.roomCode}</p>
-          </>
-        ) : (
-          <>
-            <h1>🎮 The Gaming Nook</h1>
-            <p>Simple multiplayer games for friends</p>
-          </>
-        )}
-        {!connected && (
-          <div className="connection-status offline">
-            ⚠️ Disconnected from server
-          </div>
-        )}
+        <div className="header-left">
+          {currentView === "game" && gameData ? (
+            <>
+              <h1>🎮 Vetrolisci</h1>
+              <p>Room: {gameData.roomCode}</p>
+            </>
+          ) : (
+            <>
+              <h1>🎮 The Gaming Nook</h1>
+              <p>Simple multiplayer games for friends</p>
+            </>
+          )}
+        </div>
+
+        <div className="header-center">
+          {currentView === "game" && gameData?.gameState && (
+            <>
+              {/* Turn Indicator - show during draft phase */}
+              {gameData.gameState.draftState && gameData.gameState.draftState.revealedCards && (
+                <div
+                  className={`turn-indicator ${
+                    gameData.gameState.currentPickingPlayer?.index === gameData.playerIndex ? "my-turn" : "waiting"
+                  }`}
+                >
+                  {gameData.gameState.currentPickingPlayer?.index === gameData.playerIndex ? (
+                    <span className="my-turn-text">🎯 Your turn to pick!</span>
+                  ) : (
+                    <span className="waiting-text">
+                      ⏳ Waiting for {gameData.gameState.currentPickingPlayer?.name || "Unknown"}
+                      <span className="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </span>
+                    </span>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="header-right">
+          {currentView === "game" && gameData?.gameState && (
+            <div className="game-progress">
+              <div className="round-indicators">
+                {[1, 2, 3].map((round) => (
+                  <div
+                    key={round}
+                    className={`round-indicator ${round === gameData.gameState.currentRound ? "current" : ""} ${
+                      round < gameData.gameState.currentRound ? "completed" : ""
+                    }`}
+                  >
+                    {round}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!connected && <div className="connection-status offline">⚠️ Disconnected from server</div>}
+        </div>
       </header>
 
       <main className="app-main">
-        {currentView === 'menu' && (
+        {currentView === "menu" && (
           <div className="menu">
-            <Button 
-              variant="success"
-              size="large"
-              onClick={handleCreateGame}
-              disabled={!connected}
-            >
+            <Button variant="success" size="large" onClick={handleCreateGame} disabled={!connected}>
               Create Game
             </Button>
-            
-            <Button 
-              variant="primary"
-              size="large"
-              onClick={handleJoinGame}
-              disabled={!connected}
-            >
+
+            <Button variant="primary" size="large" onClick={handleJoinGame} disabled={!connected}>
               Join Game
             </Button>
           </div>
         )}
 
-        {currentView === 'create' && (
+        {currentView === "create" && (
           <div className="create-game">
             <h2>Select Game Type</h2>
             <div className="game-selection">
@@ -279,7 +314,7 @@ function App() {
           </div>
         )}
 
-        {currentView === 'join' && (
+        {currentView === "join" && (
           <div className="join-game">
             <h2>Join Game</h2>
             <div className="join-form">
@@ -292,7 +327,7 @@ function App() {
                 className="room-code-input"
                 disabled={loading}
               />
-              <Button 
+              <Button
                 variant="primary"
                 size="large"
                 onClick={handleJoinRoom}
@@ -308,14 +343,18 @@ function App() {
           </div>
         )}
 
-        {currentView === 'waiting' && (
+        {currentView === "waiting" && (
           <div className="waiting-room">
             <h2>Room: {roomCode}</h2>
             <div className="room-info">
-              <p><strong>Game:</strong> {currentRoom?.room?.gameType || currentRoom?.gameType}</p>
-              <p><strong>Players:</strong> {currentRoom?.room?.players?.length || 1}/2</p>
+              <p>
+                <strong>Game:</strong> {currentRoom?.room?.gameType || currentRoom?.gameType}
+              </p>
+              <p>
+                <strong>Players:</strong> {currentRoom?.room?.players?.length || 1}/2
+              </p>
             </div>
-            
+
             <div className="room-code-share">
               <h3>Share this code with your friend:</h3>
               <div className="room-code-display">
@@ -327,38 +366,35 @@ function App() {
             </div>
 
             <LoadingSpinner text="Waiting for another player to join..." />
-            
+
             <Button variant="outline" onClick={handleBack}>
               Leave Room
             </Button>
           </div>
         )}
 
-        {currentView === 'game' && gameData && (
-          <GameBoard 
+        {currentView === "game" && gameData && (
+          <GameBoard
             roomCode={gameData.roomCode}
             playerIndex={gameData.playerIndex}
             onBackToMenu={handleBack}
             showHeader={false}
+            onGameStateUpdate={(gameState) => {
+              setGameData((prev) => ({ ...prev, gameState }));
+            }}
           />
         )}
       </main>
 
       {/* Error Modal */}
-      <Modal
-        isOpen={showErrorModal}
-        onClose={() => setShowErrorModal(false)}
-        title="Error"
-      >
+      <Modal isOpen={showErrorModal} onClose={() => setShowErrorModal(false)} title="Error">
         <p className="error-message">{error}</p>
         <div className="modal-actions">
-          <Button onClick={() => setShowErrorModal(false)}>
-            OK
-          </Button>
+          <Button onClick={() => setShowErrorModal(false)}>OK</Button>
         </div>
       </Modal>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

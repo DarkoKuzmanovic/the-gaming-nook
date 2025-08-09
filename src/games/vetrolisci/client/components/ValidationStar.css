@@ -1,0 +1,25 @@
+.validation-star {
+  position: absolute;
+  bottom: var(--spacing-sm);
+  right: 6px;
+  width: var(--size-validation-badge);
+  height: var(--size-validation-badge);
+  z-index: var(--z-sticky);
+  animation: starPulseRotate 2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes starPulseRotate {
+  0% {
+    transform: scale(1) rotate(-5deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.05) rotate(5deg);
+    opacity: 0.95;
+  }
+}

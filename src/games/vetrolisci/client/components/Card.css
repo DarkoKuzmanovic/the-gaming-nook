@@ -1,39 +1,76 @@
 .card {
   width: 100%;
   height: 100%;
-  border-radius: 8px;
+  border-radius: var(--border-radius-md);
   overflow: hidden;
   position: relative;
   cursor: pointer;
-  transition: all 0.2s ease;
-  background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow-default);
+  border: var(--card-border);
+  /* Enhanced 3D hover effects */
+  transform-style: preserve-3d;
+  transition: var(--transition-all), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 10;
+  transform: perspective(1000px) rotateX(5deg) rotateY(-3deg) translateY(-8px) scale(1.03);
+  box-shadow: 
+    var(--card-shadow-hover),
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  z-index: var(--z-sticky);
 }
 
 .card.selected {
-  border: 2px solid #d97706;
-  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+  border: 3px solid var(--color-selected);
+  box-shadow: 
+    var(--shadow-focus) var(--color-selected-light),
+    0 0 20px rgba(217, 119, 6, 0.4),
+    0 0 40px rgba(217, 119, 6, 0.2);
+  transform: perspective(1000px) translateY(-4px) scale(1.02);
+}
+
+.card.selected:hover {
+  transform: perspective(1000px) rotateX(5deg) rotateY(-3deg) translateY(-12px) scale(1.05);
+  box-shadow: 
+    var(--shadow-focus) var(--color-selected-light),
+    0 0 25px rgba(217, 119, 6, 0.5),
+    0 0 50px rgba(217, 119, 6, 0.3),
+    0 25px 50px rgba(0, 0, 0, 0.25);
 }
 
 .card.validated {
-  border: 2px solid #059669;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  border: 3px solid var(--color-validated);
+  box-shadow: 
+    var(--shadow-focus) var(--color-validated-light),
+    0 0 20px rgba(5, 150, 105, 0.4),
+    0 0 40px rgba(5, 150, 105, 0.2);
   animation: validatedGlow 2s ease-in-out infinite alternate;
+  position: relative;
+}
+
+.card.validated:hover {
+  transform: perspective(1000px) rotateX(5deg) rotateY(-3deg) translateY(-12px) scale(1.05);
+  box-shadow: 
+    var(--shadow-focus) var(--color-validated-light),
+    0 0 25px rgba(5, 150, 105, 0.5),
+    0 0 50px rgba(5, 150, 105, 0.3),
+    0 25px 50px rgba(0, 0, 0, 0.25);
 }
 
 @keyframes validatedGlow {
   from {
-    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    box-shadow: 
+      var(--shadow-focus) var(--color-validated-light),
+      0 0 20px rgba(5, 150, 105, 0.4),
+      0 0 40px rgba(5, 150, 105, 0.2);
   }
   to {
-    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+    box-shadow: 
+      var(--shadow-focus) var(--color-validated-medium),
+      0 0 25px rgba(5, 150, 105, 0.6),
+      0 0 50px rgba(5, 150, 105, 0.3);
   }
 }
 
@@ -48,17 +85,17 @@
 }
 
 .card-empty {
-  background-color: #f8f9fa;
-  border: 2px dashed #dee2e6;
+  background-color: var(--color-gray-100);
+  border: 2px dashed var(--color-gray-200);
 }
 
 .card-fallback {
-  padding: 8px;
+  padding: var(--spacing-sm);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .card-header {
@@ -69,8 +106,8 @@
 
 .card-number {
   font-size: 18px;
-  font-weight: bold;
-  color: #333;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-600);
 }
 
 .card-symbols {
@@ -93,8 +130,8 @@
 .card-color-indicator {
   width: 30px;
   height: 30px;
-  border-radius: 50%;
-  border: 2px solid #333;
+  border-radius: var(--border-radius-round);
+  border: 2px solid var(--color-gray-600);
 }
 
 .special-indicator {
@@ -111,36 +148,36 @@
 }
 
 .card-scoring {
-  font-weight: bold;
-  color: #666;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-500);
 }
 
 .card-number-small {
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-600);
   transform: rotate(180deg);
 }
 
 /* Color-specific styles */
 .card-blue .card-color-indicator {
-  background-color: #007bff;
+  background-color: var(--color-info);
 }
 
 .card-green .card-color-indicator {
-  background-color: #28a745;
+  background-color: var(--color-success-alt);
 }
 
 .card-yellow .card-color-indicator {
-  background-color: #ffc107;
+  background-color: var(--color-warning);
 }
 
 .card-red .card-color-indicator {
-  background-color: #dc3545;
+  background-color: var(--color-error);
 }
 
 .card-multi .card-color-indicator {
-  background: linear-gradient(45deg, #007bff 25%, #28a745 25%, #28a745 50%, #ffc107 50%, #ffc107 75%, #dc3545 75%);
+  background: linear-gradient(45deg, var(--color-info) 25%, var(--color-success-alt) 25%, var(--color-success-alt) 50%, var(--color-warning) 50%, var(--color-warning) 75%, var(--color-error) 75%);
 }
 
 .lazy-image-container {
@@ -153,7 +190,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.3s ease;
+  transition: var(--transition-opacity);
 }
 
 .lazy-image-placeholder,
@@ -166,15 +203,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
+  background-color: var(--color-gray-100);
 }
 
 .loading-spinner-small {
   width: 20px;
   height: 20px;
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #007bff;
-  border-radius: 50%;
+  border: 2px solid var(--color-gray-100);
+  border-top: 2px solid var(--color-info);
+  border-radius: var(--border-radius-round);
   animation: spin 1s linear infinite;
 }
 
@@ -183,57 +220,50 @@
   100% { transform: rotate(360deg); }
 }
 
-/* ===== VALIDATION BADGE STYLES ===== */
-.validation-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 6px;
-  width: 24px;
-  height: 24px;
-  background-size: 20px 20px;
-  background-repeat: no-repeat;
-  background-position: center center;
-  z-index: 10;
-  animation: starPulseRotate 2s ease-in-out infinite alternate;
-}
-
-/* ===== COLOR-SPECIFIC VALIDATION STARS ===== */
-.card-blue .validation-badge {
-  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%233b82f6'/%3E%3C/svg%3E");
-  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6)) drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
-}
-
-.card-green .validation-badge {
-  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%2395cc1f'/%3E%3C/svg%3E");
-  filter: drop-shadow(0 0 4px rgba(149, 204, 31, 0.6)) drop-shadow(0 0 8px rgba(149, 204, 31, 0.3));
-}
-
-.card-red .validation-badge {
-  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%23ef4444'/%3E%3C/svg%3E");
-  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6)) drop-shadow(0 0 8px rgba(239, 68, 68, 0.3));
-}
-
-.card-yellow .validation-badge {
-  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%23fbbf24'/%3E%3C/svg%3E");
-  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 8px rgba(251, 191, 36, 0.3));
-}
-
-.card-multi .validation-badge {
-  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64193 8.82547 5.99623L9.15316 5.40838Z' fill='%239333ea'/%3E%3C/svg%3E");
-  filter: drop-shadow(0 0 4px rgba(147, 51, 234, 0.6)) drop-shadow(0 0 8px rgba(147, 51, 234, 0.3));
-}
-
-@keyframes starPulseRotate {
-  0% {
-    transform: scale(1) rotate(-5deg);
-    opacity: 0.9;
+/* Mobile optimizations - reduce 3D effects for better performance */
+@media (max-width: 768px) {
+  .card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+      var(--card-shadow-hover),
+      0 8px 24px rgba(0, 0, 0, 0.15);
   }
-  50% {
-    transform: scale(1.1) rotate(0deg);
-    opacity: 1;
+  
+  .card.selected:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 
+      var(--shadow-focus) var(--color-selected-light),
+      0 0 15px rgba(217, 119, 6, 0.4),
+      0 12px 24px rgba(0, 0, 0, 0.2);
   }
-  100% {
-    transform: scale(1.05) rotate(5deg);
-    opacity: 0.95;
+  
+  .card.validated:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 
+      var(--shadow-focus) var(--color-validated-light),
+      0 0 15px rgba(5, 150, 105, 0.4),
+      0 12px 24px rgba(0, 0, 0, 0.2);
   }
 }
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  }
+  
+  .card:hover {
+    transform: translateY(-2px) scale(1.01);
+  }
+  
+  .card.selected:hover,
+  .card.validated:hover {
+    transform: translateY(-3px) scale(1.02);
+  }
+  
+  @keyframes validatedGlow {
+    from { opacity: 0.8; }
+    to { opacity: 1; }
+  }
+}
+

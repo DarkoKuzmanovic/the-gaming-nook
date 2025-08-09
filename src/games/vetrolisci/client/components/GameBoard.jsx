@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+// Component imports
 import GameGrid from './GameGrid.jsx'
 import Card from './Card.jsx' 
 import CardChoiceModal from './CardChoiceModal.jsx'
@@ -8,12 +11,17 @@ import ScoreBoard from './ScoreBoard.jsx'
 import TurnScoreModal from './TurnScoreModal.jsx'
 import ScoreboardModal from './ScoreboardModal.jsx'
 import DraftPhase from './DraftPhase.jsx'
+
+// Service imports
 import { PlacementScenario, getPickableCards } from '../../shared/placement.js'
 import socketClient from '../../../../shared/client/utils/socket-client.js'
 import audioService from '../services/audio.js'
 import './GameBoard.css'
 
-const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) => {
+const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true, onGameStateUpdate }) => {
+  // ==================== STATE MANAGEMENT ====================
+  
+  // Core game state
   const [gameState, setGameState] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -38,7 +46,13 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
   const [soundEnabled, setSoundEnabled] = useState(audioService.isSoundEffectsEnabled())
   const [musicEnabled, setMusicEnabled] = useState(audioService.isMusicEnabled())
 
-  // Audio control functions
+  // ==================== HELPER FUNCTIONS ====================
+  
+  const updateGameState = (newGameState) => {
+    setGameState(newGameState)
+    onGameStateUpdate?.(newGameState)
+  }
+
   const toggleSound = () => {
     const newState = audioService.toggleSoundEffects()
     setSoundEnabled(newState)
@@ -48,14 +62,6 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
     const newState = audioService.toggleMusic()
     setMusicEnabled(newState)
   }
-  
-  // Confetti handler
-  // Handle turn score continue
-  const handleTurnScoreContinue = () => {
-    setShowTurnScore(false)
-    // Emit to server to continue to next turn
-    socketClient.emit('continue-from-scoring', { roomCode })
-  }
 
   const handleConfettiComplete = (cardId) => {
     setConfettiCards(prev => {
@@ -64,13 +70,13 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
       return newSet
     })
   }
+
+  // ==================== EFFECTS ====================
   
-  // Start background music when game loads
+  // Start background music when component mounts
   useEffect(() => {
     audioService.startBackgroundMusic()
-    return () => {
-      audioService.stopBackgroundMusic()
-    }
+    return () => audioService.stopBackgroundMusic()
   }, [])
 
   // Update page title based on game state  
@@ -81,28 +87,24 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
       document.title = 'Game Complete - Vetrolisci'
     } else if (gameState.phase === 'draft') {
       const isMyTurn = gameState.currentPickingPlayer?.index === playerIndex
-      if (isMyTurn) {
-        document.title = `Your Turn - Round ${gameState.currentRound} - Vetrolisci`
-      } else {
-        document.title = `Round ${gameState.currentRound} - Vetrolisci`
-      }
+      document.title = isMyTurn 
+        ? `Your Turn - Round ${gameState.currentRound} - Vetrolisci`
+        : `Round ${gameState.currentRound} - Vetrolisci`
     } else {
       document.title = `Round ${gameState.currentRound} - Vetrolisci`
     }
     
-    return () => {
-      document.title = 'The Gaming Nook'
-    }
+    return () => { document.title = 'The Gaming Nook' }
   }, [gameState?.phase, gameState?.currentRound, gameState?.currentPickingPlayer?.index, playerIndex])
 
-  // Handle scoring phase
+  // Handle scoring phase transitions
   useEffect(() => {
     if (gameState?.phase === 'scoring' && !showTurnScore) {
       setShowTurnScore(true)
     }
   }, [gameState?.phase, showTurnScore])
 
-  // Log turn changes only
+  // Log turn changes for debugging
   useEffect(() => {
     if (gameState?.currentPickingPlayer?.index !== undefined) {
       console.log(`🎯 Turn: Player ${gameState.currentPickingPlayer.index} (${gameState.currentPickingPlayer?.name})`)
@@ -117,7 +119,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
         const response = await socketClient.emit('vetrolisci-get-state', { roomCode })
         
         if (response.success) {
-          setGameState(response.gameState)
+          updateGameState(response.gameState)
         } else {
           setError(response.error || 'Failed to load game state')
         }
@@ -137,10 +139,9 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
   useEffect(() => {
     if (!roomCode) return
 
-    // Listen for card placement events
     const handleCardPlaced = (data) => {
       console.log('🎯 Card placed:', data)
-      setGameState(data.gameState)
+      updateGameState(data.gameState)
       
       // Trigger animations
       if (data.cardId) {
@@ -148,9 +149,8 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
         setGlowingCards(prev => new Set([...prev, data.cardId]))
         
         // Check if card was validated for confetti
-        if (data.gameState && data.gameState.players) {
-          const allPlayers = data.gameState.players
-          for (const player of allPlayers) {
+        if (data.gameState?.players) {
+          for (const player of data.gameState.players) {
             const validatedCard = player.grid.find(card => 
               card && card.id === data.cardId && card.validated
             )
@@ -162,7 +162,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
           }
         }
         
-        // Clear animations after delay
+        // Clear animations after delays
         setTimeout(() => {
           setNewlyPlacedCards(prev => {
             const newSet = new Set(prev)
@@ -195,31 +195,35 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
 
     const handleGameComplete = (data) => {
       console.log('🎉 Game complete:', data)
-      // Determine if current player won to play appropriate sound
+      // Play appropriate sound based on win/loss
       const currentPlayerScore = data.gameState.players[playerIndex].totalScore
       const opponentScore = data.gameState.players[playerIndex === 0 ? 1 : 0].totalScore
       audioService.playSound(currentPlayerScore > opponentScore ? 'win' : 'lose')
-      setGameState(data.gameState)
+      updateGameState(data.gameState)
     }
 
+    // Register event listeners
     socketClient.on('vetrolisci-card-placed', handleCardPlaced)
     socketClient.on('vetrolisci-round-complete', handleRoundComplete)
     socketClient.on('vetrolisci-game-complete', handleGameComplete)
 
+    // Cleanup
     return () => {
       socketClient.off('vetrolisci-card-placed', handleCardPlaced)
       socketClient.off('vetrolisci-round-complete', handleRoundComplete)
       socketClient.off('vetrolisci-game-complete', handleGameComplete)
     }
-  }, [roomCode])
+  }, [roomCode, playerIndex])
 
+  // ==================== EVENT HANDLERS ====================
+  
   const handleCardPick = async (cardId) => {
-    if (!gameState || !gameState.draftState) {
+    if (!gameState?.draftState) {
       console.log('⚠️ No game state or draft state available')
       return
     }
     
-    // Check if it's player's turn
+    // Validate player's turn
     const currentPickingPlayer = gameState.currentPickingPlayer
     if (!currentPickingPlayer || currentPickingPlayer.index !== playerIndex) {
       console.log('⚠️ Not your turn to pick - current player:', currentPickingPlayer?.index, 'you are:', playerIndex)
@@ -228,10 +232,10 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
       return
     }
 
-    // Check if card can be picked
+    // Validate card can be picked
     const pickableCards = getPickableCards(gameState.players[playerIndex].grid, gameState.draftState.revealedCards)
     const cardData = pickableCards.find(card => card.id === cardId)
-    if (!cardData || !cardData.pickable.canPick) {
+    if (!cardData?.pickable.canPick) {
       const message = cardData?.pickable.reason === 'all_cards_validated' 
         ? 'All cards would violate validation rule - can place face-down'
         : 'You already have a validated card with this number'
@@ -240,7 +244,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
       return
     }
 
-    // Prevent double-clicking/rapid clicking
+    // Prevent double-clicking
     if (animatingCards.has(cardId)) {
       console.log('⚠️ Card pick already in progress')
       return
@@ -255,13 +259,11 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
       })
       
       if (response.success) {
-        // Play card pick sound
         audioService.playSound('playCard')
         
         if (response.needsChoice) {
-          // Handle placement choices
+          // Handle placement choice scenarios
           if (response.choiceType === PlacementScenario.DUPLICATE_NUMBER) {
-            // Show card choice modal
             const selectedCard = response.selectedCard
             const existingCard = gameState.players[playerIndex].grid[selectedCard.value - 1]
             
@@ -272,7 +274,6 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
             })
             setShowCardChoice(true)
           } else if (response.choiceType === PlacementScenario.ALREADY_VALIDATED) {
-            // Show placement choice modal
             const availablePositions = gameState.players[playerIndex].grid
               .map((card, index) => card === null ? index : null)
               .filter(index => index !== null)
@@ -287,7 +288,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
         } else {
           // Card was placed automatically
           audioService.playSound('placeCards')
-          setGameState(response.gameState)
+          updateGameState(response.gameState)
         }
       } else {
         console.error('Failed to pick card:', response.error)
@@ -317,7 +318,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
       
       if (response.success) {
         audioService.playSound('placeCards')
-        setGameState(response.gameState)
+        updateGameState(response.gameState)
       } else {
         setError(response.error)
       }
@@ -341,7 +342,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
       
       if (response.success) {
         audioService.playSound('placeCards')
-        setGameState(response.gameState)
+        updateGameState(response.gameState)
       } else {
         setError(response.error)
       }
@@ -356,7 +357,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
   const handleRoundContinue = () => {
     setShowRoundComplete(false)
     
-    // Update game state with the new round data
+    // Update game state with new round data
     if (roundCompleteData?.gameState) {
       setGameState(roundCompleteData.gameState)
     }
@@ -364,6 +365,13 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
     setRoundCompleteData(null)
   }
 
+  const handleTurnScoreContinue = () => {
+    setShowTurnScore(false)
+    socketClient.emit('continue-from-scoring', { roomCode })
+  }
+
+  // ==================== RENDER STATES ====================
+  
   if (loading) {
     return (
       <div className="game-board loading">
@@ -392,7 +400,6 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
     )
   }
 
-  // Show game completion screen
   if (gameState.phase === 'finished') {
     return (
       <div className="game-board">
@@ -405,87 +412,118 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
     )
   }
 
+  // ==================== MAIN RENDER ====================
+  
   const currentPlayer = gameState.players[playerIndex]
   const opponentIndex = playerIndex === 0 ? 1 : 0
   const opponent = gameState.players[opponentIndex]
-  
-  const isMyTurn = gameState.currentPickingPlayer?.index === playerIndex
-  const currentPickingPlayerName = gameState.currentPickingPlayer?.name || 'Unknown'
 
   return (
     <div className="game-board">
-      {/* Game Header - only show if showHeader is true */}
-      {showHeader && (
-        <div className="game-header">
-          <div className="header-left">
-            <h2>Vetrolisci - Round {gameState.currentRound}/3</h2>
-          </div>
-          
-          {/* Game Progress */}
-          <div className="game-progress">
-            <div className="round-indicators">
-              {[1, 2, 3].map(round => (
-                <div 
-                  key={round} 
-                  className={`round-indicator ${round === gameState.currentRound ? 'current' : ''} ${round < gameState.currentRound ? 'completed' : ''}`}
-                >
-                  {round}
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Error Display */}
+      {error && (
+        <div className="error-banner">
+          ⚠️ {error}
         </div>
       )}
-        
-
-        
-        {/* Error Display */}
-        {error && (
-          <div className="error-banner">
-            ⚠️ {error}
-          </div>
-        )}
       
       {/* Game Content Container */}
-      <div className="game-content">
-        {/* Enhanced Draft Phase */}
-        {gameState.draftState && gameState.draftState.revealedCards && (
-          <DraftPhase
-            gameState={gameState}
-            playerIndex={playerIndex}
-            onCardPick={handleCardPick}
-            error={error}
-            animatingCards={animatingCards}
-          />
-        )}
+      <motion.div 
+        className="game-content"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* Draft Phase */}
+        <AnimatePresence mode="wait">
+          {gameState.draftState?.revealedCards && (
+            <motion.div
+              key="draft-phase"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                transition: { duration: 0.4, ease: "easeOut" }
+              }}
+              exit={{ 
+                opacity: 0, 
+                y: -20,
+                transition: { duration: 0.3, ease: "easeIn" }
+              }}
+            >
+              <DraftPhase
+                gameState={gameState}
+                playerIndex={playerIndex}
+                onCardPick={handleCardPick}
+                error={error}
+                animatingCards={animatingCards}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Game Grids */}
-        <div className="game-grids">
-        <div className="player-grid-section">
-          <h3>Your Grid ({currentPlayer.name})</h3>
-          <GameGrid
-            grid={currentPlayer.grid}
-            newlyPlacedCards={newlyPlacedCards}
-            glowingCards={glowingCards}
-            confettiCards={confettiCards}
-            onConfettiComplete={handleConfettiComplete}
-          />
-        </div>
+        <motion.div 
+          className="game-grids"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ 
+            opacity: 1, 
+            y: 0,
+            transition: { 
+              duration: 0.6, 
+              delay: 0.2,
+              ease: "easeOut" 
+            }
+          }}
+        >
+          <motion.div 
+            className="player-grid-section"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ 
+              opacity: 1, 
+              x: 0,
+              transition: { 
+                duration: 0.5, 
+                delay: 0.3,
+                ease: "easeOut" 
+              }
+            }}
+          >
+            <GameGrid
+              grid={currentPlayer.grid}
+              newlyPlacedCards={newlyPlacedCards}
+              glowingCards={glowingCards}
+              confettiCards={confettiCards}
+              onConfettiComplete={handleConfettiComplete}
+            />
+          </motion.div>
 
-        <div className="opponent-grid-section">
-          <h3>Opponent ({opponent.name})</h3>
-          <GameGrid
-            grid={opponent.grid}
-            isOpponent={true}
-            newlyPlacedCards={newlyPlacedCards}
-            glowingCards={glowingCards}
-            confettiCards={confettiCards}
-            onConfettiComplete={handleConfettiComplete}
-          />
-        </div>
-      </div>
+          <motion.div 
+            className="opponent-grid-section"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ 
+              opacity: 1, 
+              x: 0,
+              transition: { 
+                duration: 0.5, 
+                delay: 0.4,
+                ease: "easeOut" 
+              }
+            }}
+          >
+            <GameGrid
+              grid={opponent.grid}
+              isOpponent={true}
+              newlyPlacedCards={newlyPlacedCards}
+              glowingCards={glowingCards}
+              confettiCards={confettiCards}
+              onConfettiComplete={handleConfettiComplete}
+            />
+          </motion.div>
+        </motion.div>
+      </motion.div>
 
-      {/* Bottom Right Controls */}
+      {/* Control Buttons */}
       <div className="bottom-right-controls">
         {/* Audio Controls */}
         <button 
@@ -505,7 +543,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
           <img src="/shared/icons/music.png" alt="Music" style={{ width: '20px', height: '20px' }} />
         </button>
         
-        {/* Scoreboard Button */}
+        {/* Utility Controls */}
         <button 
           className="control-button scoreboard-button"
           onClick={() => setShowScoreboard(true)}
@@ -515,7 +553,6 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
           <img src="/shared/icons/score.png" alt="Scoreboard" style={{ width: '20px', height: '20px' }} />
         </button>
         
-        {/* Back to Menu */}
         <button 
           className="control-button back-to-menu-button"
           onClick={onBackToMenu}
@@ -563,7 +600,6 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true }) =
         playerIndex={playerIndex}
         onClose={() => setShowScoreboard(false)}
       />
-      </div>
     </div>
   )
 }

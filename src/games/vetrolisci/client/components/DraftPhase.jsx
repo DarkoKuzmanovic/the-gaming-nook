@@ -1,4 +1,5 @@
 import React from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Card from './Card.jsx'
 import { getPickableCards } from '../../shared/placement.js'
 import './DraftPhase.css'
@@ -27,84 +28,87 @@ const DraftPhase = ({ gameState, playerIndex, onCardPick, error, animatingCards 
 
   return (
     <div className="draft-phase">
-      <div className="draft-header">
-        <h3>Draft Phase - Round {gameState.currentRound}</h3>
-        
-        <div className={`turn-indicator ${isMyTurn ? 'my-turn' : 'waiting'}`}>
-          {isMyTurn ? (
-            <span className="my-turn-text">
-              🎯 Your turn to pick!
-            </span>
-          ) : (
-            <span className="waiting-text">
-              ⏳ Waiting for {currentPickingPlayerName}
-              <span className="loading-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </span>
-          )}
-        </div>
-        
-        <div className="pick-progress">
-          <div className="pick-counter">
-            Pick {picksCompleted + 1} of {totalPicks}
-          </div>
-          <div className="cards-remaining">
-            {remainingCards} cards remaining
-          </div>
-        </div>
-        
-        {/* Error Display */}
-        {error && (
-          <div className="error-banner">
-            ⚠️ {error}
-          </div>
-        )}
-      </div>
-
       <div className="draft-content">
         {/* Available Cards */}
         <div className="available-cards-section">
-          <h4>Available Cards</h4>
-          <div className="available-cards">
-            {pickableCards.map((cardData) => {
-              const canPlayerPick = isMyTurn && cardData.pickable.canPick
-              const isAnimating = animatingCards.has(cardData.id)
-              const canPick = canPlayerPick && !isAnimating
-              
-              const tooltipText = !cardData.pickable.canPick ? 
-                (cardData.pickable.reason === 'all_cards_validated' ? 
-                  'All cards would violate validation rule - can place face-down' : 
-                  'You already have a validated card with this number') : ''
-              
-              return (
-                <div 
-                  key={cardData.id} 
-                  className={`card-container ${
-                    canPick ? 'pickable' : 'not-pickable'
-                  } ${isAnimating ? 'animating' : ''}`}
-                  title={tooltipText}
-                >
-                  <Card 
-                    card={cardData}
-                    onClick={() => {
-                      if (canPick) {
-                        onCardPick(cardData.id)
+          <div className="section-header">
+            <h4>Available Cards</h4>
+            {/* Error Display - moved here for better visibility */}
+            {error && (
+              <div className="error-banner">
+                ⚠️ {error}
+              </div>
+            )}
+          </div>
+          <motion.div 
+            className="available-cards"
+            initial={false}
+            layout
+          >
+            <AnimatePresence mode="popLayout">
+              {pickableCards.map((cardData, index) => {
+                const canPlayerPick = isMyTurn && cardData.pickable.canPick
+                const isAnimating = animatingCards.has(cardData.id)
+                const canPick = canPlayerPick && !isAnimating
+                
+                const tooltipText = !cardData.pickable.canPick ? 
+                  (cardData.pickable.reason === 'all_cards_validated' ? 
+                    'All cards would violate validation rule - can place face-down' : 
+                    'You already have a validated card with this number') : ''
+                
+                return (
+                  <motion.div 
+                    key={cardData.id} 
+                    className={`card-container ${
+                      canPick ? 'pickable' : 'not-pickable'
+                    } ${isAnimating ? 'animating' : ''}`}
+                    title={tooltipText}
+                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: 0, 
+                      scale: 1,
+                      transition: {
+                        duration: 0.4,
+                        delay: index * 0.1,
+                        ease: "easeOut"
                       }
                     }}
-                    isSelected={false}
-                  />
-                  {!cardData.pickable.canPick && (
-                    <div className="card-restriction-overlay">
-                      <span className="restriction-icon">🚫</span>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                    exit={{ 
+                      opacity: 0, 
+                      scale: 0.9, 
+                      y: -10,
+                      transition: {
+                        duration: 0.4,
+                        ease: "easeInOut"
+                      }
+                    }}
+                    layout
+                  >
+                    <Card 
+                      card={cardData}
+                      onClick={() => {
+                        if (canPick) {
+                          onCardPick(cardData.id)
+                        }
+                      }}
+                      isSelected={false}
+                    />
+                    {!cardData.pickable.canPick && (
+                      <motion.div 
+                        className="card-restriction-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <span className="restriction-icon">🚫</span>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                )
+              })}
+            </AnimatePresence>
+          </motion.div>
         </div>
 
         {/* Draft Complete - Ready for Placement */}
