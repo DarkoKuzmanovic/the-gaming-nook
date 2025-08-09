@@ -3,9 +3,10 @@
 }
 
 .round-complete-modal h3 {
-  color: #28a745;
+  color: #ffffff;
   margin-bottom: 20px;
   font-size: 24px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .round-scores {
@@ -13,16 +14,21 @@
 }
 
 .player-round-score {
-  background-color: #f8f9fa;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
   padding: 15px;
   margin-bottom: 10px;
-  border-left: 4px solid #007bff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 4px solid rgba(0, 123, 255, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .player-round-score h4 {
   margin: 0 0 8px 0;
-  color: #333;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .score-value {

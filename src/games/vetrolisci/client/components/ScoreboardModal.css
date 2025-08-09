@@ -1,13 +1,16 @@
 /* ===== SCOREBOARD MODAL ===== */
 .scoreboard-modal {
-  background: white;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
   padding: 24px;
   max-width: 700px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
@@ -22,9 +25,10 @@
 
 .scoreboard-modal .modal-header h2 {
   margin: 0;
-  color: #1f2937;
+  color: #ffffff;
   font-size: 24px;
   font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .close-button {

@@ -4,7 +4,8 @@
 
 .placement-choice-modal p {
   margin-bottom: 20px;
-  color: #666;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .placement-card {
