@@ -244,123 +244,141 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="header-left">
-          {currentView === "game" && gameData ? (
-            <>
-              <h1>🎮 Vetrolisci</h1>
-              <p>Room: {gameData.roomCode}</p>
-            </>
-          ) : (
-            <>
-              <h1>🎮 The Gaming Nook</h1>
-              <p>Simple multiplayer games for friends</p>
-            </>
-          )}
-        </div>
+      {/* Hide header on main menu and game selection for cleaner design */}
+      {currentView !== "menu" && currentView !== "create" && (
+        <header className="app-header">
+          <div className="header-left">
+            {currentView === "game" && gameData ? (
+              <>
+                <h1>🎮 Vetrolisci</h1>
+                <p>Room: {gameData.roomCode}</p>
+              </>
+            ) : (
+              <>
+                <h1>🎮 The Gaming Nook</h1>
+                <p>Simple multiplayer games for friends</p>
+              </>
+            )}
+          </div>
 
-        <div className="header-center">
-          {currentView === "game" && gameData?.gameState && (
-            <>
-              {/* Turn Indicator - show during draft phase */}
-              {gameData.gameState.draftState && gameData.gameState.draftState.revealedCards && (
-                <div
-                  className={`turn-indicator ${
-                    gameData.gameState.currentPickingPlayer?.index === gameData.playerIndex ? "my-turn" : "waiting"
-                  }`}
-                >
-                  {gameData.gameState.currentPickingPlayer?.index === gameData.playerIndex ? (
-                    <span className="my-turn-text">🎯 Your turn to pick!</span>
-                  ) : (
-                    <span className="waiting-text">
-                      ⏳ Waiting for {gameData.gameState.currentPickingPlayer?.name || "Unknown"}
-                      <span className="loading-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </span>
-                    </span>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className="header-right">
-          {currentView === "game" && gameData?.gameState && gameData.gameType === "vetrolisci" && (
-            <div className="game-progress">
-              <div className="round-indicators">
-                {[1, 2, 3].map((round) => (
+          <div className="header-center">
+            {currentView === "game" && gameData?.gameState && (
+              <>
+                {/* Turn Indicator - show during draft phase */}
+                {gameData.gameState.draftState && gameData.gameState.draftState.revealedCards && (
                   <div
-                    key={round}
-                    className={`round-indicator ${round === gameData.gameState.currentRound ? "current" : ""} ${
-                      round < gameData.gameState.currentRound ? "completed" : ""
+                    className={`turn-indicator ${
+                      gameData.gameState.currentPickingPlayer?.index === gameData.playerIndex ? "my-turn" : "waiting"
                     }`}
                   >
-                    {round}
+                    {gameData.gameState.currentPickingPlayer?.index === gameData.playerIndex ? (
+                      <span className="my-turn-text">🎯 Your turn to pick!</span>
+                    ) : (
+                      <span className="waiting-text">
+                        ⏳ Waiting for {gameData.gameState.currentPickingPlayer?.name || "Unknown"}
+                        <span className="loading-dots">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </span>
+                      </span>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
 
-          {currentView === "game" && gameData?.gameState && gameData.gameType === "connect4" && (
-            <div className="game-progress">
-              <div className="round-info">
-                {gameData.gameState.gameState === "playing" ? "In Progress" : 
-                 gameData.gameState.gameState === "finished" ? "Game Over" : "Ready"}
+          <div className="header-right">
+            {currentView === "game" && gameData?.gameState && gameData.gameType === "vetrolisci" && (
+              <div className="game-progress">
+                <div className="round-indicators">
+                  {[1, 2, 3].map((round) => (
+                    <div
+                      key={round}
+                      className={`round-indicator ${round === gameData.gameState.currentRound ? "current" : ""} ${
+                        round < gameData.gameState.currentRound ? "completed" : ""
+                      }`}
+                    >
+                      {round}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {!connected && <div className="connection-status offline">⚠️ Disconnected from server</div>}
-        </div>
-      </header>
+            {currentView === "game" && gameData?.gameState && gameData.gameType === "connect4" && (
+              <div className="game-progress">
+                <div className="round-info">
+                  {gameData.gameState.gameState === "playing" ? "In Progress" : 
+                   gameData.gameState.gameState === "finished" ? "Game Over" : "Ready"}
+                </div>
+              </div>
+            )}
+
+            {!connected && <div className="connection-status offline">⚠️ Disconnected from server</div>}
+          </div>
+        </header>
+      )}
 
       <main className="app-main">
         {currentView === "menu" && (
           <div className="menu">
-            <Button variant="success" size="large" onClick={handleCreateGame} disabled={!connected}>
-              Create Game
-            </Button>
+            <div className="menu-title">
+              <h1>🎮 Gaming Nook</h1>
+              <p>Choose your next adventure</p>
+            </div>
+            
+            <div className="menu-buttons">
+              <Button variant="success" size="large" onClick={handleCreateGame} disabled={!connected}>
+                Create Game
+              </Button>
 
-            <Button variant="primary" size="large" onClick={handleJoinGame} disabled={!connected}>
-              Join Game
-            </Button>
+              <Button variant="primary" size="large" onClick={handleJoinGame} disabled={!connected}>
+                Join Game
+              </Button>
+            </div>
+            
+            {/* Connection status for main menu */}
+            {!connected && (
+              <div className="menu-connection-status">
+                ⚠️ Disconnected from server
+              </div>
+            )}
           </div>
         )}
 
         {currentView === "create" && (
           <div className="create-game">
-            <h2>Select Game Type</h2>
+            <div className="create-game-title">
+              <h2>Select Game Type</h2>
+              <p>Pick your game and create a room to play with friends</p>
+            </div>
             <div className="game-selection">
-              <Button
+              <button
                 className="game-card-button"
-                variant="danger"
-                size="large"
                 onClick={handleCreateVetrolisciRoom}
-                loading={loading}
-                disabled={!connected}
+                disabled={loading || !connected}
               >
-                <div className="game-card-content">
-                  <h3>Vetrolisci</h3>
-                  <p>Card Strategy Game</p>
+                <div className="game-card">
+                  <div className="game-card-content">
+                    <h3>Vetrolisci</h3>
+                    <p>Card Strategy Game</p>
+                  </div>
                 </div>
-              </Button>
-              <Button
+              </button>
+              <button
                 className="game-card-button"
-                variant="primary"
-                size="large"
                 onClick={handleCreateConnect4Room}
-                loading={loading}
-                disabled={!connected}
+                disabled={loading || !connected}
               >
-                <div className="game-card-content">
-                  <h3>Connect 4</h3>
-                  <p>Classic Strategy Game</p>
+                <div className="game-card">
+                  <div className="game-card-content">
+                    <h3>Connect 4</h3>
+                    <p>Classic Strategy Game</p>
+                  </div>
                 </div>
-              </Button>
+              </button>
             </div>
             <Button variant="outline" onClick={handleBack}>
               ← Back
