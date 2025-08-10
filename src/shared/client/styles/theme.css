@@ -109,10 +109,10 @@
   --shadow-button-hover: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   /* Glassmorphism Effects */
-  --glass-bg: rgba(255, 255, 255, 0.15);
-  --glass-bg-light: rgba(255, 255, 255, 0.12);
-  --glass-bg-medium: rgba(255, 255, 255, 0.18);
-  --glass-bg-strong: rgba(255, 255, 255, 0.25);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-bg-light: rgba(255, 255, 255, 0.75);
+  --glass-bg-medium: rgba(255, 255, 255, 0.88);
+  --glass-bg-strong: rgba(255, 255, 255, 0.92);
   --glass-bg-mobile: rgba(255, 255, 255, 0.85);
   --glass-bg-mobile-hover: rgba(255, 255, 255, 0.92);
   --glass-border: rgba(255, 255, 255, 0.25);

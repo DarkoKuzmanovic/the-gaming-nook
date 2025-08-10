@@ -1,4 +1,4 @@
-/* ==================== CONNECT 4 GAME BOARD ==================== */
+/* ==================== UNIFIED GLASSMORPHISM CONNECT 4 ==================== */
 
 .connect4-game-board {
   display: flex;
@@ -6,9 +6,9 @@
   align-items: center;
   padding: var(--spacing-2xl);
   min-height: 100vh;
-  background: url("/background.jpg") repeat;
-  background-size: 50px 50px;
+  color: var(--color-black);
   position: relative;
+  gap: var(--spacing-xl);
 }
 
 .connect4-game-board::before {
@@ -18,13 +18,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.85);
-  z-index: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
 }
 
 .connect4-game-board > * {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-base);
 }
 
 /* ==================== GAME CONTENT ==================== */
@@ -33,50 +33,66 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-2xl);
+  gap: var(--spacing-xl);
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  border-radius: var(--border-radius-2xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-xl);
+  position: relative;
 }
 
 /* ==================== GAME STATUS ==================== */
 
 .connect4-game-status {
   text-align: center;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  border: var(--glass-border);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-lg);
-  box-shadow: var(--shadow-lg);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 500px;
 }
 
 .connect4-current-player {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-white);
+  color: var(--color-black);
   margin-bottom: var(--spacing-sm);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .connect4-player-indicator {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--border-radius-md);
-  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  font-weight: var(--font-weight-bold);
   transition: var(--transition-all);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 .connect4-player-indicator.red {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.8));
+  color: white;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .connect4-player-indicator.yellow {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fde047;
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.9), rgba(245, 158, 11, 0.8));
+  color: var(--color-black);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 .connect4-player-indicator.active {
@@ -226,41 +242,46 @@
 }
 
 .connect4-button {
-  padding: var(--button-padding-md);
+  padding: var(--spacing-md) var(--spacing-xl);
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  border: none;
-  border-radius: var(--button-border-radius);
+  font-weight: var(--font-weight-bold);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--border-radius-lg);
   cursor: pointer;
   transition: var(--transition-all);
   font-family: inherit;
-  min-width: 120px;
+  min-width: 140px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-lg);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 .connect4-button.primary {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: white;
   border: 1px solid var(--color-primary);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
 }
 
 .connect4-button.primary:hover {
   background: var(--color-primary-hover);
   border-color: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-focus) var(--color-primary-focus);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.4);
 }
 
 .connect4-button.secondary {
-  background: var(--color-white);
-  color: var(--color-secondary);
-  border: 1px solid var(--color-gray-300);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--color-black);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .connect4-button.secondary:hover {
-  background: var(--color-gray-50);
-  border-color: var(--color-secondary-lighter);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-button-hover);
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 /* ==================== LOADING & ERROR STATES ==================== */

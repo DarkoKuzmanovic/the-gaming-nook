@@ -244,8 +244,8 @@ function App() {
 
   return (
     <div className="app">
-      {/* Hide header on main menu and game selection for cleaner design */}
-      {currentView !== "menu" && currentView !== "create" && (
+      {/* Hide header on main menu, game selection, join game, waiting room, and game screens for cleaner design */}
+      {currentView !== "menu" && currentView !== "create" && currentView !== "join" && currentView !== "waiting" && currentView !== "game" && (
         <header className="app-header">
           <div className="header-left">
             {currentView === "game" && gameData ? (
@@ -388,7 +388,10 @@ function App() {
 
         {currentView === "join" && (
           <div className="join-game">
-            <h2>Join Game</h2>
+            <div className="join-game-title">
+              <h2>Join Game</h2>
+              <p>Enter your room code to join friends</p>
+            </div>
             <div className="join-form">
               <input
                 type="text"
@@ -417,23 +420,48 @@ function App() {
 
         {currentView === "waiting" && (
           <div className="waiting-room">
-            <h2>Room: {roomCode}</h2>
-            <div className="room-info">
-              <p>
-                <strong>Game:</strong> {currentRoom?.room?.gameType || currentRoom?.gameType}
-              </p>
-              <p>
-                <strong>Players:</strong> {currentRoom?.room?.players?.length || 1}/2
-              </p>
+            <div className="waiting-room-title">
+              <h2>Room Created!</h2>
+              <p>Share your room code and wait for friends to join</p>
             </div>
 
             <div className="room-code-share">
-              <h3>Share this code with your friend:</h3>
+              <h3>Room Code</h3>
               <div className="room-code-display">
                 <span className="room-code-text">{roomCode}</span>
                 <Button variant="outline" size="small" onClick={copyRoomCode}>
-                  Copy
+                  📋
                 </Button>
+              </div>
+            </div>
+
+            <div className="room-info">
+              <div className="room-info-section game-section">
+                <div className="game-info">
+                  <span className="game-icon">
+                    {(currentRoom?.room?.gameType || currentRoom?.gameType) === 'vetrolisci' ? '🎴' : '🔴'}
+                  </span>
+                  <div className="game-details">
+                    <span className="game-label">Playing</span>
+                    <span className="game-name">{(currentRoom?.room?.gameType || currentRoom?.gameType) === 'vetrolisci' ? 'Vetrolisci' : 'Connect 4'}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="room-info-section players-section">
+                <div className="players-info">
+                  <span className="players-label">Players</span>
+                  <div className="players-progress">
+                    <div className="player-slots">
+                      <div className="player-slot filled">
+                        <span className="player-icon">👤</span>
+                      </div>
+                      <div className={`player-slot ${(currentRoom?.room?.players?.length || 1) > 1 ? 'filled' : 'empty'}`}>
+                        <span className="player-icon">{(currentRoom?.room?.players?.length || 1) > 1 ? '👤' : '⏳'}</span>
+                      </div>
+                    </div>
+                    <span className="players-count">{currentRoom?.room?.players?.length || 1}/2</span>
+                  </div>
+                </div>
               </div>
             </div>
 

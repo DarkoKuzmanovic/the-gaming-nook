@@ -1,134 +1,93 @@
-/* ===== DRAFT PHASE CONTAINER ===== */
+/* ===== CARD-INSPIRED DRAFT PHASE ===== */
 .draft-phase {
-  border-radius: 12px;
-  padding: 20px 24px;
-  margin: 16px 0;
+  /* Card-inspired container */
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--card-shadow-default);
+  padding: var(--spacing-2xl);
+  margin: var(--spacing-lg) auto;
   width: 100%;
-  max-width: 780px; /* Matched with game-grids container */
-  margin: 16px auto;
+  max-width: 780px;
+  transform-style: preserve-3d;
+  transition: var(--transition-all);
+}
+
+.draft-phase:hover {
+  /* Subtle card-like hover effect */
+  transform: translateY(-1px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 @media (min-width: 1024px) {
   .draft-phase {
-    max-width: 900px; /* Matched with game-grids container */
+    max-width: 900px;
   }
 }
 
-/* ===== DRAFT HEADER ===== */
-.draft-header {
-  text-align: center;
-  margin-bottom: 12px; /* reduced since title removed */
-  border-bottom: none; /* no divider needed without title */
-  padding-bottom: 0;
-}
-
-.draft-header h3 {
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-/* Turn indicator and loading dots styles moved to GameBoard.css */
-
-/* ===== PICK PROGRESS ===== */
-.pick-progress {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 15px 0;
-  flex-wrap: wrap;
-}
-
-.pick-counter {
-  background: #007bff;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.9em;
-}
-
-.cards-remaining {
-  background: #6c757d;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9em;
-}
-
-/* ===== ERROR BANNER ===== */
-.error-banner {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  border-radius: 6px;
-  padding: 10px 15px;
-  margin: 10px 0;
-  font-weight: bold;
-}
-
-/* ===== DRAFT CONTENT ===== */
-.draft-content {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-/* ===== AVAILABLE CARDS ===== */
-/* Section header with error display */
+/* ===== SECTION HEADER ===== */
 .section-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
   gap: var(--spacing-sm);
 }
 
 .available-cards-section h4 {
-  color: var(--color-gray-800);
   margin: 0;
   text-align: center;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-white);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-black);
+  text-shadow: var(--text-shadow-light);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-/* Error banner in section header */
+/* ===== CARD-INSPIRED ERROR BANNER ===== */
 .section-header .error-banner {
-  background: var(--color-error-light);
-  color: var(--color-error-dark);
-  padding: var(--spacing-sm) var(--spacing-lg);
+  /* Card-like error display */
+  background: var(--card-bg);
+  color: var(--color-error);
+  border: var(--card-border);
+  border-left: 4px solid var(--color-error);
   border-radius: var(--border-radius-md);
-  border: 1px solid var(--color-error);
+  padding: var(--spacing-sm) var(--spacing-lg);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
   text-align: center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--card-shadow-default);
+  text-shadow: var(--text-shadow-light);
 }
 
+/* ===== OPTIMIZED AVAILABLE CARDS CONTAINER ===== */
 .available-cards {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: var(--spacing-lg);
   flex-wrap: nowrap;
-  padding: 20px;
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
-  border: 2px dashed #dee2e6;
+  padding: var(--spacing-2xl);
+  /* Card-inspired styling with optimized shadows */
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--card-shadow-default);
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   margin: 0 auto;
   box-sizing: border-box;
+  /* Removed transform-style and complex transitions for performance */
 }
 
+/* ===== OPTIMIZED CARD CONTAINERS ===== */
 .card-container {
   position: relative;
-  transition: all 0.3s ease;
   width: 100px;
   height: 140px;
+  /* Simplified transitions for better performance */
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 @media (min-width: 768px) {
@@ -150,21 +109,24 @@
 }
 
 .card-container.pickable:hover {
-  transform: translateY(-5px) scale(1.05);
-  z-index: 10;
+  /* Simplified, performant hover effect */
+  transform: translateY(-4px) scale(1.02);
+  z-index: var(--z-sticky);
 }
 
 .card-container.not-pickable {
   cursor: not-allowed;
   opacity: 0.6;
+  filter: grayscale(0.3);
 }
 
 .card-container.animating {
-  opacity: 0.5;
+  opacity: 0.7;
   pointer-events: none;
+  transform: scale(0.98);
 }
 
-/* ===== CARD RESTRICTION OVERLAY ===== */
+/* ===== CARD-INSPIRED RESTRICTION OVERLAY ===== */
 .card-restriction-overlay {
   position: absolute;
   top: 0;
@@ -175,74 +137,96 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  backdrop-filter: blur(1px);
+  border-radius: var(--border-radius-md);
+  backdrop-filter: blur(2px);
+  border: 2px solid var(--color-error);
 }
 
 .restriction-icon {
   font-size: 2em;
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--text-shadow-strong);
 }
 
-/* ===== DRAFT COMPLETE ===== */
+/* ===== CARD-INSPIRED DRAFT COMPLETE ===== */
 .draft-complete-section {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border: 2px solid #28a745;
-  border-radius: 12px;
-  padding: 1.5rem;
+  /* Card-inspired completion notice */
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-left: 4px solid var(--color-success);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-2xl);
   text-align: center;
-  margin: 1.5rem 0;
+  margin: var(--spacing-xl) 0;
+  box-shadow: 
+    var(--card-shadow-default),
+    0 0 0 1px var(--color-success-light);
+  transform-style: preserve-3d;
+  transition: var(--transition-all);
+}
+
+.draft-complete-section:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 
+    var(--card-shadow-hover),
+    0 0 0 1px var(--color-success-light);
 }
 
 .draft-complete-section h4 {
-  color: #155724;
-  margin: 0 0 0.5rem 0;
-  font-size: 1.2rem;
-  font-weight: 600;
+  color: var(--color-success);
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  text-shadow: var(--text-shadow-light);
 }
 
 .draft-complete-section p {
-  color: #155724;
+  color: var(--color-black);
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  text-shadow: var(--text-shadow-light);
+}
+
+/* ===== DRAFT CONTENT ===== */
+.draft-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   .draft-phase {
-    margin: 8px auto;
-    padding: 16px;
-    border-radius: 8px;
-    max-width: 430px; /* Match the max-width of game-content on mobile */
-  }
-
-  .pick-progress {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    margin: var(--spacing-sm) auto;
+    padding: var(--spacing-lg);
+    max-width: 430px;
   }
 
   .available-cards {
-    gap: 8px;
-    padding: 12px;
-    width: 100%;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
   }
 }
 
 @media (max-width: 480px) {
-  .draft-header h3 {
-    font-size: 1.2em;
+  .draft-phase {
+    padding: var(--spacing-md);
   }
 
-  /* Turn indicator styles removed - now in GameBoard.css */
+  .available-cards-section h4 {
+    font-size: var(--font-size-lg);
+  }
 
   .available-cards {
-    gap: 8px;
-    padding: 10px;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
   }
-}
 
-/* Remove pick-progress styling since UI elements removed */
-.pick-progress {
-  display: none;
+  .draft-complete-section {
+    padding: var(--spacing-lg);
+  }
+
+  .draft-complete-section h4 {
+    font-size: var(--font-size-lg);
+  }
 }

@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Card from './Card.jsx'
 import { getPickableCards } from '../../shared/placement.js'
 import './DraftPhase.css'
 
 const DraftPhase = ({ gameState, playerIndex, onCardPick, error, animatingCards }) => {
+  const isInitialRender = useRef(true)
+  
   if (!gameState || !gameState.draftState) {
     return null
   }
@@ -26,6 +28,11 @@ const DraftPhase = ({ gameState, playerIndex, onCardPick, error, animatingCards 
   const pickableCards = draftState.revealedCards ? 
     getPickableCards(currentPlayer.grid, draftState.revealedCards) : []
 
+  // Set initial render to false after first render
+  if (isInitialRender.current && pickableCards.length > 0) {
+    isInitialRender.current = false
+  }
+
   return (
     <div className="draft-phase">
       <div className="draft-content">
@@ -43,9 +50,8 @@ const DraftPhase = ({ gameState, playerIndex, onCardPick, error, animatingCards 
           <motion.div 
             className="available-cards"
             initial={false}
-            layout
           >
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence>
               {pickableCards.map((cardData, index) => {
                 const canPlayerPick = isMyTurn && cardData.pickable.canPick
                 const isAnimating = animatingCards.has(cardData.id)
@@ -63,27 +69,26 @@ const DraftPhase = ({ gameState, playerIndex, onCardPick, error, animatingCards 
                       canPick ? 'pickable' : 'not-pickable'
                     } ${isAnimating ? 'animating' : ''}`}
                     title={tooltipText}
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                    initial={isInitialRender.current ? { opacity: 0, y: 8, scale: 0.95 } : false}
                     animate={{ 
                       opacity: 1, 
                       y: 0, 
                       scale: 1,
-                      transition: {
-                        duration: 0.4,
-                        delay: index * 0.1,
-                        ease: "easeOut"
-                      }
+                      transition: isInitialRender.current ? {
+                        duration: 0.25,
+                        delay: index * 0.05,
+                        ease: [0.25, 0.46, 0.45, 0.94]
+                      } : { duration: 0 }
                     }}
                     exit={{ 
                       opacity: 0, 
-                      scale: 0.9, 
-                      y: -10,
+                      scale: 0.8,
+                      y: -20,
                       transition: {
-                        duration: 0.4,
-                        ease: "easeInOut"
+                        duration: 0.3,
+                        ease: "easeIn"
                       }
                     }}
-                    layout
                   >
                     <Card 
                       card={cardData}
@@ -100,6 +105,7 @@ const DraftPhase = ({ gameState, playerIndex, onCardPick, error, animatingCards 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
                       >
                         <span className="restriction-icon">🚫</span>
                       </motion.div>

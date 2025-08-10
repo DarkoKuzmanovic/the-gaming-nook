@@ -3,45 +3,53 @@
 }
 
 .card-choice-modal p {
-  margin-bottom: 20px;
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin-bottom: var(--spacing-xl);
+  color: var(--color-black);
+  text-shadow: var(--text-shadow-light);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
 }
 
 .card-choices {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
 }
 
 .choice-option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  /* Card-inspired styling */
+  border: var(--card-border);
+  border-radius: var(--border-radius-md);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow-default);
+  transition: var(--transition-all);
   cursor: pointer;
+  transform-style: preserve-3d;
 }
 
 .choice-option:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  background: var(--card-bg);
+  border-color: var(--color-primary);
+  /* Card-like 3D hover effect */
+  transform: perspective(1000px) rotateX(2deg) rotateY(-1deg) translateY(-4px) scale(1.02);
+  box-shadow: 
+    var(--card-shadow-hover),
+    0 15px 30px rgba(0, 0, 0, 0.2),
+    0 0 0 2px var(--color-primary-light);
 }
 
 .choice-option h4 {
   margin: 0;
-  color: #333;
-  font-size: 16px;
+  color: var(--color-black);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-shadow: var(--text-shadow-light);
 }
 
 .choice-option .card {

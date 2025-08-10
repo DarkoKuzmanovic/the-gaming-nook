@@ -48,28 +48,37 @@ Browser Load → Main Menu → Game Selection → Waiting Room → Game Play
 ---
 
 ### 3. **Join Game Screen** (`currentView === "join"`)
-**Location**: `src/App.jsx` line ~371  
-**CSS**: `.join-game`, `.join-form` in `src/App.css`
+**Location**: `src/App.jsx` line ~391  
+**CSS**: `.join-game`, `.join-game-title`, `.join-form`, `.room-code-input` in `src/App.css`
 
 **Elements**:
-- **Page Title**: "Join Game" (h2)
-- **Room Code Input**: 6-character uppercase input field
+- **Page Title**: "Join Game" (h2) with styled title section
+- **Page Subtitle**: "Enter your room code to join friends" (p)
+- **Room Code Input**: Enhanced 6-character uppercase input with glassmorphism styling
 - **Join Game Button**: Primary variant, disabled until valid room code entered
 - **Back Button**: Outline variant, returns to Main Menu
+
+**Current State**: 400px centered glassmorphism container with enhanced input styling, no App Header
+**Recent Changes**: Added title/subtitle section, glassmorphism container and input, hidden header for consistency
 
 ---
 
 ### 4. **Waiting Room** (`currentView === "waiting"`)
-**Location**: `src/App.jsx` line ~399  
-**CSS**: `.waiting-room` in `src/App.css`
+**Location**: `src/App.jsx` line ~423  
+**CSS**: `.waiting-room`, `.waiting-room-title`, `.room-code-share`, `.room-info` in `src/App.css`
 
 **Elements**:
-- **Room Code Display**: Large prominent room code with copy button
-- **Game Type Info**: Shows selected game (Vetrolisci/Connect 4)
-- **Player Counter**: "Players: X/2" indicator
-- **Share Instructions**: "Share this code with your friend"
+- **Page Title**: "Room Created!" (h2) with styled title section
+- **Page Subtitle**: "Share your room code and wait for friends to join" (p)
+- **Room Code Display**: Large prominent room code with glassmorphism styling and clipboard icon copy button (📋)
+- **Enhanced Room Info Card**: Unified glassmorphism card with two sections:
+  - **Game Section**: Game icon (🎴/🔴) + "Playing [GameName]" with visual hierarchy
+  - **Players Section**: Visual player slots showing filled/waiting states + animated progress indicators
 - **Loading Spinner**: With "Waiting for another player to join..." text
 - **Leave Room Button**: Outline variant, returns to Main Menu
+
+**Current State**: 500px centered glassmorphism container with enhanced room code display and info cards, no App Header
+**Recent Changes**: Added title/subtitle section, glassmorphism container, enhanced room info card with game icons and player progress indicators, matched widths (380px) for room code and info card, clipboard icon for copy button, hidden header for consistency
 
 ---
 
@@ -84,18 +93,262 @@ Browser Load → Main Menu → Game Selection → Waiting Room → Game Play
 
 ## 🎮 Game-Specific Screens
 
-### **Vetrolisci Game Screen**
+---
+
+# 🎴 **VETROLISCI GAME - COMPREHENSIVE BREAKDOWN**
+
+## **Main Game Container**
 **Location**: `src/games/vetrolisci/client/components/GameBoard.jsx`  
 **CSS**: `src/games/vetrolisci/client/components/GameBoard.css`
 
-**Key Elements**:
-- **Game Grid**: 3x3 card placement grid
-- **Draft Area**: Shows 4 cards to choose from
-- **Score Display**: Current round scores
-- **Card Choice Modal**: When duplicate cards need resolution
-- **Placement Choice Modal**: When validated cards need face-down placement
-- **Round Complete Modal**: End-of-round summary with scores
+### **🏆 Enhanced Game Status Card**
+**Purpose**: Top navigation and game state display
+- **Game Icon & Title**: 🎴 Vetrolisci with room code display
+- **Round Progress**: Current round number (no phase text)
+- **Turn Indicator**: "Your Turn" vs "Opponent Turn" with proper tracking
+- **Current State**: ✅ Unified glassmorphism styling with fixed turn logic
+
+### **🎯 Game Content Container** 
+**Purpose**: Main glassmorphism container holding all game elements
+- **Background**: Unified glassmorphism with backdrop blur
+- **Layout**: Flexbox column with proper spacing
+- **Current State**: ✅ Enhanced styling matching other screens
+
+---
+
+## **🎴 CORE GAME COMPONENTS**
+
+### **1. Draft Phase Component (Available Cards Section)**
+**File**: `src/games/vetrolisci/client/components/DraftPhase.jsx`
+**CSS**: `src/games/vetrolisci/client/components/DraftPhase.css`
+- **Purpose**: Shows 4 cards to pick from during draft rounds in card-inspired container
+- **Features**: 
+  - **Card-inspired main container** with hover effects and card styling
+  - **Available Cards display** with enhanced 3D card hover transforms
+  - **Card restriction overlays** with improved styling and error borders
+  - **Draft completion notices** using card-like styling with success accents
+  - **Error handling** with card-inspired error banners
+- **Current State**: ✅ **RECENTLY ENHANCED** - Complete card-inspired overhaul with 3D effects
+
+### **2. Game Grid Component - COMPREHENSIVE ASSESSMENT**
+**File**: `src/games/vetrolisci/client/components/GameGrid.jsx`
+**CSS**: `src/games/vetrolisci/client/components/GameGrid.css`
+- **Purpose**: 3x3 grid container displaying placed cards for player and opponent
+- **Current Architecture**: CSS Grid layout with Framer Motion animations, responsive breakpoints
+- **Features**: Card placement animations, state management (new/glowing/confetti), space numbering
+- **Current State**: ⚠️ **NEEDS MAJOR UPDATES** - Multiple design and performance issues identified
+
+#### **🔧 Issues Identified:**
+1. **Design Inconsistency**: Dashed borders don't match card-inspired theme
+2. **Animation Conflicts**: Layout props + complex 3D transforms causing performance issues  
+3. **Styling Misalignment**: Hard-coded colors, missing CSS variables, no card aesthetic
+4. **Visual Hierarchy**: Space numbers and opponent grid need better contrast/distinction
+5. **Performance**: Multiple backdrop-filters and layout animations causing inefficiency
+
+#### **💡 Priority Improvements Needed:**
+- **Card-Inspired Redesign**: Replace dashed borders with card-like styling
+- **Animation Optimization**: Remove layout conflicts, simplify card placement
+- **Theme Integration**: Use CSS variables, match overall design system
+- **Performance Optimization**: Reduce expensive effects, streamline animations
+
+### **3. Individual Card Component - COMPREHENSIVE ASSESSMENT**
+**File**: `src/games/vetrolisci/client/components/Card.jsx`
+**CSS**: `src/games/vetrolisci/client/components/Card.css`
+- **Purpose**: Core card display component handling front/back/empty/validated states
+- **Current Architecture**: React memo component with LazyImage integration, Framer Motion support
+- **Features**: Multiple card states, fallback system, validation animations, hover effects
+- **Current State**: ⚠️ **CRITICAL ISSUES IDENTIFIED** - Image sizing, animation inconsistencies, performance problems
+
+#### **🚨 Critical Issues:**
+1. **Image Sizing Problem**: `object-fit: cover` crops card images incorrectly (main user concern)
+2. **Animation Inconsistencies**: Validated cards use complex 3D while others use simple transforms
+3. **Performance Issues**: Complex glow animations, expensive hover effects
+4. **Styling Inconsistencies**: Hard-coded values, missing CSS variables
+5. **Visual Hierarchy**: Validation feedback too intense, selected state needs refinement
+6. **Component Complexity**: Multiple animation systems competing, props explosion
+
+#### **💡 Priority Fixes Needed:**
+- **🎯 CRITICAL**: Fix image sizing with `object-fit: contain` or aspect ratio approach
+- **⚡ HIGH**: Unify animation system - remove complex 3D transforms on validated cards
+- **🎨 MEDIUM**: Replace hard-coded styles with design system variables
+- **🚀 MEDIUM**: Optimize performance - simplify glow animations, add will-change
+- **✨ LOW**: Enhance visual refinements and fallback card design
+
+### **4. Score Board Component**
+**File**: `src/games/vetrolisci/client/components/ScoreBoard.jsx`
+**CSS**: `src/games/vetrolisci/client/components/ScoreBoard.css`
+- **Purpose**: Live score display during gameplay
+- **Features**: Player scores, round tracking
+- **Current State**: ❓ Likely needs glassmorphism update
+
+---
+
+## **🎭 MODAL COMPONENTS**
+
+### **5. Card Choice Modal**
+**File**: `src/games/vetrolisci/client/components/CardChoiceModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/CardChoiceModal.css`
+- **Purpose**: Choose between duplicate cards when placing
+- **Features**: Side-by-side card comparison
+- **Current State**: ❓ May need glassmorphism modal styling
+
+### **6. Placement Choice Modal**
+**File**: `src/games/vetrolisci/client/components/PlacementChoiceModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/PlacementChoiceModal.css`
+- **Purpose**: Choose grid position for face-down placement
+- **Features**: Grid position selection interface
+- **Current State**: ❓ May need glassmorphism modal styling
+
+### **7. Round Complete Modal**
+**File**: `src/games/vetrolisci/client/components/RoundCompleteModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/RoundCompleteModal.css`
+- **Purpose**: Show round results and scores
+- **Features**: Score breakdown, continue button
+- **Current State**: ❓ Likely needs glassmorphism update
+
+### **8. Turn Score Modal**
+**File**: `src/games/vetrolisci/client/components/TurnScoreModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/TurnScoreModal.css`
+- **Purpose**: Show individual turn scoring details
+- **Current State**: ❓ May need styling assessment
+
+### **9. Scoreboard Modal**
+**File**: `src/games/vetrolisci/client/components/ScoreboardModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/ScoreboardModal.css`
+- **Purpose**: Detailed scoreboard view (accessible via control button)
+- **Current State**: ❓ Likely needs glassmorphism update
+
+---
+
+## **✨ VISUAL EFFECTS COMPONENTS**
+
+### **10. Validation Star Component**
+**File**: `src/games/vetrolisci/client/components/ValidationStar.jsx`
+**CSS**: `src/games/vetrolisci/client/components/ValidationStar.css`
+- **Purpose**: Visual indicator for validated cards
+- **Features**: Star animation on validation
+- **Current State**: ❓ May need styling assessment
+
+### **11. Confetti Component**
+**File**: `src/games/vetrolisci/client/components/Confetti.jsx`
+**CSS**: `src/games/vetrolisci/client/components/Confetti.css`
+- **Purpose**: Celebration animation for game events
+- **Current State**: ❓ Animation styling assessment needed
+
+### **12. Lazy Image Component**
+**File**: `src/games/vetrolisci/client/components/LazyImage.jsx`
+- **Purpose**: Optimized image loading for card assets
+- **Current State**: ✅ Likely fine as utility component
+
+---
+
+## **🎭 MODAL SYSTEM - CARD-INSPIRED DESIGN**
+
+### **📦 Modal Base Component**
+**File**: `src/shared/client/components/Modal.jsx`
+**CSS**: `src/shared/client/components/Modal.css`
+- **Purpose**: Reusable modal wrapper for all modals
+- **Features**: Card-inspired styling with 3D perspective effects, fixed overlay positioning (z-index: 1000)
+- **Design**: White card background, subtle shadows, card-like borders and hover effects
+- **Current State**: ✅ **RECENTLY ENHANCED** - Card-inspired design matching Vetrolisci aesthetic
+
+### **🎴 Vetrolisci Modal Components**
+
+#### **1. CardChoiceModal**
+**File**: `src/games/vetrolisci/client/components/CardChoiceModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/CardChoiceModal.css`
+- **Purpose**: Choose between existing/new card when duplicate numbers occur
+- **Design**: Two-column grid layout with card-inspired choice options featuring 3D hover effects
+- **Current State**: ✅ **RECENTLY ENHANCED** - Card-inspired design with 3D perspective and hover transforms
+
+#### **2. PlacementChoiceModal**
+**File**: `src/games/vetrolisci/client/components/PlacementChoiceModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/PlacementChoiceModal.css`
+- **Purpose**: Select grid position when placing face-down cards
+- **Design**: 3x3 position grid with card-inspired buttons featuring subtle 3D effects
+- **Current State**: ✅ **RECENTLY ENHANCED** - Card-like buttons with hover transforms and card styling
+
+#### **3. RoundCompleteModal**
+**File**: `src/games/vetrolisci/client/components/RoundCompleteModal.jsx`  
+**CSS**: `src/games/vetrolisci/client/components/RoundCompleteModal.css`
+- **Purpose**: Display round scores and progress between rounds
+- **Design**: Card-inspired score panels with subtle hover effects and mini card-like badges
+- **Current State**: ✅ **RECENTLY ENHANCED** - Full card aesthetic with score cards that have hover transforms
+
+#### **4. TurnScoreModal**
+**File**: `src/games/vetrolisci/client/components/TurnScoreModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/TurnScoreModal.css` 
+- **Purpose**: Show turn-by-turn scoring breakdown
+- **Current State**: ❓ **NEEDS ASSESSMENT** - May need glassmorphism enhancement
+
+#### **5. ScoreboardModal**
+**File**: `src/games/vetrolisci/client/components/ScoreboardModal.jsx`
+**CSS**: `src/games/vetrolisci/client/components/ScoreboardModal.css`
+- **Purpose**: Detailed game scoreboard display with player scores and round breakdown
+- **Design**: Card-inspired player score panels, mini card-like round items, and card-style total scores
+- **Animations**: Beautiful Framer Motion entrance with spring physics, 3D transforms, and staggered content reveals
+- **Current State**: ✅ **RECENTLY ENHANCED** - Complete card-inspired overhaul + smooth animations matching other modals
+
+### **🔧 Modal Positioning Fix**
+- **Issue Fixed**: Modals were appearing below game content in document flow
+- **Solution**: Moved all modal components outside game container in `GameBoard.jsx`  
+- **Result**: Proper overlay positioning with fixed z-index layering (z-modal: 1000)
+
+---
+
+## **🎮 CONTROL SYSTEM**
+
+### **13. Glassmorphism Control Buttons**
+**Location**: Within `GameBoard.jsx`
+**CSS**: Styled in `GameBoard.css`
+- **Audio Controls**: Sound/Music toggle buttons
+- **Scoreboard Button**: Opens detailed scoreboard modal
 - **Back to Menu Button**: Returns to main menu
+- **Current State**: ✅ Already has unified glassmorphism styling
+
+---
+
+## **📊 VETROLISCI IMPROVEMENT ASSESSMENT**
+
+### **✅ RECENTLY COMPLETED ENHANCEMENTS:**
+1. **✅ Modal System** - **COMPLETED** - All 4 main modals now have **card-inspired design + animations**:
+   - **CardChoiceModal**: Card-like choice options with 3D perspective hover effects + Framer Motion animations
+   - **PlacementChoiceModal**: Card-inspired position buttons with subtle 3D transforms + smooth entrance
+   - **RoundCompleteModal**: Score cards with hover effects and card-like styling + animated appearance
+   - **ScoreboardModal**: Complete overhaul with card-inspired panels + beautiful spring physics animations
+   - **Modal Positioning**: Fixed overlay positioning (modals now properly float above game content)
+   - **Base Modal Component**: Full card aesthetic + consistent animation system throughout
+2. **✅ Game Status Card** - Unified glassmorphism styling with proper turn indicators
+3. **✅ Draft Phase/Available Cards** - Complete card-inspired redesign + animation optimization:
+   - **Main container**: Card-styled with optimized hover effects
+   - **Available cards container**: Enhanced card styling replacing dashed borders
+   - **Card interactions**: Simplified, performant hover animations (removed complex 3D transforms)
+   - **Error handling**: Card-inspired error banners with left border accents
+   - **Draft completion**: Success notices with card styling
+   - **Animation performance**: Fixed janky animations with optimized Framer Motion settings
+
+### **🔧 Remaining Areas for Enhancement:**
+1. **⚠️ Individual Card Component** - **CRITICAL ISSUES** - Image sizing problem (user concern), animation inconsistencies
+2. **⚠️ Game Grid** - **MAJOR UPDATES NEEDED** - Design inconsistency, animation conflicts, performance issues
+3. **TurnScoreModal** - Still needs card-inspired design treatment  
+4. **Score Display Components** - Typography/styling consistency review
+
+### **✅ ANIMATION SYSTEM - RECENTLY OPTIMIZED:**
+- **Performance Issues Fixed**: Removed janky animations throughout
+- **Available Cards**: Optimized Framer Motion settings, reduced complex 3D transforms
+- **Card Hover Effects**: Simplified from complex perspective transforms to smooth translate/scale
+- **Layout Animations**: Changed from `popLayout` to `wait` mode to prevent conflicts
+- **Transition Timing**: Reduced animation durations and optimized easing curves
+- **Will-change Properties**: Added for better browser optimization
+
+### **🎯 Next Steps:**
+- ✅ **Modal System** - **COMPLETED** (4/5 modals enhanced, 1 remaining: TurnScoreModal)
+- ✅ **Draft Phase/Available Cards** - **COMPLETED** 
+- ✅ **Game Grid Assessment** - **COMPLETED** - Comprehensive analysis documented
+- ✅ **Individual Card Component Assessment** - **COMPLETED** - Critical issues identified
+- **🚨 PRIORITY**: Fix Individual Card image sizing problem (critical user concern)
+- **Priority**: Address Game Grid major updates (card-inspired redesign, animation optimization)
+- Complete remaining component enhancements
 
 ---
 
@@ -104,12 +357,17 @@ Browser Load → Main Menu → Game Selection → Waiting Room → Game Play
 **CSS**: `src/games/connect4/client/components/GameBoard.css`
 
 **Key Elements**:
-- **Column Headers**: Clickable column selectors (1-7)
-- **Game Grid**: 6×7 Connect 4 grid with animated disc drops
-- **Turn Indicator**: Shows whose turn it is
-- **Win/Draw Message**: Game result display
-- **Play Again Button**: Restart game (host only)
-- **Back to Menu Button**: Returns to main menu
+- **Enhanced Game Content Container**: Large glassmorphism container with unified styling
+- **Enhanced Game Status Card**: Glassmorphism status with enhanced player indicators (red/yellow gradient badges)
+- **Column Headers**: Clickable column selectors (1-7) with hover effects
+- **Game Grid**: 6×7 Connect 4 grid with animated disc drops within styled container
+- **Enhanced Turn Indicator**: Player indicators with gradient backgrounds and glow effects
+- **Win/Draw Message**: Game result display with enhanced typography
+- **Glassmorphism Control Buttons**: Play Again and Back to Menu with unified styling
+- **Professional Typography**: Enhanced text shadows and color consistency
+
+**Current State**: Unified glassmorphism design, no App Header, enhanced player indicators, professional control buttons
+**Recent Changes**: Applied unified glassmorphism styling, removed App Header, enhanced player indicators with gradients, unified color scheme and typography
 
 ---
 
@@ -203,10 +461,14 @@ src/
 ```
 
 ### **Current State**
-- ✅ Connect 4 fully implemented and working
-- ✅ Simple, clean UI without enhanced animations
-- ✅ Responsive design for mobile/desktop
-- ✅ Real-time multiplayer via Socket.IO
+- ✅ **Unified Glassmorphism Design**: All screens use consistent glassmorphism styling
+- ✅ **No App Headers in Games**: Clean, focused game interfaces without distracting headers
+- ✅ **Enhanced Status Cards**: Professional game status indicators with turn management
+- ✅ **Consistent Control Buttons**: Unified button styling across all games and screens
+- ✅ **Professional Typography**: Enhanced text shadows, consistent colors, proper hierarchy
+- ✅ **Connect 4 & Vetrolisci**: Both games fully implemented with unified design language
+- ✅ **Responsive Design**: Mobile/desktop optimized with consistent glassmorphism
+- ✅ **Real-time Multiplayer**: Socket.IO integration with enhanced visual feedback
 
 ---
 

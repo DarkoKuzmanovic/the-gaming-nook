@@ -419,150 +419,180 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true, onG
   const opponent = gameState.players[opponentIndex]
 
   return (
-    <div className="game-board">
-      {/* Error Display */}
-      {error && (
-        <div className="error-banner">
-          ⚠️ {error}
-        </div>
-      )}
-      
-      {/* Game Content Container */}
-      <motion.div 
-        className="game-content"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        {/* Draft Phase */}
-        <AnimatePresence mode="wait">
-          {gameState.draftState?.revealedCards && (
-            <motion.div
-              key="draft-phase"
-              initial={{ opacity: 0, y: -20 }}
+    <>
+      <div className="game-board">
+        {/* Error Display */}
+        {error && (
+          <div className="error-banner">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Enhanced Game Status Card */}
+        <motion.div 
+          className="game-status-card"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="game-status-left">
+            <span className="game-icon">🎴</span>
+            <div className="game-info">
+              <h2>Vetrolisci</h2>
+              <span className="room-code">Room: {roomCode}</span>
+            </div>
+          </div>
+          
+          <div className="game-status-center">
+            <div className="round-progress">
+              <span className="round-text">Round {gameState.currentRound || 1}</span>
+            </div>
+          </div>
+          
+          <div className="game-status-right">
+            <div className={`turn-indicator ${(gameState.currentPickingPlayer?.index === playerIndex || gameState.currentPlayer === playerIndex) ? 'my-turn' : 'opponent-turn'}`}>
+              {(gameState.currentPickingPlayer?.index === playerIndex || gameState.currentPlayer === playerIndex) ? 'Your Turn' : 'Opponent Turn'}
+            </div>
+          </div>
+        </motion.div>
+        
+        {/* Game Content Container */}
+        <motion.div 
+          className="game-content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          {/* Draft Phase */}
+          <AnimatePresence mode="wait">
+            {gameState.draftState?.revealedCards && (
+              <motion.div
+                key="draft-phase"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  transition: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  y: -10,
+                  transition: { duration: 0.2, ease: "easeIn" }
+                }}
+              >
+                <DraftPhase
+                  gameState={gameState}
+                  playerIndex={playerIndex}
+                  onCardPick={handleCardPick}
+                  error={error}
+                  animatingCards={animatingCards}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Game Grids */}
+          <motion.div 
+            className="game-grids"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ 
+              opacity: 1, 
+              y: 0,
+              transition: { 
+                duration: 0.6, 
+                delay: 0.2,
+                ease: "easeOut" 
+              }
+            }}
+          >
+            <motion.div 
+              className="player-grid-section"
+              initial={{ opacity: 0, x: -30 }}
               animate={{ 
                 opacity: 1, 
-                y: 0,
-                transition: { duration: 0.4, ease: "easeOut" }
-              }}
-              exit={{ 
-                opacity: 0, 
-                y: -20,
-                transition: { duration: 0.3, ease: "easeIn" }
+                x: 0,
+                transition: { 
+                  duration: 0.5, 
+                  delay: 0.3,
+                  ease: "easeOut" 
+                }
               }}
             >
-              <DraftPhase
-                gameState={gameState}
-                playerIndex={playerIndex}
-                onCardPick={handleCardPick}
-                error={error}
-                animatingCards={animatingCards}
+              <GameGrid
+                grid={currentPlayer.grid}
+                newlyPlacedCards={newlyPlacedCards}
+                glowingCards={glowingCards}
+                confettiCards={confettiCards}
+                onConfettiComplete={handleConfettiComplete}
               />
             </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Game Grids */}
-        <motion.div 
-          className="game-grids"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ 
-            opacity: 1, 
-            y: 0,
-            transition: { 
-              duration: 0.6, 
-              delay: 0.2,
-              ease: "easeOut" 
-            }
-          }}
-        >
-          <motion.div 
-            className="player-grid-section"
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ 
-              opacity: 1, 
-              x: 0,
-              transition: { 
-                duration: 0.5, 
-                delay: 0.3,
-                ease: "easeOut" 
-              }
-            }}
-          >
-            <GameGrid
-              grid={currentPlayer.grid}
-              newlyPlacedCards={newlyPlacedCards}
-              glowingCards={glowingCards}
-              confettiCards={confettiCards}
-              onConfettiComplete={handleConfettiComplete}
-            />
-          </motion.div>
-
-          <motion.div 
-            className="opponent-grid-section"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ 
-              opacity: 1, 
-              x: 0,
-              transition: { 
-                duration: 0.5, 
-                delay: 0.4,
-                ease: "easeOut" 
-              }
-            }}
-          >
-            <GameGrid
-              grid={opponent.grid}
-              isOpponent={true}
-              newlyPlacedCards={newlyPlacedCards}
-              glowingCards={glowingCards}
-              confettiCards={confettiCards}
-              onConfettiComplete={handleConfettiComplete}
-            />
+            <motion.div 
+              className="opponent-grid-section"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ 
+                opacity: 1, 
+                x: 0,
+                transition: { 
+                  duration: 0.5, 
+                  delay: 0.4,
+                  ease: "easeOut" 
+                }
+              }}
+            >
+              <GameGrid
+                grid={opponent.grid}
+                isOpponent={true}
+                newlyPlacedCards={newlyPlacedCards}
+                glowingCards={glowingCards}
+                confettiCards={confettiCards}
+                onConfettiComplete={handleConfettiComplete}
+              />
+            </motion.div>
           </motion.div>
         </motion.div>
-      </motion.div>
 
-      {/* Control Buttons */}
-      <div className="bottom-right-controls">
-        {/* Audio Controls */}
-        <button 
-          className={`control-button audio-button ${soundEnabled ? 'enabled' : 'disabled'}`}
-          onClick={toggleSound}
-          title={soundEnabled ? 'Disable sound effects' : 'Enable sound effects'}
-          style={{ bottom: '180px', right: '20px' }}
-        >
-          <img src="/shared/icons/sound.png" alt="Sound Effects" style={{ width: '20px', height: '20px' }} />
-        </button>
-        <button 
-          className={`control-button audio-button ${musicEnabled ? 'enabled' : 'disabled'}`}
-          onClick={toggleMusic}
-          title={musicEnabled ? 'Disable music' : 'Enable music'}
-          style={{ bottom: '120px', right: '20px' }}
-        >
-          <img src="/shared/icons/music.png" alt="Music" style={{ width: '20px', height: '20px' }} />
-        </button>
-        
-        {/* Utility Controls */}
-        <button 
-          className="control-button scoreboard-button"
-          onClick={() => setShowScoreboard(true)}
-          title="View detailed scoreboard"
-          style={{ bottom: '60px', right: '20px' }}
-        >
-          <img src="/shared/icons/score.png" alt="Scoreboard" style={{ width: '20px', height: '20px' }} />
-        </button>
-        
-        <button 
-          className="control-button back-to-menu-button"
-          onClick={onBackToMenu}
-          style={{ bottom: '60px', left: '20px' }}
-        >
-          <img src="/shared/icons/back-to-menu.svg" alt="Back to Menu" style={{ width: '20px', height: '20px' }} />
-        </button>
+        {/* Control Buttons */}
+        <div className="bottom-right-controls">
+          {/* Audio Controls */}
+          <button 
+            className={`control-button audio-button ${soundEnabled ? 'enabled' : 'disabled'}`}
+            onClick={toggleSound}
+            title={soundEnabled ? 'Disable sound effects' : 'Enable sound effects'}
+            style={{ bottom: '180px', right: '20px' }}
+          >
+            <img src="/shared/icons/sound.png" alt="Sound Effects" style={{ width: '20px', height: '20px' }} />
+          </button>
+          <button 
+            className={`control-button audio-button ${musicEnabled ? 'enabled' : 'disabled'}`}
+            onClick={toggleMusic}
+            title={musicEnabled ? 'Disable music' : 'Enable music'}
+            style={{ bottom: '120px', right: '20px' }}
+          >
+            <img src="/shared/icons/music.png" alt="Music" style={{ width: '20px', height: '20px' }} />
+          </button>
+          
+          {/* Utility Controls */}
+          <button 
+            className="control-button scoreboard-button"
+            onClick={() => setShowScoreboard(true)}
+            title="View detailed scoreboard"
+            style={{ bottom: '60px', right: '20px' }}
+          >
+            <img src="/shared/icons/score.png" alt="Scoreboard" style={{ width: '20px', height: '20px' }} />
+          </button>
+          
+          <button 
+            className="control-button back-to-menu-button"
+            onClick={onBackToMenu}
+            style={{ bottom: '60px', left: '20px' }}
+          >
+            <img src="/shared/icons/back-to-menu.svg" alt="Back to Menu" style={{ width: '20px', height: '20px' }} />
+          </button>
+        </div>
       </div>
 
-      {/* Modals */}
+      {/* Modals - Rendered outside game container for proper overlay positioning */}
       <CardChoiceModal
         isOpen={showCardChoice}
         existingCard={cardChoiceData?.existingCard}
@@ -600,7 +630,7 @@ const GameBoard = ({ roomCode, playerIndex, onBackToMenu, showHeader = true, onG
         playerIndex={playerIndex}
         onClose={() => setShowScoreboard(false)}
       />
-    </div>
+    </>
   )
 }
 
