@@ -12,7 +12,8 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(npm run lint)",
-      "WebFetch(domain:www.svgrepo.com)"
+      "WebFetch(domain:www.svgrepo.com)",
+      "Bash(netsh:*)"
     ],
     "deny": []
   }

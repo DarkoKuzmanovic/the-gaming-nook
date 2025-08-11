@@ -34,6 +34,17 @@
   gap: var(--spacing-sm);
 }
 
+/* ===== MY TURN STYLING ===== */
+.available-cards-section.my-turn {
+  border: 2px solid rgba(74, 144, 226, 0.3);
+  animation: border-pulse 3s ease-in-out infinite;
+}
+
+@keyframes border-pulse {
+  0%, 100% { border-color: rgba(74, 144, 226, 0.2); }
+  50% { border-color: rgba(74, 144, 226, 0.4); }
+}
+
 .available-cards-section h4 {
   margin: 0;
   text-align: center;
@@ -42,6 +53,13 @@
   color: var(--color-black);
   text-shadow: var(--text-shadow-light);
   letter-spacing: var(--letter-spacing-tight);
+}
+
+/* ===== TURN INDICATOR ===== */
+.turn-indicator {
+  color: #4A90E2;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
 }
 
 /* ===== CARD-INSPIRED ERROR BANNER ===== */

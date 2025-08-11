@@ -7,7 +7,14 @@ class SocketClient {
     this.listeners = new Map()
   }
 
-  connect(serverUrl = 'http://localhost:8001') {
+  connect(serverUrl) {
+    // Auto-detect server URL based on current page URL
+    if (!serverUrl) {
+      const hostname = window.location.hostname
+      const port = '8001' // Always use port 8001 for server
+      serverUrl = `http://${hostname}:${port}`
+    }
+    
     if (this.socket?.connected) {
       console.log('🔌 Socket already connected')
       return Promise.resolve()

@@ -347,8 +347,12 @@ export class VetrolisciServer {
         player.grid = Array(9).fill(null)
       })
       
+      // Refill and reshuffle deck for new round
+      game.deck = createGameDeck()
+      
       console.log(`🎯 Round ${game.currentRound - 1} complete. Starting round ${game.currentRound}`)
       console.log(`🎯 Reset turn counts for new round`)
+      console.log(`🎯 Deck refilled and reshuffled for new round (${game.deck.length} cards)`)
       
       // Start first turn of new round
       this.startNewTurn(game)

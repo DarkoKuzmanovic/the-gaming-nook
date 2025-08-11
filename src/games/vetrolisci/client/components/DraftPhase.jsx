@@ -37,9 +37,9 @@ const DraftPhase = ({ gameState, playerIndex, onCardPick, error, animatingCards 
     <div className="draft-phase">
       <div className="draft-content">
         {/* Available Cards */}
-        <div className="available-cards-section">
+        <div className={`available-cards-section ${isMyTurn ? 'my-turn' : ''}`}>
           <div className="section-header">
-            <h4>Available Cards</h4>
+            <h4>Available Cards {isMyTurn && <span className="turn-indicator">• Your Turn</span>}</h4>
             {/* Error Display - moved here for better visibility */}
             {error && (
               <div className="error-banner">
