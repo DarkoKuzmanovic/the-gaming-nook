@@ -2,12 +2,21 @@
   width: 100%;
   height: 100%;
   border-radius: var(--border-radius-md);
-  overflow: hidden;
+  /* 🔧 FIXED: Remove overflow hidden to prevent image clipping */
+  overflow: visible;
   position: relative;
   cursor: pointer;
   background-color: var(--card-bg);
   box-shadow: var(--card-shadow-default);
   border: var(--card-border);
+  /* 🎯 Enhanced card container for proper image display */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* ✨ PREMIUM: Subtle depth and premium feel */
+  box-shadow: 
+    var(--card-shadow-default),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   /* Optimized transitions for better performance */
   transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
               box-shadow 0.25s ease;
@@ -22,76 +31,97 @@
 }
 
 .card.selected {
+  /* 🎨 DESIGN SYSTEM: Using CSS variables consistently */
   border: 3px solid var(--color-selected);
   box-shadow: 
     var(--shadow-focus) var(--color-selected-light),
-    0 0 15px rgba(217, 119, 6, 0.3);
+    var(--shadow-lg);
   transform: translateY(-3px) scale(1.01);
+  /* Enhanced selected state styling */
+  background: var(--card-bg);
+  position: relative;
 }
 
 .card.selected:hover {
   transform: translateY(-8px) scale(1.03);
   box-shadow: 
     var(--shadow-focus) var(--color-selected-light),
-    0 0 20px rgba(217, 119, 6, 0.4);
+    var(--shadow-xl);
 }
 
 .card.validated {
+  /* 🎨 ENHANCED: Card-inspired validation styling */
   border: 3px solid var(--color-validated);
   box-shadow: 
     var(--shadow-focus) var(--color-validated-light),
-    0 0 20px rgba(5, 150, 105, 0.4),
-    0 0 40px rgba(5, 150, 105, 0.2);
+    var(--shadow-lg);
   animation: validatedGlow 2s ease-in-out infinite alternate;
   position: relative;
+  /* Subtle inner glow for premium feel */
+  background: var(--card-bg);
 }
 
 .card.validated:hover {
-  transform: perspective(1000px) rotateX(5deg) rotateY(-3deg) translateY(-12px) scale(1.05);
+  /* ⚡ UNIFIED: Same hover system as other cards - no complex 3D */
+  transform: translateY(-8px) scale(1.03);
   box-shadow: 
     var(--shadow-focus) var(--color-validated-light),
-    0 0 25px rgba(5, 150, 105, 0.5),
-    0 0 50px rgba(5, 150, 105, 0.3),
-    0 25px 50px rgba(0, 0, 0, 0.25);
+    0 0 25px rgba(5, 150, 105, 0.5);
 }
 
 @keyframes validatedGlow {
+  /* 🚀 OPTIMIZED: Simplified glow animation for better performance */
   from {
     box-shadow: 
       var(--shadow-focus) var(--color-validated-light),
-      0 0 20px rgba(5, 150, 105, 0.4),
-      0 0 40px rgba(5, 150, 105, 0.2);
+      0 0 15px rgba(5, 150, 105, 0.4);
   }
   to {
     box-shadow: 
       var(--shadow-focus) var(--color-validated-medium),
-      0 0 25px rgba(5, 150, 105, 0.6),
-      0 0 50px rgba(5, 150, 105, 0.3);
+      0 0 25px rgba(5, 150, 105, 0.6);
   }
 }
 
-.card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.card .card-image {
+  /* 🎯 CRITICAL FIX: Higher specificity + proper sizing */
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain !important;
+  object-position: center;
+  /* Enhanced card image styling */
+  border-radius: var(--border-radius-md);
+  /* Ensure image displays properly */
+  display: block;
 }
 
 .card-back .card-image {
   opacity: 0.8;
+  /* 🚀 PERFORMANCE: Optimized back card display */
+  will-change: opacity;
 }
 
 .card-empty {
-  background-color: var(--color-gray-100);
-  border: 2px dashed var(--color-gray-200);
+  /* ✨ ENHANCED: Card-inspired empty state */
+  background: var(--card-bg);
+  border: var(--card-border);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  opacity: 0.6;
 }
 
 .card-fallback {
-  padding: var(--spacing-sm);
+  /* 🎨 PREMIUM: Enhanced fallback card design */
+  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
   font-size: var(--font-size-xs);
+  background: var(--card-bg);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--card-shadow-default);
 }
 
 .card-header {
@@ -103,7 +133,8 @@
 .card-number {
   font-size: 18px;
   font-weight: var(--font-weight-bold);
-  color: var(--color-gray-600);
+  color: var(--color-black);
+  text-shadow: var(--text-shadow-light);
 }
 
 .card-symbols {
@@ -145,14 +176,18 @@
 
 .card-scoring {
   font-weight: var(--font-weight-bold);
-  color: var(--color-gray-500);
+  color: var(--color-black);
+  text-shadow: var(--text-shadow-light);
 }
 
 .card-number-small {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  color: var(--color-gray-600);
+  color: var(--color-black);
+  text-shadow: var(--text-shadow-light);
   transform: rotate(180deg);
+  /* 🚀 PERFORMANCE: Optimize rotation */
+  will-change: transform;
 }
 
 /* Color-specific styles */

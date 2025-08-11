@@ -44,6 +44,8 @@
   backdrop-filter: blur(5px);
   transition: all 0.3s ease;
   position: relative;
+  /* 🔧 CRITICAL: Prevent overflow to allow proper image display */
+  overflow: visible;
 }
 
 @media (min-width: 768px) {
@@ -76,6 +78,34 @@
   width: 100%;
   height: 100%;
   border-radius: 6px;
+  /* 🔧 IMPORTANT: Don't override card image display */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🎯 CRITICAL FIX: Ensure card images display properly in grid */
+.grid-space .card .card-image {
+  width: auto !important;
+  height: auto !important;
+  max-width: 96px; /* Grid space width minus padding */
+  max-height: 136px; /* Grid space height minus padding */
+  object-fit: contain !important;
+  object-position: center;
+}
+
+@media (min-width: 768px) {
+  .grid-space .card .card-image {
+    max-width: 106px;
+    max-height: 150px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-space .card .card-image {
+    max-width: 116px;
+    max-height: 164px;
+  }
 }
 
 .card-fade-in {
