@@ -268,11 +268,13 @@ io.on('connection', (socket) => {
           placementResult: result.placementResult
         });
         
-        // Check if round/game is complete
-        if (gameState.phase === 'scoring') {
-          // Round complete
+        // Check if round/game is complete using the result data
+        if (result.roundComplete && result.roundScores) {
+          // Round complete - use data from the vetrolisci server
           io.to(roomCode).emit('vetrolisci-round-complete', {
-            roundNumber: gameState.currentRound - 1, // Previous round that just completed
+            roundNumber: gameState.currentRound - 1, // Round that just completed
+            roundScores: result.roundScores,
+            nextRound: result.gameComplete ? null : gameState.currentRound,
             gameState
           });
         } else if (gameState.phase === 'finished') {
@@ -310,11 +312,13 @@ io.on('connection', (socket) => {
         placementResult: result.placementResult
       });
       
-      // Check if round/game is complete
-      if (gameState.phase === 'scoring') {
-        // Round complete
+      // Check if round/game is complete using the result data
+      if (result.roundComplete && result.roundScores) {
+        // Round complete - use data from the vetrolisci server
         io.to(roomCode).emit('vetrolisci-round-complete', {
-          roundNumber: gameState.currentRound - 1, // Previous round that just completed
+          roundNumber: gameState.currentRound - 1, // Round that just completed
+          roundScores: result.roundScores,
+          nextRound: result.gameComplete ? null : gameState.currentRound,
           gameState
         });
       } else if (gameState.phase === 'finished') {

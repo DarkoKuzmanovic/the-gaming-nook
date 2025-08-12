@@ -201,6 +201,7 @@ export class VetrolisciServer {
       }
 
       // Check if draft phase is complete
+      let turnEndResult = null
       if (game.draftState.phase === DraftPhase.COMPLETE) {
         console.log(`🎯 Turn complete - all 4 cards picked`)
         
@@ -213,7 +214,7 @@ export class VetrolisciServer {
         game.playerTurnCounts[1]++
         console.log(`🎯 Updated turn counts: Player 0: ${game.playerTurnCounts[0]}, Player 1: ${game.playerTurnCounts[1]}`)
         
-        this.checkTurnEnd(game)
+        turnEndResult = this.checkTurnEnd(game)
       }
 
       return {
@@ -223,7 +224,8 @@ export class VetrolisciServer {
         needsChoice,
         choiceType: needsChoice ? scenario : null,
         selectedCard,
-        placementResult
+        placementResult,
+        ...(turnEndResult || {})
       }
 
     } catch (error) {
@@ -260,10 +262,12 @@ export class VetrolisciServer {
     // 1. At least one player has filled all 9 grid spaces
     // 2. Both players have had equal number of turns
     if (this.checkRoundEndCondition(game)) {
-      this.endRound(game)
+      const roundResult = this.endRound(game)
+      return { roundComplete: true, ...roundResult }
     } else {
       // Start next turn
       this.startNewTurn(game)
+      return { roundComplete: false }
     }
   }
 
